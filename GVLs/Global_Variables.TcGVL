@@ -1,0 +1,484 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <GVL Name="Global_Variables" Id="{bcaa4f18-97b1-4818-bac8-1835e8da9e31}">
+    <Declaration><![CDATA[//{attribute 'Tc2GvlVarNames'}
+VAR_GLOBAL
+(************simulation OR not***********)
+	simulation:BOOL:=FALSE;
+(************USELinearEncoeder*******)
+	USELinearEncoeder:BOOL:=TRUE;
+(*****)
+m_restartTC:BOOL;
+(************ÏÞÎ»¿ª¹Ø**********************)
+	LS_LeftTop_Top  :BOOL;
+	LS_LeftTop_Bottom  :BOOL;
+	LS_RightTop_Top  :BOOL;
+	LS_RightTop_Bottom  :BOOL;
+	LS_LeftBottom_Top  :BOOL;
+	LS_LeftBottom_Bottom  :BOOL;
+	LS_RightBottom_Top :BOOL;
+	LS_RightBottom_Bottom  :BOOL;
+	Unreach_LS_Top:BOOL;
+	Unreach_LS_Bottom:BOOL;
+(*********Öá¼°ÖáÐÅÏ¢*************************)
+	LeftTopLin: axis_ref;
+	RightTopLin:axis_ref;
+	LeftBottomLin:axis_ref;
+	RightBottomLin:axis_ref;
+(*Î»ÖÃ*)
+	Pos_LeftTopLin: LREAL;
+	Pos_RightTopLin:LREAL;
+	Pos_LeftBottomLin:LREAL;
+	Pos_RightBottomLin:LREAL;
+	LB_TestRecord:LREAL;
+	RB_TestRecord:LREAL;
+
+(*ËÙ¶È*)
+	Velo_LeftTopLin: LREAL;
+	Velo_RightTopLin:LREAL;
+	Velo_LeftBottomLin:LREAL;
+	Velo_RightBottomLin:LREAL;
+(*Lag Distance*)
+	PosDiff_LeftTopLin_actual: LREAL;
+	PosDiff_RightTopLin_actual:LREAL;
+	PosDiff_LeftBottomLin_actual:LREAL;
+	PosDiff_RightBottomLin_actual:LREAL;
+(*Lag DistanceãÐÖµ£¬ÔÝÎ´ÓÃ*)
+	PosDiff_LeftTopLin: LREAL:=0.5;
+	PosDiff_RightTopLin:LREAL:=0.5;
+	PosDiff_LeftBottomLin:LREAL:=0.5;
+	PosDiff_RightBottomLin:LREAL:=0.5;
+(********************Gap Mode*************************)
+(*Î»ÖÃ¡¢Î»ÖÃ¡¢·½ÏòÖ¸Ê¾*)
+	GapPositionActual:LREAL;
+	GapVelocityActual:LREAL;
+	GapMoveIndicator:DINT:=0;
+	(*1=OPEN;0=NOTMOVE;-1=CLOSE*)
+
+(******************Taper Mode**************************)
+(*TaperÎ»ÖÃºÍËÙ¶È*)
+	TaperPositionActual:LREAL;
+	TaperVelocityActual:LREAL;
+	TaperMoveIndicator:DINT:=0;
+	(*1=OPEN;0=NOTMOVE;-1=CLOSE*)
+(*****************µ¥ÁºMode*******************************)
+(*Î»ÖÃ¡¢ËÙ¶È¡¢·½ÏòÖ¸Ê¾*)
+	TopPositionActual:LREAL;
+	TopVelocityActual:LREAL;
+	BottomPositionActual:LREAL;
+	BottomVelocityActual:LREAL;
+	TopMoveIndicator:DINT:=0;
+	(*1=OPEN;0=NOTMOVE;-1=CLOSE*)
+	BottomMoveIndicator:DINT:=0;
+	(*1=OPEN;0=NOTMOVE;-1=CLOSE*)
+(******************DebugMode & BCGapMode*****************************)
+	LeftTopLinMoveIndicator:DINT:=0;
+	(*1=OPEN;0=NOTMOVE;-1=CLOSE*)
+	LeftBottomLinMoveIndicator:DINT:=0;
+	(*1=OPEN;0=NOTMOVE;-1=CLOSE*)
+	RightTopLinMoveIndicator:DINT:=0;
+	(*1=OPEN;0=NOTMOVE;-1=CLOSE*)
+	RightBottomLinMoveIndicator:DINT:=0;
+	(*1=OPEN;0=NOTMOVE;-1=CLOSE*)
+(******************Îó²îãÐÖµGap&SingleCarrier********************************)
+	Diff_TopPos: LREAL:=2;
+	Diff_BottomPos: LREAL:=2;
+	Diff_LeftPos: LREAL:=2;
+	Diff_RightPos: LREAL:=2;
+	Diff_TopVelo: LREAL:=2;
+	Diff_BottomVelo: LREAL:=2;
+	Diff_LeftVelo: LREAL:=2;
+	Diff_RightVelo: LREAL:=2;
+(******************Êµ¼ÊÎó²îGap&SingleCarrier***********************************)
+	Diff_TopPos_actual: LREAL;
+	Diff_BottomPos_actual: LREAL;
+	Diff_LeftPos_actual: LREAL;
+	Diff_RightPos_actual: LREAL;
+	Diff_TopVelo_actual:  LREAL;
+	Diff_BottomVelo_actual: LREAL;
+	Diff_LeftVelo_actual: LREAL;
+	Diff_RightVelo_actual:  LREAL;
+(******************Îó²îãÐÖµBCGap********************************)
+	Diff_BCTopPos: LREAL:=0.5;
+	Diff_BCBottomPos: LREAL:=0.5;
+	Diff_BCLeftPos: LREAL:=0.5;
+	Diff_BCRightPos: LREAL:=0.5;
+	Diff_BCTopVelo: LREAL:=0.5;
+	Diff_BCBottomVelo: LREAL:=0.5;
+	Diff_BCLeftVelo: LREAL:=0.5;
+	Diff_BCRightVelo: LREAL:=0.5;
+(*
+	Diff_BCTopPos: LREAL:=1;
+	Diff_BCBottomPos: LREAL:=1;
+	Diff_BCLeftPos: LREAL:=1;
+	Diff_BCRightPos: LREAL:=1;
+	Diff_BCTopVelo: LREAL:=1;
+	Diff_BCBottomVelo: LREAL:=1;
+	Diff_BCLeftVelo: LREAL:=1;
+	Diff_BCRightVelo: LREAL:=1;
+*)
+(******************Êµ¼ÊÎó²îBCGap***********************************)
+	Diff_BCTopPos_actual: LREAL;
+	Diff_BCBottomPos_actual: LREAL;
+	Diff_BCLeftPos_actual: LREAL;
+	Diff_BCRightPos_actual: LREAL;
+	Diff_BCTopVelo_actual:  LREAL;
+	Diff_BCBottomVelo_actual: LREAL;
+	Diff_BCLeftVelo_actual: LREAL;
+	Diff_BCRightVelo_actual:  LREAL;
+(***************************Îó²îãÐÖµDebug**********************************)
+	Diff_TopPos_Debug: LREAL:=400 ;
+	Diff_BottomPos_Debug: LREAL:=400 ;
+	Diff_LeftPos_Debug: LREAL:=400 ;
+	Diff_RightPos_Debug: LREAL:=400 ;
+(*************************Îó²îãÐÖµTaper*********************************)
+	Range_TaperPos:LREAL:=5.01;
+	Range_TaperVelo:LREAL:=1.01;
+	Diff_TaperLeftPos:LREAL:=0.01;
+	Diff_TaperLeftVelo:LREAL:=0.2;
+	Diff_TaperRightPos:LREAL:=0.05;
+	Diff_TaperRightVelo:LREAL:=0.5;
+	Taper_BeyondRangePositive:BOOL;
+	Diff_TaperTopPos:LREAL:=0.05;
+	Diff_TaperBottomPos:LREAL:=0.05;
+	Taper_BeyondRangeNegtive:BOOL;
+(************************Plc_EmergencyStop ************************)
+	Plc_EmergencyStop  AT %Q*:BOOL:=TRUE;
+(************************LED***********************************************)
+	Led_Run  AT %Q*:BOOL;
+	Led_Error  AT %Q*:BOOL;
+(************************È«¾ÖÖØÒª×´Ì¬************************)
+	st_Power:DINT;
+	st_Couple:DINT;
+(************************È«¾ÖFB************************)
+	FB_Power:FB_Power;
+	FB_PlcEmergencyStop: FB_PlcEmergencyStop;
+	FB_CheckCoupleStatus:FB_CheckCoupleStatus;
+	FB_Move:FB_Move;
+	FB_Stop:FB_Stop;
+	FB_DecoupleAxis:FB_DecoupleAxis;
+	FB_CoupleAxis: FB_CoupleAxis;
+(********************²¹³¥GapÄ£Ê½£¬µ¥Öá²¹³¥Êý¾Ý************************)
+	(*ÊÇ·ñ²¹³¥*)
+	USE_SingleAxis_Compensation:BOOL:=TRUE;
+	Mdut:ARRAY[1..2] OF DUT:=
+	[(Encoder:=2.0,	LeftTop:=2.3000),
+	(Encoder:=2.0,	LeftTop:=2.3000)];
+	
+(*2020.11.23CPMU¹¤ÒÕÑù»ú*)
+
+	M_Compensation:ARRAY[1..18] OF Struct_M_Compensation:=[
+(Encoder:=0,	LeftTop:=0,	RightTop:=0,		LeftBottom:=0,	RightBottom:=0,	InRange:=FALSE),
+(Encoder:=5.5,	LeftTop:=5.5705,	RightTop:=5.5903,	LeftBottom:=5.5670,	RightBottom:=5.5673,	InRange:=FALSE),
+(Encoder:=6.0,	LeftTop:=6.0527,	RightTop:=6.0690,	LeftBottom:=6.0546,	RightBottom:=6.0524,	InRange:=FALSE),
+(Encoder:=6.5,	LeftTop:=6.5448,	RightTop:=6.5597,	LeftBottom:=6.5488,	RightBottom:=6.5461,	InRange:=FALSE),
+(Encoder:=7.5,	LeftTop:=7.5275,	RightTop:=7.5393,	LeftBottom:=7.5424,	RightBottom:=7.5401,	InRange:=FALSE),
+(Encoder:=8.5,	LeftTop:=8.5148,	RightTop:=8.5252,	LeftBottom:=8.5306,	RightBottom:=8.5282,	InRange:=FALSE),
+(Encoder:=9.5,	LeftTop:=9.5108,	RightTop:=9.5207,	LeftBottom:=9.5263,	RightBottom:=9.5233,	InRange:=FALSE),
+(Encoder:=10.5,	LeftTop:=10.5112,	RightTop:=10.5207,	LeftBottom:=10.5272,	RightBottom:=10.5247,		InRange:=FALSE),
+(Encoder:=11.5,	LeftTop:=11.5131,	RightTop:=11.5216,	LeftBottom:=11.5267,	RightBottom:=11.5227,		InRange:=FALSE),
+(Encoder:=30.0,	LeftTop:=30.0,	RightTop:=30.0,	LeftBottom:=30.0,	RightBottom:=30.0,		InRange:=FALSE),
+(Encoder:=100.0,	LeftTop:=100.0,	RightTop:=100.0,	LeftBottom:=100.0,	RightBottom:=100.0,		InRange:=FALSE),
+(Encoder:=110.0,	LeftTop:=110.0,	RightTop:=110.0,	LeftBottom:=110.0,	RightBottom:=110.0,		InRange:=FALSE),
+(Encoder:=120.0,	LeftTop:=120.0,	RightTop:=120.0,	LeftBottom:=120.0,	RightBottom:=120.0,		InRange:=FALSE),
+(Encoder:=130.0,	LeftTop:=130.0,	RightTop:=130.0,	LeftBottom:=130.0,	RightBottom:=130.0,		InRange:=FALSE),
+(Encoder:=140.0,	LeftTop:=140.0,	RightTop:=140.0,	LeftBottom:=140.0,	RightBottom:=140.0,		InRange:=FALSE),
+(Encoder:=150.0,	LeftTop:=150.0,	RightTop:=150.0,	LeftBottom:=150.0,	RightBottom:=150.0,		InRange:=FALSE),
+(Encoder:=160.0,	LeftTop:=160.0,	RightTop:=160.0,	LeftBottom:=160.0,	RightBottom:=160.0,		InRange:=FALSE),
+(Encoder:=300.001,	LeftTop:=300.001,	RightTop:=300.001,		LeftBottom:=300.001,	RightBottom:=300.001,	InRange:=FALSE)];
+(*														
+
+ (Encoder:=5.5,	LeftTop:=5.7810,	RightTop:=5.7137,	LeftBottom:=5.7517,	RightBottom:=5.7361,	InRange:=FALSE),*)
+(*³£ÎÂÏÂ*)
+(**)
+(*(Encoder:=3.0,	LeftTop:=2.9930,	RightTop:=3.0453,		LeftBottom:=3.0230,	RightBottom:=3.0830,	InRange:=FALSE),
+(Encoder:=3.5,	LeftTop:=3.5370,	RightTop:=3.6020,		LeftBottom:=3.5650,	RightBottom:=3.6380,	InRange:=FALSE),
+(Encoder:=4.0,	LeftTop:=4.0010,	RightTop:=4.0223,		LeftBottom:=4.0280,	RightBottom:=4.0567,	InRange:=FALSE),
+(Encoder:=4.5,	LeftTop:=4.5000,	RightTop:=4.5180,		LeftBottom:=4.5270,	RightBottom:=4.5507,	InRange:=FALSE),
+(Encoder:=5.0,	LeftTop:=5.0000,	RightTop:=5.0147,		LeftBottom:=5.0250,	RightBottom:=5.0453,	InRange:=FALSE),
+(Encoder:=5.5,	LeftTop:=5.5000,	RightTop:=5.5133,		LeftBottom:=5.5230,	RightBottom:=5.5413,	InRange:=FALSE),
+(Encoder:=6.0,	LeftTop:=6.0010,	RightTop:=6.0110,		LeftBottom:=6.0220,	RightBottom:=6.0360,	InRange:=FALSE),
+(Encoder:=6.5,	LeftTop:=6.5010,	RightTop:=6.5093,		LeftBottom:=6.5210,	RightBottom:=6.5323,	InRange:=FALSE),
+(Encoder:=7.0,	LeftTop:=7.0020,	RightTop:=7.0077,		LeftBottom:=7.0200,	RightBottom:=7.0270,	InRange:=FALSE),
+(Encoder:=7.5,	LeftTop:=7.5020,	RightTop:=7.5067,		LeftBottom:=7.5190,	RightBottom:=7.5217,	InRange:=FALSE),
+(Encoder:=8.0,	LeftTop:=8.0030,	RightTop:=8.0053,		LeftBottom:=8.0170,	RightBottom:=8.0173,	InRange:=FALSE),
+(Encoder:=8.5,	LeftTop:=8.5030,	RightTop:=8.5043,		LeftBottom:=8.5140,	RightBottom:=8.5113,	InRange:=FALSE),
+(Encoder:=9.0,	LeftTop:=9.0030,	RightTop:=9.0017,		LeftBottom:=9.0110,	RightBottom:=9.0077,	InRange:=FALSE),
+(Encoder:=9.5,	LeftTop:=9.5040,	RightTop:=9.4997,		LeftBottom:=9.5050,	RightBottom:=9.5027,	InRange:=FALSE),
+(Encoder:=10.0,	LeftTop:=10.0030,	RightTop:=9.9987,		LeftBottom:=10.0010,	RightBottom:=9.9963,	InRange:=FALSE),
+(Encoder:=80.001,	LeftTop:=80.001,	RightTop:=80.001,		LeftBottom:=80.001,	RightBottom:=80.001,	InRange:=FALSE);
+*)
+(*2021.0103µÍÎÂÏÂ
+	M_Compensation:ARRAY[1..18] OF Struct_M_Compensation:=
+(Encoder:=2.0,	LeftTop:=1.2337,	RightTop:=1.5190,		LeftBottom:=1.7017,	RightBottom:=1.5495,	InRange:=FALSE),
+(Encoder:=2.6,	LeftTop:=1.4500,	RightTop:=1.6940,		LeftBottom:=1.8900,	RightBottom:=1.7880,	InRange:=FALSE),
+(Encoder:=3.0,	LeftTop:=1.8500,	RightTop:=2.0890,		LeftBottom:=2.2900,	RightBottom:=2.1830,	InRange:=FALSE),
+(Encoder:=3.5,	LeftTop:=2.3500,	RightTop:=2.5810,		LeftBottom:=2.7900,	RightBottom:=2.6750,	InRange:=FALSE),
+(Encoder:=4.0,	LeftTop:=2.9347,	RightTop:=3.2413,		LeftBottom:=3.4297,	RightBottom:=3.3062,	InRange:=FALSE),
+(Encoder:=4.5,	LeftTop:=3.4337,	RightTop:=3.7370,		LeftBottom:=3.9287,	RightBottom:=3.8002,	InRange:=FALSE),
+(Encoder:=5.0,	LeftTop:=3.9337,	RightTop:=4.2337,		LeftBottom:=4.4267,	RightBottom:=4.2948,	InRange:=FALSE),
+(Encoder:=5.5,	LeftTop:=4.4337,	RightTop:=4.7323,		LeftBottom:=4.9247,	RightBottom:=4.7908,	InRange:=FALSE),
+(Encoder:=6.0,	LeftTop:=4.9347,	RightTop:=5.2300,		LeftBottom:=5.4237,	RightBottom:=5.2855,	InRange:=FALSE),
+(Encoder:=6.5,	LeftTop:=5.4347,	RightTop:=5.7283,		LeftBottom:=5.9227,	RightBottom:=5.7818,	InRange:=FALSE),
+(Encoder:=7.0,	LeftTop:=5.9357,	RightTop:=6.2267,		LeftBottom:=6.4217,	RightBottom:=6.2765,	InRange:=FALSE),
+(Encoder:=7.5,	LeftTop:=6.4357,	RightTop:=6.7257,		LeftBottom:=6.9207,	RightBottom:=6.7712,	InRange:=FALSE),
+(Encoder:=8.0,	LeftTop:=6.9367,	RightTop:=7.2243,		LeftBottom:=7.4187,	RightBottom:=7.2668,	InRange:=FALSE),
+(Encoder:=8.5,	LeftTop:=7.4367,	RightTop:=7.7233,		LeftBottom:=7.9157,	RightBottom:=7.7608,	InRange:=FALSE),
+(Encoder:=9.0,	LeftTop:=7.9367,	RightTop:=8.2207,		LeftBottom:=8.4127,	RightBottom:=8.2572,	InRange:=FALSE),
+(Encoder:=9.5,	LeftTop:=8.4377,	RightTop:=8.7187,		LeftBottom:=8.9067,	RightBottom:=8.7522,	InRange:=FALSE),
+(Encoder:=10.0,	LeftTop:=8.9367,	RightTop:=9.2177,		LeftBottom:=9.4027,	RightBottom:=9.2458,	InRange:=FALSE),
+(Encoder:=80.001,	LeftTop:=78.9347,	RightTop:=79.220,		LeftBottom:=79.4027,	RightBottom:=79.2505,	InRange:=FALSE);
+
+*)
+
+(*µÚËÄ´Î½µÎÂµÍÎÂÏÂÊý¾Ý2018.12.13*)
+(*
+	M_Compensation:ARRAY[1..6] OF Struct_M_Compensation:=(Encoder:=2,		LeftTop:=1.025,	RightTop:=1.055,		LeftBottom:=2.049,		RightBottom:=2.049,	InRange:=FALSE),
+														(Encoder:=2.5,	LeftTop:=1.225,	RightTop:=1.405,		LeftBottom:=2.348,		RightBottom:=2.599,	InRange:=FALSE),
+														(Encoder:=3.5,	LeftTop:=2.225,	RightTop:=2.405,		LeftBottom:=3.348,		RightBottom:=3.599,	InRange:=FALSE),
+														(Encoder:=4.5,	LeftTop:=3.225,	RightTop:=3.405,		LeftBottom:=4.348,		RightBottom:=4.599,	InRange:=FALSE),
+														(Encoder:=7,		LeftTop:=6.997,	RightTop:=6.996,		LeftBottom:=6.998,		RightBottom:=7.040,	InRange:=FALSE),
+														(Encoder:=80.001,	LeftTop:=80.001,	RightTop:=80.001,		LeftBottom:=80.001,	RightBottom:=80.001,	InRange:=FALSE);
+*)
+
+(*µÚËÄ´Î½µÎÂ³£ÎÂÏÂÊý¾Ý2018.11.29*)
+(*
+	M_Compensation:ARRAY[1..6] OF Struct_M_Compensation:=(Encoder:=2,		LeftTop:=1.800,	RightTop:=2.000,		LeftBottom:=2.800,		RightBottom:=3.000,	InRange:=FALSE),
+														(Encoder:=2.5,	LeftTop:=1.991,	RightTop:=2.120,		LeftBottom:=3.018,		RightBottom:=3.342,	InRange:=FALSE),
+														(Encoder:=3.5,	LeftTop:=2.991,	RightTop:=3.120,		LeftBottom:=4.018,		RightBottom:=4.342,	InRange:=FALSE),
+														(Encoder:=4.5,	LeftTop:=3.991,	RightTop:=4.120,		LeftBottom:=5.018,		RightBottom:=5.342,	InRange:=FALSE),
+														(Encoder:=7,		LeftTop:=6.997,	RightTop:=6.996,		LeftBottom:=6.998,		RightBottom:=7.040,	InRange:=FALSE),
+														(Encoder:=80.001,	LeftTop:=80.001,	RightTop:=80.001,		LeftBottom:=80.001,	RightBottom:=80.001,	InRange:=FALSE);
+
+*)
+(*µÚÈý´Î½µÎÂµÍÎÂÏÂÊý¾Ý*)
+(*	M_Compensation:ARRAY[1..6] OF Struct_M_Compensation:=(Encoder:=2,		LeftTop:=0.562,	RightTop:=1.225,		LeftBottom:=2.802,		RightBottom:=2.574,	InRange:=FALSE),
+														(Encoder:=2.5,	LeftTop:=0.668,	RightTop:=1.331,		LeftBottom:=2.908,		RightBottom:=2.680,	InRange:=FALSE),
+														(Encoder:=3.5,	LeftTop:=1.662,	RightTop:=2.325,		LeftBottom:=3.902,		RightBottom:=3.674,	InRange:=FALSE),
+														(Encoder:=4.5,	LeftTop:=2.662,	RightTop:=3.325,		LeftBottom:=4.902,		RightBottom:=4.674,	InRange:=FALSE),
+				5						(Encoder:=80.001,	LeftTop:=80.001,	RightTop:=80.001,		LeftBottom:=80.001,	RightBottom:=80.001,	InRange:=FALSE);
+*)
+(*µÚÈý´Î½µÎÂ³£ÎÂÏÂÊý¾Ý*)
+(*
+	M_Compensation:ARRAY[1..6] OF Struct_M_Compensation:=(Encoder:=2,		LeftTop:=2.031,	RightTop:=2.062,		LeftBottom:=2.015,		RightBottom:=2.080,	InRange:=FALSE),
+														(Encoder:=2.5,	LeftTop:=2.213,	RightTop:=2.846,		LeftBottom:=2.921,		RightBottom:=2.663,	InRange:=FALSE),
+														(Encoder:=3.5,	LeftTop:=3.204,	RightTop:=3.895,		LeftBottom:=3.808,		RightBottom:=3.511,	InRange:=FALSE),
+														(Encoder:=4.5,	LeftTop:=4.202,	RightTop:=4.904,		LeftBottom:=4.802,		RightBottom:=4.528,	InRange:=FALSE),
+														(Encoder:=7,		LeftTop:=6.997,	RightTop:=6.996,		LeftBottom:=6.998,		RightBottom:=7.040,	InRange:=FALSE),
+														(Encoder:=80.001,	LeftTop:=80.001,	RightTop:=80.001,		LeftBottom:=80.001,	RightBottom:=80.001,	InRange:=FALSE);
+*)
+(*µÚ¶þ´ÎµÍÎÂ²âÊÔÊý¾Ý*)
+(*
+	M_Compensation:ARRAY[1..8] OF Struct_M_Compensation:=(Encoder:=2,		LeftTop:=1.100,	RightTop:=1.700,		LeftBottom:=2.115,		RightBottom:=1.900,	InRange:=FALSE),
+														(Encoder:=2.5,	LeftTop:=1.316,	RightTop:=1.951,		LeftBottom:=2.327,		RightBottom:=2.083,	InRange:=FALSE),
+														(Encoder:=3,     	LeftTop:=1.849,	RightTop:=2.550,		LeftBottom:=2.757,		RightBottom:=2.475,	InRange:=FALSE),
+														(Encoder:=3.5,	LeftTop:=2.349,	RightTop:=3.047,		LeftBottom:=3.257,		RightBottom:=2.972,	InRange:=FALSE),
+														(Encoder:=4,   	LeftTop:=2.847,	RightTop:=3.549,		LeftBottom:=3.751,		RightBottom:=3.482,	InRange:=FALSE),
+														(Encoder:=4.5,	LeftTop:=3.347,	RightTop:=4.049,		LeftBottom:=4.251,		RightBottom:=3.982,	InRange:=FALSE),
+														(Encoder:=7,		LeftTop:=6.997,	RightTop:=6.996,		LeftBottom:=6.998,		RightBottom:=7.040,	InRange:=FALSE),
+														(Encoder:=80.001,	LeftTop:=80.001,	RightTop:=80.001,		LeftBottom:=80.001,	RightBottom:=80.001,	InRange:=FALSE);
+*)
+(*2018.7.16µÍÎÂÇ°*)
+(*
+	M_Compensation:ARRAY[1..6] OF Struct_M_Compensation:=(Encoder:=2,		LeftTop:=2.031,	RightTop:=2.062,		LeftBottom:=2.015,		RightBottom:=2.080,	InRange:=FALSE),
+														(Encoder:=2.5,	LeftTop:=2.563,	RightTop:=2.907,		LeftBottom:=2.671,		RightBottom:=2.726,	InRange:=FALSE),
+														(Encoder:=3.5,	LeftTop:=3.504,	RightTop:=3.895,		LeftBottom:=3.508,		RightBottom:=3.511,	InRange:=FALSE),
+														(Encoder:=4.5,	LeftTop:=4.502,	RightTop:=4.899,		LeftBottom:=4.502,		RightBottom:=4.523,	InRange:=FALSE),
+														(Encoder:=7,		LeftTop:=6.997,	RightTop:=6.996,		LeftBottom:=6.998,		RightBottom:=7.040,	InRange:=FALSE),
+														(Encoder:=80.001,	LeftTop:=80.001,	RightTop:=80.001,		LeftBottom:=80.001,	RightBottom:=80.001,	InRange:=FALSE);
+*)
+(*2018.6.4¸´ÎÂ²âÊÔ*)
+(*
+	M_Compensation:ARRAY[1..7] OF Struct_M_Compensation:=(Encoder:=2,		LeftTop:=1.331,	RightTop:=1.362,		LeftBottom:=1.315,		RightBottom:=1.380,	InRange:=FALSE),
+														(Encoder:=2.5,	LeftTop:=2.332,	RightTop:=2.295,           	LeftBottom:=2.561,		RightBottom:=2.555,	InRange:=FALSE),
+														(Encoder:=3,		LeftTop:=2.485,	RightTop:=2.455,		LeftBottom:=2.745,		RightBottom:=2.768,	InRange:=FALSE),
+														(Encoder:=3.5,	LeftTop:=2.585,	RightTop:=2.548,		LeftBottom:=2.845,		RightBottom:=2.839,	InRange:=FALSE),
+														(Encoder:=4.5,	LeftTop:=3.592,	RightTop:=3.548,		LeftBottom:=3.852,		RightBottom:=3.832,	InRange:=FALSE),
+														(Encoder:=7,		LeftTop:=6.997,	RightTop:=6.996,		LeftBottom:=6.998,		RightBottom:=7.040,	InRange:=FALSE),
+														(Encoder:=80.001,	LeftTop:=80.001,	RightTop:=80.001,		LeftBottom:=80.001,	RightBottom:=80.001,	InRange:=FALSE);
+*)
+(*2018.5.23µÍÎÂÏÂ*)
+(*
+	M_Compensation:ARRAY[1..7] OF Struct_M_Compensation:=(Encoder:=2,		LeftTop:=1.331,	RightTop:=1.362,		LeftBottom:=1.315,		RightBottom:=1.380,	InRange:=FALSE),
+														(Encoder:=2.5,	LeftTop:=1.585,	RightTop:=1.548,		LeftBottom:=1.845,		RightBottom:=1.839,	InRange:=FALSE),
+														(Encoder:=3,		LeftTop:=2.085,	RightTop:=2.055,		LeftBottom:=2.345,		RightBottom:=2.368,	InRange:=FALSE),
+														(Encoder:=3.5,	LeftTop:=2.594,	RightTop:=2.547,		LeftBottom:=2.858,		RightBottom:=2.830,	InRange:=FALSE),
+														(Encoder:=4.5,	LeftTop:=3.592,	RightTop:=3.548,		LeftBottom:=3.852,		RightBottom:=3.832,	InRange:=FALSE),
+														(Encoder:=7,		LeftTop:=6.997,	RightTop:=6.996,		LeftBottom:=6.998,		RightBottom:=7.040,	InRange:=FALSE),
+														(Encoder:=80.001,	LeftTop:=80.001,	RightTop:=80.001,		LeftBottom:=80.001,	RightBottom:=80.001,	InRange:=FALSE);
+*)
+(*
+(*2018.5.18£¬5¡¢6¡¢7¡¢9²¹³¥£¬¼ÓÈë6mm²¢²¹³¥*)
+	M_Compensation:ARRAY[1..7] OF Struct_M_Compensation:=(Encoder:=2,		LeftTop:=1.331,	RightTop:=1.362,		LeftBottom:=1.315,		RightBottom:=1.380,	InRange:=FALSE),
+														(Encoder:=2.5,	LeftTop:=1.585,	RightTop:=1.570,		LeftBottom:=1.845,		RightBottom:=1.884,	InRange:=FALSE),
+														(Encoder:=3,		LeftTop:=2.085,	RightTop:=2.055,		LeftBottom:=2.345,		RightBottom:=2.368,	InRange:=FALSE),
+														(Encoder:=3.5,	LeftTop:=2.594,	RightTop:=2.572,		LeftBottom:=2.858,		RightBottom:=2.856,	InRange:=FALSE),
+														(Encoder:=4.5,	LeftTop:=3.592,	RightTop:=3.568,		LeftBottom:=3.852,		RightBottom:=3.852,	InRange:=FALSE),
+														(Encoder:=7,		LeftTop:=6.997,	RightTop:=6.996,		LeftBottom:=6.998,		RightBottom:=7.040,	InRange:=FALSE),
+														(Encoder:=80.001,	LeftTop:=80.001,	RightTop:=80.001,		LeftBottom:=80.001,	RightBottom:=80.001,	InRange:=FALSE);
+*)
+(*
+(*2018.5.9.22:00£¬µÍÎÂ²¹³¥£¬²ÉÓÃ±±Ãæ²Î¿¼¼«Êý¾Ý£¬5mm£¬ÉÏÁº²¹³¥0.91mm£¬ÏÂÁº²¹³¥0.65mm*)
+	M_Compensation:ARRAY[1..6] OF Struct_M_Compensation:=(Encoder:=2,		LeftTop:=1.331,	RightTop:=1.362,		LeftBottom:=1.315,		RightBottom:=1.380,	InRange:=FALSE),
+														(Encoder:=2.5,	LeftTop:=1.585,	RightTop:=1.553,		LeftBottom:=1.845,		RightBottom:=1.866,	InRange:=FALSE),
+														(Encoder:=3.5,	LeftTop:=3.504,	RightTop:=3.500,		LeftBottom:=3.508,		RightBottom:=3.524,	InRange:=FALSE),
+														(Encoder:=4.5,	LeftTop:=4.502,	RightTop:=4.499,		LeftBottom:=4.502,		RightBottom:=4.523,	InRange:=FALSE),
+														(Encoder:=7,		LeftTop:=6.997,	RightTop:=6.996,		LeftBottom:=6.998,		RightBottom:=7.040,	InRange:=FALSE),
+														(Encoder:=80.001,	LeftTop:=80.001,	RightTop:=80.001,		LeftBottom:=80.001,	RightBottom:=80.001,	InRange:=FALSE);
+(*
+(*2018.5.9.22:00Ç°£¬²¹³¥5mmµÍÎÂÊÕËõÁ¿Ç°Êý¾Ý*)
+	M_Compensation:ARRAY[1..6] OF Struct_M_Compensation:=(Encoder:=2,		LeftTop:=2.031,	RightTop:=2.062,		LeftBottom:=2.015,		RightBottom:=2.080,	InRange:=FALSE),
+														(Encoder:=2.5,	LeftTop:=2.495,	RightTop:=2.463,		LeftBottom:=2.495,		RightBottom:=2.516,	InRange:=FALSE),
+														(Encoder:=3.5,	LeftTop:=3.504,	RightTop:=3.500,		LeftBottom:=3.508,		RightBottom:=3.524,	InRange:=FALSE),
+														(Encoder:=4.5,	LeftTop:=4.502,	RightTop:=4.499,		LeftBottom:=4.502,		RightBottom:=4.523,	InRange:=FALSE),
+														(Encoder:=7,		LeftTop:=6.997,	RightTop:=6.996,		LeftBottom:=6.998,		RightBottom:=7.040,	InRange:=FALSE),
+														(Encoder:=80.001,	LeftTop:=80.001,	RightTop:=80.001,		LeftBottom:=80.001,	RightBottom:=80.001,	InRange:=FALSE);
+*)*)
+	M_CompensationNumber:INT;
+	M_DisplayNumber:INT;
+	(*Conpensation Position Target*)
+	LeftTopLinPositionNew:LREAL;
+	LeftBottomLinPositionNew:LREAL;
+	RightTopLinPositionNew:LREAL;
+	RightBottomLinPositionNew:LREAL;
+	(*Display Position*)
+	LeftTopLinPositionDisplay:LREAL;
+	LeftBottomLinPositionDisplay:LREAL;
+	RightTopLinPositionDisplay:LREAL;
+	RightBottomLinPositionDisplay:LREAL;
+	(*Display Velocity*)
+	LeftTopLinVelocityDisplay:LREAL;
+	LeftBottomLinVelocityDisplay:LREAL;
+	RightTopLinVelocityDisplay:LREAL;
+	RightBottomLinVelocityDisplay:LREAL;
+	(*temperature sensors*)
+	thermocouple AT %I*:ARRAY[1..12]OF  DINT;
+	shieldPt100  AT %I*:ARRAY[1..12]OF INT;
+	thermocouple_Celsius:ARRAY[1..12]OF  LREAL;
+	shieldPt100_Celsius  :ARRAY[1..12]OF LREAL;
+	huoer_Celsius AT %I* :ARRAY[1..3]OF INT;
+	(**)
+	lakeshorePt100  AT %I*:ARRAY[1..12]OF INT;(*16*×èÖµ*)
+	lakeshorePt100_Resistance :ARRAY[1..12]OF LREAL;(*ÉãÊÏÎÂ¶È*)
+	lakeshorePt100_Celsius  :ARRAY[1..12]OF LREAL;(*ÉãÊÏÎÂ¶È*)
+	temperatureCompensationValue:LREAL:=6;
+	testSensors  AT %I*:ARRAY[1..4]OF INT;
+
+(*Test No.184*)
+	Struct_M_lakeshore_168:ARRAY[1..52] OF Struct_M_lakeshore:=[(Temperature:=-255.02072961,	Resistance:=19394.22709513),
+														       (Temperature:=-254.05045152,	Resistance:=17654.92429047),
+														       (Temperature:=-253.07744087,	Resistance:=16151.62683151),
+														       (Temperature:=-252.00959324,	Resistance:=14730.57326945),
+														       (Temperature:=-250.42495220,	Resistance:=12968.55015283),
+														       (Temperature:=-248.82081761,	Resistance:=11509.89960915),
+														       (Temperature:=-247.21174565,	Resistance:=10296.55197911),
+														       (Temperature:=-245.58891366,	Resistance:=9270.75571767),
+														       (Temperature:=-243.96558907,	Resistance:=8400.62569432),
+														       (Temperature:=-242.14354329,	Resistance:=7573.26483503),
+														       (Temperature:=-240.02689351,	Resistance:=6767.17126789),
+														       (Temperature:=-237.01618411,	Resistance:=5838.58514549),
+														       (Temperature:=-234.00593745,	Resistance:=5101.58555065),
+														       (Temperature:=-230.99752410,	Resistance:=4505.18214539),
+														       (Temperature:=-228.00173193,	Resistance:=4017.09732257),
+														       (Temperature:=-224.99947745,	Resistance:=3609.02040601),
+														       (Temperature:=-223.00692641,	Resistance:=3374.28026471),
+														       (Temperature:=-218.01660226,	Resistance:=2884.61719537),
+														       (Temperature:=-213.02574325,	Resistance:=2501.58514940),
+														       (Temperature:=-208.03560884,	Resistance:=2195.64012040),
+														       (Temperature:=-203.04420176,	Resistance:=1946.81103230),
+														       (Temperature:=-198.05275449,	Resistance:=1741.06206884),
+														       (Temperature:=-193.06103279,	Resistance:=1568.92560629),
+														       (Temperature:=-188.06248282,	Resistance:=1422.92395120),
+														       (Temperature:=-183.06714354,	Resistance:=1298.17958491),
+														       (Temperature:=-178.06870827,	Resistance:=1190.47468069),
+														       (Temperature:=-173.07068956,	Resistance:=1096.60468916),
+														       (Temperature:=-163.08053594,	Resistance:=942.07281950),
+														       (Temperature:=-153.08718985,	Resistance:=820.42837839),
+														       (Temperature:=-143.08487641,	Resistance:=722.56760466),
+														       (Temperature:=-133.08398781,	Resistance:=642.67848926),
+														       (Temperature:=-123.08745222,	Resistance:=576.45895597),
+														       (Temperature:=-113.09120089,	Resistance:=520.90762376),
+														       (Temperature:=-103.09942915,	Resistance:=473.74837218),
+														       (Temperature:=-93.10598968,		Resistance:=433.38294834),
+														       (Temperature:=-83.10392915,		Resistance:=398.41968464),
+														       (Temperature:=-73.10228709,		Resistance:=368.09301028),
+														       (Temperature:=-63.10299621,		Resistance:=341.43424414),
+														       (Temperature:=-53.11519681,		Resistance:=318.02847824),
+														       (Temperature:=-43.10742807	,	Resistance:=297.22485607),
+														       (Temperature:=-33.10726812,		Resistance:=278.69871028),
+														       (Temperature:=-23.11858134,		Resistance:=262.15834948),
+														       (Temperature:=-13.10195090,		Resistance:=247.23616978),
+														       (Temperature:=-3.11184252,		Resistance:=233.79708047),
+														       (Temperature:=6.89903472,		Resistance:=221.61300733),
+														       (Temperature:=16.89346621,		Resistance:=210.54967929),
+														       (Temperature:=26.90358952,		Resistance:=200.45587628),
+														       (Temperature:=36.88287604,		Resistance:=191.25204791),
+														       (Temperature:=41.88872196,		Resistance:=186.92616816),
+														       (Temperature:=46.88480694,		Resistance:=182.78432099),
+														       (Temperature:=52.87776550,		Resistance:=178.06184409),
+														       (Temperature:=56.87370113,		Resistance:=175.01081354)];
+
+(*
+Struct_M_lakeshore_168:ARRAY[1..52] OF Struct_M_lakeshore:=(Temperature:=-255.02148584,	Resistance:=17467.51361429),
+														       (Temperature:=-254.05229765,	Resistance:=15920.82205731),
+														       (Temperature:=-253.07582822,	Resistance:=14578.50586503),
+														       (Temperature:=-252.01029408,	Resistance:=13314.83293750),
+														       (Temperature:=-250.42593953,	Resistance:=11741.46150061),
+														       (Temperature:=-248.82114671,	Resistance:=10435.92048251),
+														       (Temperature:=-247.21093179,	Resistance:=9348.73725539),
+														       (Temperature:=-245.58869114,	Resistance:=8428.36508630),
+														       (Temperature:=-243.96317077,	Resistance:=7645.95382882),
+														       (Temperature:=-242.14282659,	Resistance:=6901.52980185),
+														       (Temperature:=-240.02565306,	Resistance:=6174.70288700),
+														       (Temperature:=-237.01772619,	Resistance:=5337.15935418),
+														       (Temperature:=-234.00641032,	Resistance:=4669.94432605),
+														       (Temperature:=-230.99638631,	Resistance:=4129.44762482),
+														       (Temperature:=-228.00091359,	Resistance:=3686.25091590),
+														       (Temperature:=-225.00020456,	Resistance:=3315.69773718),
+														       (Temperature:=-223.00791577,	Resistance:=3102.03825436),
+														       (Temperature:=-218.01784455,	Resistance:=2655.95765650),
+														       (Temperature:=-213.02820409,	Resistance:=2306.30469335),
+														       (Temperature:=-208.03707086,	Resistance:=2026.68631979),
+														       (Temperature:=-203.04413996,	Resistance:=1798.75031171),
+														       (Temperature:=-198.05551086,	Resistance:=1610.35975891),
+														       (Temperature:=-193.06273927,	Resistance:=1452.39526661),
+														       (Temperature:=-188.05883288,	Resistance:=1318.25592597),
+														       (Temperature:=-183.06258538,	Resistance:=1203.56234118),
+														       (Temperature:=-178.06718279,	Resistance:=1104.51148216),
+														       (Temperature:=-173.07249199,	Resistance:=1018.20332165),
+														       (Temperature:=-163.08375191,	Resistance:=875.68114167),
+														       (Temperature:=-153.08708895,	Resistance:=763.40014611),
+														       (Temperature:=-143.08456026,	Resistance:=673.01413079),
+														       (Temperature:=-133.08511977,	Resistance:=599.14558137),
+														       (Temperature:=-123.08749266,	Resistance:=537.87435730),
+														       (Temperature:=-113.09351200,	Resistance:=486.39730699),
+														       (Temperature:=-103.10083499,	Resistance:=442.70701049),
+														       (Temperature:=-93.10681179,		Resistance:=405.24490154),
+														       (Temperature:=-83.10668364,		Resistance:=372.85251196),
+														       (Temperature:=-73.10424427,		Resistance:=344.62377216),
+														       (Temperature:=-63.10525050,		Resistance:=319.91272482),
+														       (Temperature:=-53.11631884,		Resistance:=298.14326645),
+														       (Temperature:=-43.10919062	,	Resistance:=278.79776489),
+														       (Temperature:=-33.10718139,		Resistance:=261.57224548),
+														       (Temperature:=-23.12143823,		Resistance:=246.17864217),
+														       (Temperature:=-13.10564070,		Resistance:=232.27707124),
+														       (Temperature:=-3.11271856,		Resistance:=219.77787693),
+														       (Temperature:=6.89876028,		Resistance:=208.41568062),
+														       (Temperature:=16.88935188,		Resistance:=198.10158580),
+														       (Temperature:=26.89992337,		Resistance:=188.70405160),
+														       (Temperature:=36.88110394,		Resistance:=180.10572832),
+														       (Temperature:=41.88616228,		Resistance:=176.08361784),
+														       (Temperature:=46.88372409,		Resistance:=172.21346348),
+														       (Temperature:=52.87452959,		Resistance:=167.80352164),
+														       (Temperature:=56.87233822,		Resistance:=164.96790544);
+*)
+
+(******RS232************)
+	RxBufferEL			: ComBuffer;	(* Receive data buffer; used with all receive function blocks *)
+	TxBufferEL			: ComBuffer;	(* Transmit data buffer; used with all receive function blocks *)
+
+END_VAR
+
+]]></Declaration>
+  </GVL>
+</TcPlcObject>

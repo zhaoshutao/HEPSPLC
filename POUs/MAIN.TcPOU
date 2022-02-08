@@ -1,0 +1,665 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <POU Name="MAIN" Id="{9221b602-3f7e-4757-b581-54b56182ad8f}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM MAIN
+VAR
+	pbGapMode: BOOL:=FALSE;
+	pbTaperMode: BOOL:=FALSE;
+	pbSingleCarrierMode: BOOL:=FALSE;
+	pbDebugMode:BOOL:=FALSE;
+	pbBCGapMode:BOOL:=FALSE;
+	fb_led_Show: FB_LedShow;
+	btn_reset: BOOL;
+	CPMU_PLC_Reset: PLC_Reset;
+	tttt:LREAL;
+	d_state: DINT;
+	CPMU_PLC_Start: PLC_Start;
+	powerStatus:BOOL;
+
+(*TwinSAFE*)
+	Safe_run AT%Q*:BOOL;
+	Err_Ack AT %Q*:BOOL;
+	Estop_RunAndRestart AT %Q*:BOOL;
+	AX5805_Error_Ack AT %Q*:BOOL;
+	Led_Run  AT %Q*:BOOL;
+	Led_Error  AT %Q*:BOOL;
+
+	FB_ERROR AT%I*:BOOL;
+	COM_ERROR AT%I*:BOOL;
+	OUT_ERROR AT%I*:BOOL;
+	Estop_Out AT%I*:BOOL;
+
+	SafeStatus:INT;
+	SafePLCRunOK: BOOL;
+	fb_ton: TON;
+	fb_ton2: TON;
+	fb_ton3: TON;
+	fb_ton1: TON;
+	fb_ton0: TON;
+(*IO*)
+	el1808_D1  AT%I* :ARRAY[1..8] OF BOOL;
+	el1008 AT%I*:BOOL;
+	EStopTrig:BOOL;
+	Error:BOOL;
+	ErrorID:DINT;
+(*setAxisPosition*)
+	SetAxisPosState: INT;
+	FB_Set_AxisPosition:FB_SetAxisPosition;
+	fb_ton4: TON;
+	fb_ton5: TON;
+	fb_ton6: TON;
+	SerAxisPositionDone: BOOL;
+
+	i: INT;
+
+	t: LREAL;
+	a: DINT;
+	b: LREAL;
+	j: INT;
+	ddd: LREAL;
+(****RS232***)
+	fbEL6001	: FB_SerialCom;
+	moveDoneLeftTop: BOOL;
+	moveDoneRightTop: BOOL;
+	moveDoneLeftBottom: BOOL;
+	moveDoneRightBottom: BOOL;
+	moveDoneAllAxis: BOOL;
+	moveStatusLeftTop: BOOL;
+	moveStatusRightTop: BOOL;
+	moveStatusLeftBottom: BOOL;
+	moveStatusRightBottom: BOOL;
+	moveStatusAllAxis: BOOL;
+
+(*Torque*)
+	Torque_LT AT%I*:INT;
+	Torque_RT AT%I*:INT;
+	Torque_LB AT%I*:INT;
+	Torque_RB AT%I*:INT;
+	btn_setAxisPosition: BOOL;
+	GapSetValue: LREAL;
+	RestartTC: TC_Restart;
+END_VAR]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[A_RestartTC();
+(*******InitAxisParameters*******)
+A_InitAxisParameters();
+(*******¼à²âÏÞÎ»¿ª¹Ø×´Ì¬£¬·½Ïò¿ØÖÆ&½ô¼±Çé¿öÏÂEStop*******)
+A_CheckLimitSwitch();
+(*******PosDiff¼à¿Ø*******)
+A_PosDiffDetectiion();
+(*******³õÊ¼»¯SafePlc*******)
+IF NOT simulation THEN
+A_SafePlcStartInit();
+END_IF
+(************SetAxisPosition*********************)
+IF  btn_setAxisPosition THEN
+	//IF NOT SerAxisPositionDone THEN
+		FB_Set_AxisPosition.GapValueSet:=GapSetValue;
+		A_SetAxisPosition();
+	//END_IF
+END_IF
+(*******³õÊ¼»¯Íê³Éºó£¬Ñ¡Ôñ²»Í¬Ä£Ê½*******)
+IF SafePLCRunOK OR Simulation THEN
+	IF pbSingleCarrierMode AND NOT pbTaperMode AND NOT pbGapMode AND NOT pbDebugMode AND NOT pbBCGapMode THEN
+		SingleCarrierMode();
+	ELSIF pbTaperMode  AND NOT pbSingleCarrierMode AND NOT pbGapMode  AND NOT pbDebugMode AND NOT pbBCGapMode THEN
+		TaperMode();
+	ELSIF pbGapMode AND  NOT pbSingleCarrierMode AND NOT pbTaperMode  AND NOT pbDebugMode AND NOT pbBCGapMode THEN
+		GapMode();
+	ELSIF NOT pbGapMode AND  NOT pbSingleCarrierMode AND NOT pbTaperMode  AND pbDebugMode AND NOT pbBCGapMode THEN
+		DebugMode();
+	ELSIF NOT pbGapMode AND  NOT pbSingleCarrierMode AND NOT pbTaperMode  AND NOT pbDebugMode AND  pbBCGapMode THEN
+		BCGapMode();
+	END_IF
+END_IF
+(************SetAxisPosition*********************)
+IF NOT USELinearEncoeder THEN
+	IF NOT SerAxisPositionDone THEN
+		A_SetAxisPosition();
+	END_IF
+END_IF
+(*******Led Show******)
+fb_led_Show();
+(*******Check Power status£¬¸³Öµ¸øÈ«¾Ö±äÁ¿st_Power*******)
+FB_Power(Check:=TRUE);
+st_Power:=FB_Power.PowerState;
+(******Check Couple Status£¬¸³Öµ¸øÈ«¾Ö±äÁ¿st_Couple******)
+FB_CheckCoupleStatus(Check:=TRUE);
+st_Couple:=FB_CheckCoupleStatus.CoupleState;
+(***********ÎÂ¶È´«¸ÐÆ÷A_TemperatureInit************)
+A_TemperatureInit();
+
+(*********RS232*********************)
+BackgroundEL();
+(*fbEL6001(TxBuffer:=TxBufferEL, RxBuffer:=RxBufferEL);*)
+]]></ST>
+    </Implementation>
+    <Action Name="A_CheckLimitSwitch" Id="{1026ae85-58e3-4004-8dd3-becfab0085f9}">
+      <Implementation>
+        <ST><![CDATA[(*******1.´ÓIO»ñÈ¡ÏÞÎ»×´Ì¬******)
+(**)
+IF simulation THEN
+	(**)
+	LS_LeftTop_Top:=TRUE;
+	LS_LeftTop_Bottom:=TRUE;
+	LS_RightTop_Top:=TRUE;
+	LS_RightTop_Bottom:=TRUE;
+	LS_LeftBottom_Top:=TRUE;
+	LS_LeftBottom_Bottom:=TRUE;
+	LS_RightBottom_Top:=TRUE;
+	LS_RightBottom_Bottom:=TRUE;
+ELSE
+	LS_LeftTop_Top :=el1808_D1[1];
+	LS_LeftTop_Bottom:=el1808_D1[3];
+	LS_RightTop_Top:=el1808_D1[2];
+	LS_RightTop_Bottom:=el1808_D1[4];
+	LS_LeftBottom_Top:=el1808_D1[7];
+	LS_LeftBottom_Bottom:=el1808_D1[5];
+	LS_RightBottom_Top:=el1808_D1[8];
+	LS_RightBottom_Bottom:=el1808_D1[6];
+END_IF
+(*
+	LS_LeftTop_Top:=TRUE;
+	LS_LeftTop_Bottom:=TRUE;
+	LS_RightTop_Top:=TRUE;
+	LS_RightTop_Bottom:=TRUE;
+	LS_LeftBottom_Top:=TRUE;
+	LS_LeftBottom_Bottom:=TRUE;
+	LS_RightBottom_Top:=TRUE;
+	LS_RightBottom_Bottom:=TRUE;
+*)
+(******2.TopÏÞÎ»»òÕßBottomÏÞÎ»ÓÐÒ»¸ö´¥·¢£¬È«¾Ö±äÁ¿¡£¸øMC_POWERÓÃÓÚ·½Ïò¿ØÖÆ£¬ÓÐÒ»¸öÏÞÎ»Îª´¥·¢ÎªFALSE£¬ÔòUnreach_LSÎªFALSE******)
+Unreach_LS_Top:=LS_LeftTop_Top AND LS_RightTop_Top AND LS_LeftBottom_Top AND LS_RightBottom_Top;
+Unreach_LS_Bottom:=LS_LeftTop_Bottom AND LS_RightTop_Bottom AND LS_LeftBottom_Bottom AND LS_RightBottom_Bottom;
+(**************************ÏòTopÔË¶¯Ê±£¬´¥ÅöBottomÏÞÎ»¿ª¹Ø£¬»òÕßÏà·´£¬ESTOP**************************************)
+(*
+IF LeftTopLin.Status.Moving AND Velo_LeftTopLin>0 THEN
+	IF NOT Unreach_LS_Bottom THEN
+		Error:=TRUE;
+		ErrorID:=61;
+		FB_PlcEmergencyStop();
+	END_IF
+ELSIF LeftTopLin.Status.Moving AND Velo_LeftTopLin<0 THEN
+	IF NOT Unreach_LS_Top THEN
+		Error:=TRUE;
+		ErrorID:=62;
+		FB_PlcEmergencyStop();
+	END_IF
+ELSIF RightTopLin.Status.Moving AND Velo_RightTopLin>0 THEN
+	IF NOT Unreach_LS_Bottom THEN
+		Error:=TRUE;
+		ErrorID:=63;
+		FB_PlcEmergencyStop();
+	END_IF
+ELSIF RightTopLin.Status.Moving AND Velo_RightTopLin<0 THEN
+	IF NOT  Unreach_LS_Top THEN
+		Error:=TRUE;
+		ErrorID:=64;
+		FB_PlcEmergencyStop();
+	END_IF
+ELSIF LeftBottomLin.Status.Moving AND Velo_LeftBottomLin>0 THEN
+	IF NOT Unreach_LS_Bottom THEN
+		Error:=TRUE;
+		ErrorID:=65;
+		FB_PlcEmergencyStop();
+	END_IF
+ELSIF LeftBottomLin.Status.Moving AND Velo_LeftBottomLin<0 THEN
+	IF NOT Unreach_LS_Top THEN
+		Error:=TRUE;
+		ErrorID:=66;
+		FB_PlcEmergencyStop();
+	END_IF
+ELSIF RightBottomLin.Status.Moving AND Velo_RightBottomLin>0 THEN
+	IF NOT Unreach_LS_Bottom THEN
+		Error:=TRUE;
+		ErrorID:=67;
+		FB_PlcEmergencyStop();
+	END_IF
+ELSIF RightBottomLin.Status.Moving AND Velo_RightBottomLin<0 THEN
+	IF NOT Unreach_LS_Top THEN
+		Error:=TRUE;
+		ErrorID:=68;
+		FB_PlcEmergencyStop();
+	END_IF
+END_IF
+*)
+(*
+(******3.ÓÐÒ»¸öÏÞÎ»´¥·¢£¬ delayÊ±¼äºó£¬¼à²âÖáÊÇ·ñÔÚÍ£Ö¹×´Ì¬£¬ÈôÃ»ÓÐ£¬Emergency AND PowerOff******)
+IF NOT Unreach_LS_Top OR NOT Unreach_LS_Bottom THEN
+	fb_ton.IN:=TRUE;
+END_IF
+IF fb_ton.Q THEN
+	IF LeftTopLin.Status.Moving OR RightTopLin.Status.Moving OR LeftBottomLin.Status.Moving OR RightBottomLin.Status.Moving THEN
+		FB_PlcEmergencyStop();
+		fb_ton.IN:=FALSE;
+		Error:=TRUE;
+		EStopTrig:=TRUE;
+		ErrorID:=1;
+		(*FB_Power_Off(Execute:=TRUE);*)
+	END_IF
+END_IF
+
+(*******4.µ¥ÖáÉÏÏÂÏÞÎ»¾ùÎªFALSEÊ±£¬ÏÞÎ»´íÎó£¬Emergency*******)
+IF (NOT LS_LeftTop_Top AND NOT LS_LeftTop_Bottom) OR  (NOT  LS_RightTop_Top AND NOT LS_RightTop_Bottom)
+		OR (NOT LS_LeftBottom_Top AND NOT LS_LeftBottom_Bottom) OR (NOT LS_RightBottom_Top AND NOT LS_RightBottom_Bottom) THEN
+	(*FB_Plc_EmergencyStop();*)
+	Error:=TRUE;
+	EStopTrig:=TRUE;
+	ErrorID:=2;
+END_IF
+*)]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_InitAxisParameters" Id="{a92c2dd6-12b0-4a71-a4bc-d7afbc965cb4}">
+      <Implementation>
+        <ST><![CDATA[(*ÖáÎ»ÖÃ¡¢ËÙ¶È¡¢PosDiff*)
+
+	Pos_LeftTopLin:=LeftTopLin.NcToPlc.ActPos;
+	Pos_RightTopLin:=RightTopLin.NcToPlc.ActPos;
+	Pos_LeftBottomLin:=LeftBottomLin.NcToPlc.ActPos;
+	Pos_RightBottomLin:=RightBottomLin.NcToPlc.ActPos;
+
+	LB_TestRecord:=Pos_LeftBottomLin-5;
+	RB_TestRecord:=Pos_RightBottomLin-5;
+	moveStatusLeftTop:=LeftTopLin.Status.Moving;
+	moveStatusRightTop:=RightTopLin.Status.Moving;
+	moveStatusLeftBottom:=LeftBottomLin.Status.Moving;
+	moveStatusRightBottom:=RightBottomLin.Status.Moving;
+	moveStatusAllAxis:=moveStatusLeftTop AND moveStatusRightTop AND moveStatusLeftBottom AND moveStatusRightBottom;
+
+	Velo_LeftTopLin:=LeftTopLin.NcToPlc.ActVelo;
+	Velo_RightTopLin:=RightTopLin.NcToPlc.ActVelo;
+	Velo_LeftBottomLin:=LeftBottomLin.NcToPlc.ActVelo;
+	Velo_RightBottomLin:=RightBottomLin.NcToPlc.ActVelo;
+
+	PosDiff_LeftTopLin_actual:=LeftTopLin.NcToPlc.PosDiff;
+	PosDiff_RightTopLin_actual:=RightTopLin.NcToPlc.PosDiff;
+	PosDiff_LeftBottomLin_actual:=LeftBottomLin.NcToPlc.PosDiff;
+	PosDiff_RightBottomLin_actual:=RightBottomLin.NcToPlc.PosDiff;
+
+	LeftTopLin.ReadStatus();
+	RightTopLin.ReadStatus();
+	LeftBottomLin.ReadStatus();
+	RightBottomLin.ReadStatus();
+
+
+
+
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_PosDiffDetectiion" Id="{e857c546-d367-4f19-9434-ed29c144eb6f}">
+      <Implementation>
+        <ST><![CDATA[IF PosDiff_LeftTopLin_actual>PosDiff_LeftTopLin THEN
+	ErrorID:=51;
+	Error:=TRUE;
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+ELSIF PosDiff_RightTopLin_actual>PosDiff_RightTopLin THEN
+	ErrorID:=52;
+	Error:=TRUE;
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+ELSIF PosDiff_LeftBottomLin_actual>PosDiff_LeftBottomLin THEN
+	ErrorID:=53;
+	Error:=TRUE;
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+ELSIF PosDiff_RightBottomLin_actual>PosDiff_RightBottomLin THEN
+	ErrorID:=54;
+	Error:=TRUE;
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_RestartTC" Id="{737d9420-c364-46ec-805e-ce283c214994}">
+      <Implementation>
+        <NWL>
+          <XmlArchive>
+            <Data>
+              <o xml:space="preserve" t="NWLImplementationObject">
+                <v n="NetworkListComment">""</v>
+                <v n="DefaultViewMode">"Fbd"</v>
+                <l2 n="NetworkList" cet="Network">
+                  <o>
+                    <v n="ILActive">false</v>
+                    <v n="FBDValid">false</v>
+                    <v n="ILValid">false</v>
+                    <l2 n="ILLines" />
+                    <v n="Comment">""</v>
+                    <v n="Title">""</v>
+                    <v n="Label">""</v>
+                    <v n="OutCommented">false</v>
+                    <l2 n="NetworkItems" cet="BoxTreeBox">
+                      <o>
+                        <v n="BoxType">"TC_Restart"</v>
+                        <o n="Instance" t="Operand">
+                          <v n="Operand">"RestartTC"</v>
+                          <v n="Type">"TC_Restart"</v>
+                          <v n="Comment">""</v>
+                          <v n="SymbolComment">""</v>
+                          <v n="Address">""</v>
+                          <o n="Flags" t="Flags">
+                            <v n="Flags">0</v>
+                            <v n="Fixed">false</v>
+                            <v n="Extensible">false</v>
+                          </o>
+                          <v n="LValue">false</v>
+                          <v n="Boolean">false</v>
+                          <v n="IsInstance">true</v>
+                          <v n="Id">2L</v>
+                        </o>
+                        <o n="OutputItems" t="OutputItemList">
+                          <l2 n="OutputItems" cet="Operand">
+                            <n />
+                            <o>
+                              <v n="Operand">""</v>
+                              <n n="Type" />
+                              <v n="Comment">""</v>
+                              <v n="SymbolComment">""</v>
+                              <v n="Address">""</v>
+                              <o n="Flags" t="Flags">
+                                <v n="Flags">0</v>
+                                <v n="Fixed">false</v>
+                                <v n="Extensible">false</v>
+                              </o>
+                              <v n="LValue">true</v>
+                              <v n="Boolean">false</v>
+                              <v n="IsInstance">false</v>
+                              <v n="Id">4L</v>
+                            </o>
+                            <o>
+                              <v n="Operand">""</v>
+                              <n n="Type" />
+                              <v n="Comment">""</v>
+                              <v n="SymbolComment">""</v>
+                              <v n="Address">""</v>
+                              <o n="Flags" t="Flags">
+                                <v n="Flags">0</v>
+                                <v n="Fixed">false</v>
+                                <v n="Extensible">false</v>
+                              </o>
+                              <v n="LValue">true</v>
+                              <v n="Boolean">false</v>
+                              <v n="IsInstance">false</v>
+                              <v n="Id">5L</v>
+                            </o>
+                          </l2>
+                        </o>
+                        <o n="Flags" t="Flags">
+                          <v n="Flags">0</v>
+                          <v n="Fixed">false</v>
+                          <v n="Extensible">false</v>
+                        </o>
+                        <n n="InputFlags" />
+                        <l2 n="InputItems" cet="BoxTreeOperand">
+                          <o>
+                            <o n="Operand" t="Operand">
+                              <v n="Operand">""</v>
+                              <n n="Type" />
+                              <v n="Comment">""</v>
+                              <v n="SymbolComment">""</v>
+                              <v n="Address">""</v>
+                              <o n="Flags" t="Flags">
+                                <v n="Flags">0</v>
+                                <v n="Fixed">false</v>
+                                <v n="Extensible">false</v>
+                              </o>
+                              <v n="LValue">false</v>
+                              <v n="Boolean">false</v>
+                              <v n="IsInstance">false</v>
+                              <v n="Id">7L</v>
+                            </o>
+                            <v n="Id">6L</v>
+                          </o>
+                          <o>
+                            <o n="Operand" t="Operand">
+                              <v n="Operand">"Global_Variables.m_restartTC"</v>
+                              <v n="Type">"BOOL"</v>
+                              <v n="Comment">""</v>
+                              <v n="SymbolComment">""</v>
+                              <v n="Address">""</v>
+                              <o n="Flags" t="Flags">
+                                <v n="Flags">0</v>
+                                <v n="Fixed">false</v>
+                                <v n="Extensible">false</v>
+                              </o>
+                              <v n="LValue">false</v>
+                              <v n="Boolean">false</v>
+                              <v n="IsInstance">false</v>
+                              <v n="Id">9L</v>
+                            </o>
+                            <v n="Id">8L</v>
+                          </o>
+                          <o>
+                            <o n="Operand" t="Operand">
+                              <v n="Operand">""</v>
+                              <n n="Type" />
+                              <v n="Comment">""</v>
+                              <v n="SymbolComment">""</v>
+                              <v n="Address">""</v>
+                              <o n="Flags" t="Flags">
+                                <v n="Flags">0</v>
+                                <v n="Fixed">false</v>
+                                <v n="Extensible">false</v>
+                              </o>
+                              <v n="LValue">false</v>
+                              <v n="Boolean">false</v>
+                              <v n="IsInstance">false</v>
+                              <v n="Id">11L</v>
+                            </o>
+                            <v n="Id">10L</v>
+                          </o>
+                        </l2>
+                        <o n="InputParam" t="ParamList">
+                          <l2 n="Names" cet="String">
+                            <v>NETID</v>
+                            <v>RESTART</v>
+                            <v>TMOUT</v>
+                          </l2>
+                          <l2 n="Types" cet="String">
+                            <v>T_AmsNetId</v>
+                            <v>BOOL</v>
+                            <v>TIME</v>
+                          </l2>
+                        </o>
+                        <o n="OutputParam" t="ParamList">
+                          <l2 n="Names" cet="String">
+                            <v>BUSY</v>
+                            <v>ERR</v>
+                            <v>ERRID</v>
+                          </l2>
+                          <l2 n="Types" cet="String">
+                            <v>BOOL</v>
+                            <v>BOOL</v>
+                            <v>UDINT</v>
+                          </l2>
+                        </o>
+                        <v n="CallType" t="Operator">FunctionBlock</v>
+                        <v n="EN">false</v>
+                        <v n="ENO">false</v>
+                        <n n="STSnippet" />
+                        <v n="ContainsExtensibleInputs">false</v>
+                        <v n="ProvidesSTSnippet">false</v>
+                        <v n="Id">3L</v>
+                      </o>
+                    </l2>
+                    <l2 n="Connectors" />
+                    <v n="Id">1L</v>
+                  </o>
+                </l2>
+                <v n="BranchCounter">0</v>
+                <v n="ValidIds">true</v>
+              </o>
+            </Data>
+            <TypeList>
+              <Type n="Boolean">System.Boolean</Type>
+              <Type n="BoxTreeBox">{acfc6f68-8e3a-4af5-bf81-3dd512095a46}</Type>
+              <Type n="BoxTreeOperand">{9de7f100-1b87-424c-a62e-45b0cfc85ed2}</Type>
+              <Type n="Flags">{668066f2-6069-46b3-8962-8db8d13d7db2}</Type>
+              <Type n="Int32">System.Int32</Type>
+              <Type n="Int64">System.Int64</Type>
+              <Type n="Network">{d9a99d73-b633-47db-b876-a752acb25871}</Type>
+              <Type n="NWLImplementationObject">{25e509de-33d4-4447-93f8-c9e4ea381c8b}</Type>
+              <Type n="Operand">{c9b2f165-48a2-4a45-8326-3952d8a3d708}</Type>
+              <Type n="Operator">{bffb3c53-f105-4e85-aba2-e30df579d75f}</Type>
+              <Type n="OutputItemList">{f40d3e09-c02c-4522-a88c-dac23558cfc4}</Type>
+              <Type n="ParamList">{71496971-9e0c-4677-a832-b9583b571130}</Type>
+              <Type n="String">System.String</Type>
+            </TypeList>
+          </XmlArchive>
+        </NWL>
+      </Implementation>
+    </Action>
+    <Action Name="A_SafePlcStartInit" Id="{4d1a8480-9923-4117-8ca7-ea613a82dfad}">
+      <Implementation>
+        <ST><![CDATA[fb_ton0(PT:=t#1s);
+fb_ton1(PT:=t#0.1s);
+fb_ton2(PT:=t#0.1s);
+fb_ton3(PT:=t#0.1s);
+
+CASE SafeStatus OF
+	0:
+		IF COM_ERROR OR NOT Estop_Out THEN
+			Err_Ack:=TRUE;
+			fb_ton0.IN:=TRUE;
+			SafeStatus:=1;
+		ELSE
+			SafePLCRunOK:=TRUE;
+			SafeStatus:=0;
+		END_IF
+	1:
+		IF fb_ton0.Q THEN
+			Err_Ack:=FALSE;
+			Safe_run:=TRUE;
+			fb_ton1.IN:=TRUE;
+			SafeStatus:=2;
+		END_IF
+
+	2:
+		IF fb_ton1.Q THEN
+			IF Estop_RunAndRestart=FALSE THEN
+				Estop_RunAndRestart:=TRUE;
+				fb_ton2.IN:=TRUE;
+				SafeStatus:=3;
+			END_IF
+		END_IF
+	3:
+		IF fb_ton2.Q THEN
+			IF Estop_RunAndRestart THEN
+				Estop_RunAndRestart:=FALSE;
+				fb_ton3.IN:=TRUE;
+				SafeStatus:=4;
+			END_IF
+		END_IF
+	4:
+		IF fb_ton3.Q THEN
+			IF Estop_Out THEN
+				SafePLCRunOK:=TRUE;
+				SafeStatus:=0;
+			ELSE
+				SafePLCRunOK:=FALSE;
+			END_IF
+		fb_ton0.IN:=FALSE;
+		fb_ton1.IN:=FALSE;
+		fb_ton2.IN:=FALSE;
+		fb_ton3.IN:=FALSE;
+		END_IF
+
+
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_SetAxisPosition" Id="{eb32aedd-8f01-44b1-96a9-73f233ea8548}">
+      <Implementation>
+        <ST><![CDATA[fb_ton4(PT:=t#0.5s);
+CASE SetAxisPosState OF
+	0:	(*FB_Set_AxisPosition*)
+		FB_Set_AxisPosition(Execute:=TRUE);
+		fb_ton4.IN:=TRUE;
+		SetAxisPosState:=1;
+	1:	(*wait*)
+		FB_Set_AxisPosition();
+		IF NOT FB_Set_AxisPosition.Done THEN		(*FB_Set_AxisPositionÃ»ÓÐÖ´ÐÐÍê£¬wait£¬³¬Ê±FB Error*)
+			IF NOT fb_ton4.Q THEN
+				SetAxisPosState:=1;
+			ELSE
+				ErrorID:=1;
+				SetAxisPosState:=99;
+			END_IF
+		ELSE
+			SetAxisPosState:=88;
+		END_IF
+	88:
+		SetAxisPosState:=0;
+		SerAxisPositionDone:=TRUE;
+		Error:=FALSE;
+		ErrorID:=0;
+		FB_Set_AxisPosition.Execute:=FALSE;
+		fb_ton4.IN:=FALSE;
+	99:
+		SetAxisPosState:=99;
+		SerAxisPositionDone:=FALSE;
+		Error:=TRUE;
+		FB_Set_AxisPosition.Execute:=FALSE;
+		fb_ton4.IN:=FALSE;
+		LED_Error:=TRUE;
+END_CASE
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_TemperatureInit" Id="{03abcf6e-103f-48f0-b5c5-faed58283e83}">
+      <Implementation>
+        <ST><![CDATA[
+FOR	i:= 1 TO 12 DO
+	thermocouple_Celsius[i]:=DINT_TO_LREAL(thermocouple[i])/100-temperatureCompensationValue;
+	shieldPt100_Celsius[i]:=DINT_TO_LREAL(shieldPt100[i])/100-temperatureCompensationValue;
+	lakeshorePt100_Resistance[i]:=DINT_TO_LREAL(lakeshorePt100[i])/16;(*Resistance(Ohms)*)
+END_FOR
+
+FOR  j:=1 TO 51 DO
+	IF lakeshorePt100_Resistance[1]<=Struct_M_lakeshore_168[j].Resistance AND  lakeshorePt100_Resistance[1]>Struct_M_lakeshore_168[j+1].Resistance THEN
+		lakeshorePt100_Celsius[1]:=Struct_M_lakeshore_168[j+1].Temperature-(((Struct_M_lakeshore_168[j+1].Temperature-Struct_M_lakeshore_168[j].Temperature)
+							*(lakeshorePt100_Resistance[1]-Struct_M_lakeshore_168[j+1].Resistance))/
+							(Struct_M_lakeshore_168[j].Resistance-Struct_M_lakeshore_168[j+1].Resistance))-temperatureCompensationValue;
+	END_IF
+END_FOR]]></ST>
+      </Implementation>
+    </Action>
+    <LineIds Name="MAIN">
+      <LineId Id="74" Count="8" />
+      <LineId Id="193" Count="0" />
+      <LineId Id="84" Count="0" />
+      <LineId Id="269" Count="5" />
+      <LineId Id="268" Count="0" />
+      <LineId Id="85" Count="34" />
+    </LineIds>
+    <LineIds Name="MAIN.A_CheckLimitSwitch">
+      <LineId Id="0" Count="0" />
+      <LineId Id="110" Count="0" />
+      <LineId Id="1" Count="19" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="103" Count="6" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="21" Count="79" />
+    </LineIds>
+    <LineIds Name="MAIN.A_InitAxisParameters">
+      <LineId Id="0" Count="33" />
+    </LineIds>
+    <LineIds Name="MAIN.A_PosDiffDetectiion">
+      <LineId Id="0" Count="21" />
+    </LineIds>
+    <LineIds Name="MAIN.A_SafePlcStartInit">
+      <LineId Id="0" Count="54" />
+    </LineIds>
+    <LineIds Name="MAIN.A_SetAxisPosition">
+      <LineId Id="0" Count="33" />
+    </LineIds>
+    <LineIds Name="MAIN.A_TemperatureInit">
+      <LineId Id="0" Count="13" />
+    </LineIds>
+  </POU>
+</TcPlcObject>
