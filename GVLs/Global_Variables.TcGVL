@@ -7,7 +7,7 @@ VAR_GLOBAL
 	simulation:BOOL:=FALSE;
 (************USELinearEncoeder*******)
 	USELinearEncoeder:BOOL:=TRUE;
-(*****)
+(***restartTwinCAT**)
 m_restartTC:BOOL;
 (************ÏÞÎ»¿ª¹Ø**********************)
 	LS_LeftTop_Top  :BOOL;
