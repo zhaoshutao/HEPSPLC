@@ -78,9 +78,21 @@ VAR
 	btn_setAxisPosition: BOOL;
 	GapSetValue: LREAL;
 	RestartTC: TC_Restart;
+	
+	(**)
+	RecipeINT:INT;
+	RecipeBOOL:BOOL;
+	RecipeManCommands: RecipeManCommands;
+	SaveParameter : BOOL;  //保存文件
+	LoadParameter : BOOL;  //读取文件
+	Save_R_TRIG   : R_TRIG;
+	Read_R_TRIG   : R_TRIG;
+	loadparameterStatus: INT;
+	RecipeBOOL2:BOOL;
 END_VAR]]></Declaration>
     <Implementation>
-      <ST><![CDATA[A_RestartTC();
+      <ST><![CDATA[A_InitRecipeParameters();
+A_RestartTC();
 (*******InitAxisParameters*******)
 A_InitAxisParameters();
 (*******¼à²âÏÞÎ»¿ª¹Ø×´Ì¬£¬·½Ïò¿ØÖÆ&½ô¼±Çé¿öÏÂEStop*******)
@@ -285,6 +297,23 @@ END_IF
 
 
 
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_InitRecipeParameters" Id="{6aa76980-7ae7-46e7-9688-f94b6fa6510d}">
+      <Implementation>
+        <ST><![CDATA[LoadParameter:=TRUE;
+Save_R_TRIG(CLK:=SaveParameter , Q=> );
+Read_R_TRIG(CLK:=LoadParameter , Q=> );
+IF Save_R_TRIG.Q THEN  //将plc数据以文件形式保存在工控机中
+	 RecipeManCommands.CreateRecipe(RecipeDefinitionName:='Recipes' , RecipeName:='MyRecipe' );
+	 RecipeManCommands.ReadAndSaveRecipe(RecipeDefinitionName:='Recipes' , RecipeName:='MyRecipe' );
+	 SaveParameter:=FALSE;
+END_IF
+IF Read_R_TRIG.Q THEN  //将工控机中的文件数据读取到plc中
+     RecipeManCommands.LoadAndWriteRecipe(RecipeDefinitionName:='Recipes' , RecipeName:='MyRecipe');
+     LoadParameter:=FALSE;
+END_IF 
 ]]></ST>
       </Implementation>
     </Action>
@@ -629,6 +658,7 @@ END_FOR]]></ST>
       </Implementation>
     </Action>
     <LineIds Name="MAIN">
+      <LineId Id="352" Count="0" />
       <LineId Id="74" Count="8" />
       <LineId Id="193" Count="0" />
       <LineId Id="84" Count="0" />
@@ -648,6 +678,12 @@ END_FOR]]></ST>
     </LineIds>
     <LineIds Name="MAIN.A_InitAxisParameters">
       <LineId Id="0" Count="33" />
+    </LineIds>
+    <LineIds Name="MAIN.A_InitRecipeParameters">
+      <LineId Id="12" Count="0" />
+      <LineId Id="2" Count="9" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="31" Count="0" />
     </LineIds>
     <LineIds Name="MAIN.A_PosDiffDetectiion">
       <LineId Id="0" Count="21" />
