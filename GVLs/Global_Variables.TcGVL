@@ -70,6 +70,11 @@ VAR_GLOBAL
 	USELinearEncoeder:BOOL:=TRUE;
 (*restartTwinCAT*)
 	m_restartTC:BOOL;
+(*Plc_EmergencyStop *)
+	Plc_EmergencyStop  AT %Q*:BOOL:=TRUE;
+(*LED*)
+	Led_Run  AT %Q*:BOOL;
+	Led_Error  AT %Q*:BOOL;
 (*LimitSwitch*)
 	LS_LeftTop_Top  :BOOL;
 	LS_LeftTop_Bottom  :BOOL;
@@ -164,11 +169,7 @@ VAR_GLOBAL
 	Diff_BCLeftVelo_actual: LREAL;
 	Diff_BCRightVelo_actual:  LREAL;
 
-(************************Plc_EmergencyStop ************************)
-	Plc_EmergencyStop  AT %Q*:BOOL:=TRUE;
-(************************LED***********************************************)
-	Led_Run  AT %Q*:BOOL;
-	Led_Error  AT %Q*:BOOL;
+
 (************************È«¾ÖÖØÒª×´Ì¬************************)
 	st_Power:DINT;
 	st_Couple:DINT;
@@ -186,156 +187,8 @@ VAR_GLOBAL
 	Mdut:ARRAY[1..2] OF DUT:=
 	[(Encoder:=2.0,	LeftTop:=2.3000),
 	(Encoder:=2.0,	LeftTop:=2.3000)];
-	
-(*2020.11.23CPMU¹¤ÒÕÑù»ú*)
 
-(*														
- (Encoder:=5.5,	LeftTop:=5.7810,	RightTop:=5.7137,	LeftBottom:=5.7517,	RightBottom:=5.7361,	InRange:=FALSE),*)
-(*³£ÎÂÏÂ*)
-(**)
-(*(Encoder:=3.0,	LeftTop:=2.9930,	RightTop:=3.0453,		LeftBottom:=3.0230,	RightBottom:=3.0830,	InRange:=FALSE),
-(Encoder:=3.5,	LeftTop:=3.5370,	RightTop:=3.6020,		LeftBottom:=3.5650,	RightBottom:=3.6380,	InRange:=FALSE),
-(Encoder:=4.0,	LeftTop:=4.0010,	RightTop:=4.0223,		LeftBottom:=4.0280,	RightBottom:=4.0567,	InRange:=FALSE),
-(Encoder:=4.5,	LeftTop:=4.5000,	RightTop:=4.5180,		LeftBottom:=4.5270,	RightBottom:=4.5507,	InRange:=FALSE),
-(Encoder:=5.0,	LeftTop:=5.0000,	RightTop:=5.0147,		LeftBottom:=5.0250,	RightBottom:=5.0453,	InRange:=FALSE),
-(Encoder:=5.5,	LeftTop:=5.5000,	RightTop:=5.5133,		LeftBottom:=5.5230,	RightBottom:=5.5413,	InRange:=FALSE),
-(Encoder:=6.0,	LeftTop:=6.0010,	RightTop:=6.0110,		LeftBottom:=6.0220,	RightBottom:=6.0360,	InRange:=FALSE),
-(Encoder:=6.5,	LeftTop:=6.5010,	RightTop:=6.5093,		LeftBottom:=6.5210,	RightBottom:=6.5323,	InRange:=FALSE),
-(Encoder:=7.0,	LeftTop:=7.0020,	RightTop:=7.0077,		LeftBottom:=7.0200,	RightBottom:=7.0270,	InRange:=FALSE),
-(Encoder:=7.5,	LeftTop:=7.5020,	RightTop:=7.5067,		LeftBottom:=7.5190,	RightBottom:=7.5217,	InRange:=FALSE),
-(Encoder:=8.0,	LeftTop:=8.0030,	RightTop:=8.0053,		LeftBottom:=8.0170,	RightBottom:=8.0173,	InRange:=FALSE),
-(Encoder:=8.5,	LeftTop:=8.5030,	RightTop:=8.5043,		LeftBottom:=8.5140,	RightBottom:=8.5113,	InRange:=FALSE),
-(Encoder:=9.0,	LeftTop:=9.0030,	RightTop:=9.0017,		LeftBottom:=9.0110,	RightBottom:=9.0077,	InRange:=FALSE),
-(Encoder:=9.5,	LeftTop:=9.5040,	RightTop:=9.4997,		LeftBottom:=9.5050,	RightBottom:=9.5027,	InRange:=FALSE),
-(Encoder:=10.0,	LeftTop:=10.0030,	RightTop:=9.9987,		LeftBottom:=10.0010,	RightBottom:=9.9963,	InRange:=FALSE),
-(Encoder:=80.001,	LeftTop:=80.001,	RightTop:=80.001,		LeftBottom:=80.001,	RightBottom:=80.001,	InRange:=FALSE);
-*)
-(*2021.0103µÍÎÂÏÂ
-	M_Compensation:ARRAY[1..18] OF Struct_M_Compensation:=
-(Encoder:=2.0,	LeftTop:=1.2337,	RightTop:=1.5190,		LeftBottom:=1.7017,	RightBottom:=1.5495,	InRange:=FALSE),
-(Encoder:=2.6,	LeftTop:=1.4500,	RightTop:=1.6940,		LeftBottom:=1.8900,	RightBottom:=1.7880,	InRange:=FALSE),
-(Encoder:=3.0,	LeftTop:=1.8500,	RightTop:=2.0890,		LeftBottom:=2.2900,	RightBottom:=2.1830,	InRange:=FALSE),
-(Encoder:=3.5,	LeftTop:=2.3500,	RightTop:=2.5810,		LeftBottom:=2.7900,	RightBottom:=2.6750,	InRange:=FALSE),
-(Encoder:=4.0,	LeftTop:=2.9347,	RightTop:=3.2413,		LeftBottom:=3.4297,	RightBottom:=3.3062,	InRange:=FALSE),
-(Encoder:=4.5,	LeftTop:=3.4337,	RightTop:=3.7370,		LeftBottom:=3.9287,	RightBottom:=3.8002,	InRange:=FALSE),
-(Encoder:=5.0,	LeftTop:=3.9337,	RightTop:=4.2337,		LeftBottom:=4.4267,	RightBottom:=4.2948,	InRange:=FALSE),
-(Encoder:=5.5,	LeftTop:=4.4337,	RightTop:=4.7323,		LeftBottom:=4.9247,	RightBottom:=4.7908,	InRange:=FALSE),
-(Encoder:=6.0,	LeftTop:=4.9347,	RightTop:=5.2300,		LeftBottom:=5.4237,	RightBottom:=5.2855,	InRange:=FALSE),
-(Encoder:=6.5,	LeftTop:=5.4347,	RightTop:=5.7283,		LeftBottom:=5.9227,	RightBottom:=5.7818,	InRange:=FALSE),
-(Encoder:=7.0,	LeftTop:=5.9357,	RightTop:=6.2267,		LeftBottom:=6.4217,	RightBottom:=6.2765,	InRange:=FALSE),
-(Encoder:=7.5,	LeftTop:=6.4357,	RightTop:=6.7257,		LeftBottom:=6.9207,	RightBottom:=6.7712,	InRange:=FALSE),
-(Encoder:=8.0,	LeftTop:=6.9367,	RightTop:=7.2243,		LeftBottom:=7.4187,	RightBottom:=7.2668,	InRange:=FALSE),
-(Encoder:=8.5,	LeftTop:=7.4367,	RightTop:=7.7233,		LeftBottom:=7.9157,	RightBottom:=7.7608,	InRange:=FALSE),
-(Encoder:=9.0,	LeftTop:=7.9367,	RightTop:=8.2207,		LeftBottom:=8.4127,	RightBottom:=8.2572,	InRange:=FALSE),
-(Encoder:=9.5,	LeftTop:=8.4377,	RightTop:=8.7187,		LeftBottom:=8.9067,	RightBottom:=8.7522,	InRange:=FALSE),
-(Encoder:=10.0,	LeftTop:=8.9367,	RightTop:=9.2177,		LeftBottom:=9.4027,	RightBottom:=9.2458,	InRange:=FALSE),
-(Encoder:=80.001,	LeftTop:=78.9347,	RightTop:=79.220,		LeftBottom:=79.4027,	RightBottom:=79.2505,	InRange:=FALSE);
 
-*)
-
-(*µÚËÄ´Î½µÎÂµÍÎÂÏÂÊý¾Ý2018.12.13*)
-(*
-	M_Compensation:ARRAY[1..6] OF Struct_M_Compensation:=(Encoder:=2,		LeftTop:=1.025,	RightTop:=1.055,		LeftBottom:=2.049,		RightBottom:=2.049,	InRange:=FALSE),
-														(Encoder:=2.5,	LeftTop:=1.225,	RightTop:=1.405,		LeftBottom:=2.348,		RightBottom:=2.599,	InRange:=FALSE),
-														(Encoder:=3.5,	LeftTop:=2.225,	RightTop:=2.405,		LeftBottom:=3.348,		RightBottom:=3.599,	InRange:=FALSE),
-														(Encoder:=4.5,	LeftTop:=3.225,	RightTop:=3.405,		LeftBottom:=4.348,		RightBottom:=4.599,	InRange:=FALSE),
-														(Encoder:=7,		LeftTop:=6.997,	RightTop:=6.996,		LeftBottom:=6.998,		RightBottom:=7.040,	InRange:=FALSE),
-														(Encoder:=80.001,	LeftTop:=80.001,	RightTop:=80.001,		LeftBottom:=80.001,	RightBottom:=80.001,	InRange:=FALSE);
-*)
-
-(*µÚËÄ´Î½µÎÂ³£ÎÂÏÂÊý¾Ý2018.11.29*)
-(*
-	M_Compensation:ARRAY[1..6] OF Struct_M_Compensation:=(Encoder:=2,		LeftTop:=1.800,	RightTop:=2.000,		LeftBottom:=2.800,		RightBottom:=3.000,	InRange:=FALSE),
-														(Encoder:=2.5,	LeftTop:=1.991,	RightTop:=2.120,		LeftBottom:=3.018,		RightBottom:=3.342,	InRange:=FALSE),
-														(Encoder:=3.5,	LeftTop:=2.991,	RightTop:=3.120,		LeftBottom:=4.018,		RightBottom:=4.342,	InRange:=FALSE),
-														(Encoder:=4.5,	LeftTop:=3.991,	RightTop:=4.120,		LeftBottom:=5.018,		RightBottom:=5.342,	InRange:=FALSE),
-														(Encoder:=7,		LeftTop:=6.997,	RightTop:=6.996,		LeftBottom:=6.998,		RightBottom:=7.040,	InRange:=FALSE),
-														(Encoder:=80.001,	LeftTop:=80.001,	RightTop:=80.001,		LeftBottom:=80.001,	RightBottom:=80.001,	InRange:=FALSE);
-
-*)
-(*µÚÈý´Î½µÎÂµÍÎÂÏÂÊý¾Ý*)
-(*	M_Compensation:ARRAY[1..6] OF Struct_M_Compensation:=(Encoder:=2,		LeftTop:=0.562,	RightTop:=1.225,		LeftBottom:=2.802,		RightBottom:=2.574,	InRange:=FALSE),
-														(Encoder:=2.5,	LeftTop:=0.668,	RightTop:=1.331,		LeftBottom:=2.908,		RightBottom:=2.680,	InRange:=FALSE),
-														(Encoder:=3.5,	LeftTop:=1.662,	RightTop:=2.325,		LeftBottom:=3.902,		RightBottom:=3.674,	InRange:=FALSE),
-														(Encoder:=4.5,	LeftTop:=2.662,	RightTop:=3.325,		LeftBottom:=4.902,		RightBottom:=4.674,	InRange:=FALSE),
-				5						(Encoder:=80.001,	LeftTop:=80.001,	RightTop:=80.001,		LeftBottom:=80.001,	RightBottom:=80.001,	InRange:=FALSE);
-*)
-(*µÚÈý´Î½µÎÂ³£ÎÂÏÂÊý¾Ý*)
-(*
-	M_Compensation:ARRAY[1..6] OF Struct_M_Compensation:=(Encoder:=2,		LeftTop:=2.031,	RightTop:=2.062,		LeftBottom:=2.015,		RightBottom:=2.080,	InRange:=FALSE),
-														(Encoder:=2.5,	LeftTop:=2.213,	RightTop:=2.846,		LeftBottom:=2.921,		RightBottom:=2.663,	InRange:=FALSE),
-														(Encoder:=3.5,	LeftTop:=3.204,	RightTop:=3.895,		LeftBottom:=3.808,		RightBottom:=3.511,	InRange:=FALSE),
-														(Encoder:=4.5,	LeftTop:=4.202,	RightTop:=4.904,		LeftBottom:=4.802,		RightBottom:=4.528,	InRange:=FALSE),
-														(Encoder:=7,		LeftTop:=6.997,	RightTop:=6.996,		LeftBottom:=6.998,		RightBottom:=7.040,	InRange:=FALSE),
-														(Encoder:=80.001,	LeftTop:=80.001,	RightTop:=80.001,		LeftBottom:=80.001,	RightBottom:=80.001,	InRange:=FALSE);
-*)
-(*µÚ¶þ´ÎµÍÎÂ²âÊÔÊý¾Ý*)
-(*
-	M_Compensation:ARRAY[1..8] OF Struct_M_Compensation:=(Encoder:=2,		LeftTop:=1.100,	RightTop:=1.700,		LeftBottom:=2.115,		RightBottom:=1.900,	InRange:=FALSE),
-														(Encoder:=2.5,	LeftTop:=1.316,	RightTop:=1.951,		LeftBottom:=2.327,		RightBottom:=2.083,	InRange:=FALSE),
-														(Encoder:=3,     	LeftTop:=1.849,	RightTop:=2.550,		LeftBottom:=2.757,		RightBottom:=2.475,	InRange:=FALSE),
-														(Encoder:=3.5,	LeftTop:=2.349,	RightTop:=3.047,		LeftBottom:=3.257,		RightBottom:=2.972,	InRange:=FALSE),
-														(Encoder:=4,   	LeftTop:=2.847,	RightTop:=3.549,		LeftBottom:=3.751,		RightBottom:=3.482,	InRange:=FALSE),
-														(Encoder:=4.5,	LeftTop:=3.347,	RightTop:=4.049,		LeftBottom:=4.251,		RightBottom:=3.982,	InRange:=FALSE),
-														(Encoder:=7,		LeftTop:=6.997,	RightTop:=6.996,		LeftBottom:=6.998,		RightBottom:=7.040,	InRange:=FALSE),
-														(Encoder:=80.001,	LeftTop:=80.001,	RightTop:=80.001,		LeftBottom:=80.001,	RightBottom:=80.001,	InRange:=FALSE);
-*)
-(*2018.7.16µÍÎÂÇ°*)
-(*
-	M_Compensation:ARRAY[1..6] OF Struct_M_Compensation:=(Encoder:=2,		LeftTop:=2.031,	RightTop:=2.062,		LeftBottom:=2.015,		RightBottom:=2.080,	InRange:=FALSE),
-														(Encoder:=2.5,	LeftTop:=2.563,	RightTop:=2.907,		LeftBottom:=2.671,		RightBottom:=2.726,	InRange:=FALSE),
-														(Encoder:=3.5,	LeftTop:=3.504,	RightTop:=3.895,		LeftBottom:=3.508,		RightBottom:=3.511,	InRange:=FALSE),
-														(Encoder:=4.5,	LeftTop:=4.502,	RightTop:=4.899,		LeftBottom:=4.502,		RightBottom:=4.523,	InRange:=FALSE),
-														(Encoder:=7,		LeftTop:=6.997,	RightTop:=6.996,		LeftBottom:=6.998,		RightBottom:=7.040,	InRange:=FALSE),
-														(Encoder:=80.001,	LeftTop:=80.001,	RightTop:=80.001,		LeftBottom:=80.001,	RightBottom:=80.001,	InRange:=FALSE);
-*)
-(*2018.6.4¸´ÎÂ²âÊÔ*)
-(*
-	M_Compensation:ARRAY[1..7] OF Struct_M_Compensation:=(Encoder:=2,		LeftTop:=1.331,	RightTop:=1.362,		LeftBottom:=1.315,		RightBottom:=1.380,	InRange:=FALSE),
-														(Encoder:=2.5,	LeftTop:=2.332,	RightTop:=2.295,           	LeftBottom:=2.561,		RightBottom:=2.555,	InRange:=FALSE),
-														(Encoder:=3,		LeftTop:=2.485,	RightTop:=2.455,		LeftBottom:=2.745,		RightBottom:=2.768,	InRange:=FALSE),
-														(Encoder:=3.5,	LeftTop:=2.585,	RightTop:=2.548,		LeftBottom:=2.845,		RightBottom:=2.839,	InRange:=FALSE),
-														(Encoder:=4.5,	LeftTop:=3.592,	RightTop:=3.548,		LeftBottom:=3.852,		RightBottom:=3.832,	InRange:=FALSE),
-														(Encoder:=7,		LeftTop:=6.997,	RightTop:=6.996,		LeftBottom:=6.998,		RightBottom:=7.040,	InRange:=FALSE),
-														(Encoder:=80.001,	LeftTop:=80.001,	RightTop:=80.001,		LeftBottom:=80.001,	RightBottom:=80.001,	InRange:=FALSE);
-*)
-(*2018.5.23µÍÎÂÏÂ*)
-(*
-	M_Compensation:ARRAY[1..7] OF Struct_M_Compensation:=(Encoder:=2,		LeftTop:=1.331,	RightTop:=1.362,		LeftBottom:=1.315,		RightBottom:=1.380,	InRange:=FALSE),
-														(Encoder:=2.5,	LeftTop:=1.585,	RightTop:=1.548,		LeftBottom:=1.845,		RightBottom:=1.839,	InRange:=FALSE),
-														(Encoder:=3,		LeftTop:=2.085,	RightTop:=2.055,		LeftBottom:=2.345,		RightBottom:=2.368,	InRange:=FALSE),
-														(Encoder:=3.5,	LeftTop:=2.594,	RightTop:=2.547,		LeftBottom:=2.858,		RightBottom:=2.830,	InRange:=FALSE),
-														(Encoder:=4.5,	LeftTop:=3.592,	RightTop:=3.548,		LeftBottom:=3.852,		RightBottom:=3.832,	InRange:=FALSE),
-														(Encoder:=7,		LeftTop:=6.997,	RightTop:=6.996,		LeftBottom:=6.998,		RightBottom:=7.040,	InRange:=FALSE),
-														(Encoder:=80.001,	LeftTop:=80.001,	RightTop:=80.001,		LeftBottom:=80.001,	RightBottom:=80.001,	InRange:=FALSE);
-*)
-(*
-(*2018.5.18£¬5¡¢6¡¢7¡¢9²¹³¥£¬¼ÓÈë6mm²¢²¹³¥*)
-	M_Compensation:ARRAY[1..7] OF Struct_M_Compensation:=(Encoder:=2,		LeftTop:=1.331,	RightTop:=1.362,		LeftBottom:=1.315,		RightBottom:=1.380,	InRange:=FALSE),
-														(Encoder:=2.5,	LeftTop:=1.585,	RightTop:=1.570,		LeftBottom:=1.845,		RightBottom:=1.884,	InRange:=FALSE),
-														(Encoder:=3,		LeftTop:=2.085,	RightTop:=2.055,		LeftBottom:=2.345,		RightBottom:=2.368,	InRange:=FALSE),
-														(Encoder:=3.5,	LeftTop:=2.594,	RightTop:=2.572,		LeftBottom:=2.858,		RightBottom:=2.856,	InRange:=FALSE),
-														(Encoder:=4.5,	LeftTop:=3.592,	RightTop:=3.568,		LeftBottom:=3.852,		RightBottom:=3.852,	InRange:=FALSE),
-														(Encoder:=7,		LeftTop:=6.997,	RightTop:=6.996,		LeftBottom:=6.998,		RightBottom:=7.040,	InRange:=FALSE),
-														(Encoder:=80.001,	LeftTop:=80.001,	RightTop:=80.001,		LeftBottom:=80.001,	RightBottom:=80.001,	InRange:=FALSE);
-*)
-(*
-(*2018.5.9.22:00£¬µÍÎÂ²¹³¥£¬²ÉÓÃ±±Ãæ²Î¿¼¼«Êý¾Ý£¬5mm£¬ÉÏÁº²¹³¥0.91mm£¬ÏÂÁº²¹³¥0.65mm*)
-	M_Compensation:ARRAY[1..6] OF Struct_M_Compensation:=(Encoder:=2,		LeftTop:=1.331,	RightTop:=1.362,		LeftBottom:=1.315,		RightBottom:=1.380,	InRange:=FALSE),
-														(Encoder:=2.5,	LeftTop:=1.585,	RightTop:=1.553,		LeftBottom:=1.845,		RightBottom:=1.866,	InRange:=FALSE),
-														(Encoder:=3.5,	LeftTop:=3.504,	RightTop:=3.500,		LeftBottom:=3.508,		RightBottom:=3.524,	InRange:=FALSE),
-														(Encoder:=4.5,	LeftTop:=4.502,	RightTop:=4.499,		LeftBottom:=4.502,		RightBottom:=4.523,	InRange:=FALSE),
-														(Encoder:=7,		LeftTop:=6.997,	RightTop:=6.996,		LeftBottom:=6.998,		RightBottom:=7.040,	InRange:=FALSE),
-														(Encoder:=80.001,	LeftTop:=80.001,	RightTop:=80.001,		LeftBottom:=80.001,	RightBottom:=80.001,	InRange:=FALSE);
-(*
-(*2018.5.9.22:00Ç°£¬²¹³¥5mmµÍÎÂÊÕËõÁ¿Ç°Êý¾Ý*)
-	M_Compensation:ARRAY[1..6] OF Struct_M_Compensation:=(Encoder:=2,		LeftTop:=2.031,	RightTop:=2.062,		LeftBottom:=2.015,		RightBottom:=2.080,	InRange:=FALSE),
-														(Encoder:=2.5,	LeftTop:=2.495,	RightTop:=2.463,		LeftBottom:=2.495,		RightBottom:=2.516,	InRange:=FALSE),
-														(Encoder:=3.5,	LeftTop:=3.504,	RightTop:=3.500,		LeftBottom:=3.508,		RightBottom:=3.524,	InRange:=FALSE),
-														(Encoder:=4.5,	LeftTop:=4.502,	RightTop:=4.499,		LeftBottom:=4.502,		RightBottom:=4.523,	InRange:=FALSE),
-														(Encoder:=7,		LeftTop:=6.997,	RightTop:=6.996,		LeftBottom:=6.998,		RightBottom:=7.040,	InRange:=FALSE),
-														(Encoder:=80.001,	LeftTop:=80.001,	RightTop:=80.001,		LeftBottom:=80.001,	RightBottom:=80.001,	InRange:=FALSE);
-*)*)
 	M_CompensationNumber:INT;
 	M_DisplayNumber:INT;
 	(*Conpensation Position Target*)
