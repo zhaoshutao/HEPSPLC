@@ -3,13 +3,74 @@
   <GVL Name="Global_Variables" Id="{bcaa4f18-97b1-4818-bac8-1835e8da9e31}">
     <Declaration><![CDATA[//{attribute 'Tc2GvlVarNames'}
 VAR_GLOBAL
-(************simulation OR not***********)
-	simulation:BOOL:=FALSE;
-(************USELinearEncoeder*******)
+
+(*Lag Distance threshold*)
+	PosDiff_LeftTopLin: LREAL:=0.5;
+	PosDiff_RightTopLin:LREAL:=0.5;
+	PosDiff_LeftBottomLin:LREAL:=0.5;
+	PosDiff_RightBottomLin:LREAL:=0.5;
+(*BCGap Threshold*)
+	Diff_BCTopPos: LREAL:=0.5;
+	Diff_BCBottomPos: LREAL:=0.5;
+	Diff_BCLeftPos: LREAL:=0.5;
+	Diff_BCRightPos: LREAL:=0.5;
+	Diff_BCTopVelo: LREAL:=0.5;
+	Diff_BCBottomVelo: LREAL:=0.5;
+	Diff_BCLeftVelo: LREAL:=0.5;
+	Diff_BCRightVelo: LREAL:=0.5;
+(*DebugMode Threshold*)
+	Diff_TopPos_Debug: LREAL:=400 ;
+	Diff_BottomPos_Debug: LREAL:=400 ;
+	Diff_LeftPos_Debug: LREAL:=400 ;
+	Diff_RightPos_Debug: LREAL:=400 ;
+(*Taper Mode Threshold*)
+	Range_TaperPos:LREAL:=5.01;
+	Range_TaperVelo:LREAL:=1.01;
+	Diff_TaperLeftPos:LREAL:=0.01;
+	Diff_TaperLeftVelo:LREAL:=0.2;
+	Diff_TaperRightPos:LREAL:=0.05;
+	Diff_TaperRightVelo:LREAL:=0.5;
+	Taper_BeyondRangePositive:BOOL;
+	Diff_TaperTopPos:LREAL:=0.05;
+	Diff_TaperBottomPos:LREAL:=0.05;
+	Taper_BeyondRangeNegtive:BOOL;
+(*SingleCarrierMode threshold*)
+	Diff_TopPos: LREAL:=2;
+	Diff_BottomPos: LREAL:=2;
+	Diff_LeftPos: LREAL:=2;
+	Diff_RightPos: LREAL:=2;
+	Diff_TopVelo: LREAL:=2;
+	Diff_BottomVelo: LREAL:=2;
+	Diff_LeftVelo: LREAL:=2;
+	Diff_RightVelo: LREAL:=2;
+(*Compensation Value*)
+	M_Compensation:ARRAY[1..18] OF Struct_M_Compensation:=[
+(Encoder:=0,	LeftTop:=0,	RightTop:=0,		LeftBottom:=0,	RightBottom:=0,	InRange:=FALSE),
+(Encoder:=5.5,	LeftTop:=5.5705,	RightTop:=5.5903,	LeftBottom:=5.5670,	RightBottom:=5.5673,	InRange:=FALSE),
+(Encoder:=6.0,	LeftTop:=6.0527,	RightTop:=6.0690,	LeftBottom:=6.0546,	RightBottom:=6.0524,	InRange:=FALSE),
+(Encoder:=6.5,	LeftTop:=6.5448,	RightTop:=6.5597,	LeftBottom:=6.5488,	RightBottom:=6.5461,	InRange:=FALSE),
+(Encoder:=7.5,	LeftTop:=7.5275,	RightTop:=7.5393,	LeftBottom:=7.5424,	RightBottom:=7.5401,	InRange:=FALSE),
+(Encoder:=8.5,	LeftTop:=8.5148,	RightTop:=8.5252,	LeftBottom:=8.5306,	RightBottom:=8.5282,	InRange:=FALSE),
+(Encoder:=9.5,	LeftTop:=9.5108,	RightTop:=9.5207,	LeftBottom:=9.5263,	RightBottom:=9.5233,	InRange:=FALSE),
+(Encoder:=10.5,	LeftTop:=10.5112,	RightTop:=10.5207,	LeftBottom:=10.5272,	RightBottom:=10.5247,		InRange:=FALSE),
+(Encoder:=11.5,	LeftTop:=11.5131,	RightTop:=11.5216,	LeftBottom:=11.5267,	RightBottom:=11.5227,		InRange:=FALSE),
+(Encoder:=30.0,	LeftTop:=30.0,	RightTop:=30.0,	LeftBottom:=30.0,	RightBottom:=30.0,		InRange:=FALSE),
+(Encoder:=100.0,	LeftTop:=100.0,	RightTop:=100.0,	LeftBottom:=100.0,	RightBottom:=100.0,		InRange:=FALSE),
+(Encoder:=110.0,	LeftTop:=110.0,	RightTop:=110.0,	LeftBottom:=110.0,	RightBottom:=110.0,		InRange:=FALSE),
+(Encoder:=120.0,	LeftTop:=120.0,	RightTop:=120.0,	LeftBottom:=120.0,	RightBottom:=120.0,		InRange:=FALSE),
+(Encoder:=130.0,	LeftTop:=130.0,	RightTop:=130.0,	LeftBottom:=130.0,	RightBottom:=130.0,		InRange:=FALSE),
+(Encoder:=140.0,	LeftTop:=140.0,	RightTop:=140.0,	LeftBottom:=140.0,	RightBottom:=140.0,		InRange:=FALSE),
+(Encoder:=150.0,	LeftTop:=150.0,	RightTop:=150.0,	LeftBottom:=150.0,	RightBottom:=150.0,		InRange:=FALSE),
+(Encoder:=160.0,	LeftTop:=160.0,	RightTop:=160.0,	LeftBottom:=160.0,	RightBottom:=160.0,		InRange:=FALSE),
+(Encoder:=300.001,	LeftTop:=300.001,	RightTop:=300.001,		LeftBottom:=300.001,	RightBottom:=300.001,	InRange:=FALSE)];
+
+(*simulation OR NOT*)
+	simulation:BOOL;
+(*USELinearEncoeder*)
 	USELinearEncoeder:BOOL:=TRUE;
-(***restartTwinCAT**)
-m_restartTC:BOOL;
-(************ÏÞÎ»¿ª¹Ø**********************)
+(*restartTwinCAT*)
+	m_restartTC:BOOL;
+(*LimitSwitch*)
 	LS_LeftTop_Top  :BOOL;
 	LS_LeftTop_Bottom  :BOOL;
 	LS_RightTop_Top  :BOOL;
@@ -20,20 +81,20 @@ m_restartTC:BOOL;
 	LS_RightBottom_Bottom  :BOOL;
 	Unreach_LS_Top:BOOL;
 	Unreach_LS_Bottom:BOOL;
-(*********Öá¼°ÖáÐÅÏ¢*************************)
+(*aixs_ref*)
 	LeftTopLin: axis_ref;
 	RightTopLin:axis_ref;
 	LeftBottomLin:axis_ref;
 	RightBottomLin:axis_ref;
-(*Î»ÖÃ*)
+(*axis Position*)
 	Pos_LeftTopLin: LREAL;
 	Pos_RightTopLin:LREAL;
 	Pos_LeftBottomLin:LREAL;
 	Pos_RightBottomLin:LREAL;
+(*********)
 	LB_TestRecord:LREAL;
 	RB_TestRecord:LREAL;
-
-(*ËÙ¶È*)
+(*axis Velocity*)
 	Velo_LeftTopLin: LREAL;
 	Velo_RightTopLin:LREAL;
 	Velo_LeftBottomLin:LREAL;
@@ -43,26 +104,20 @@ m_restartTC:BOOL;
 	PosDiff_RightTopLin_actual:LREAL;
 	PosDiff_LeftBottomLin_actual:LREAL;
 	PosDiff_RightBottomLin_actual:LREAL;
-(*Lag DistanceãÐÖµ£¬ÔÝÎ´ÓÃ*)
-	PosDiff_LeftTopLin: LREAL:=0.5;
-	PosDiff_RightTopLin:LREAL:=0.5;
-	PosDiff_LeftBottomLin:LREAL:=0.5;
-	PosDiff_RightBottomLin:LREAL:=0.5;
 (********************Gap Mode*************************)
-(*Î»ÖÃ¡¢Î»ÖÃ¡¢·½ÏòÖ¸Ê¾*)
+(**)
 	GapPositionActual:LREAL;
 	GapVelocityActual:LREAL;
 	GapMoveIndicator:DINT:=0;
 	(*1=OPEN;0=NOTMOVE;-1=CLOSE*)
-
 (******************Taper Mode**************************)
-(*TaperÎ»ÖÃºÍËÙ¶È*)
+(*Taper*)
 	TaperPositionActual:LREAL;
 	TaperVelocityActual:LREAL;
 	TaperMoveIndicator:DINT:=0;
 	(*1=OPEN;0=NOTMOVE;-1=CLOSE*)
-(*****************µ¥ÁºMode*******************************)
-(*Î»ÖÃ¡¢ËÙ¶È¡¢·½ÏòÖ¸Ê¾*)
+(*****************singleCarrier Mode*******************************)
+(**)
 	TopPositionActual:LREAL;
 	TopVelocityActual:LREAL;
 	BottomPositionActual:LREAL;
@@ -80,15 +135,6 @@ m_restartTC:BOOL;
 	(*1=OPEN;0=NOTMOVE;-1=CLOSE*)
 	RightBottomLinMoveIndicator:DINT:=0;
 	(*1=OPEN;0=NOTMOVE;-1=CLOSE*)
-(******************Îó²îãÐÖµGap&SingleCarrier********************************)
-	Diff_TopPos: LREAL:=2;
-	Diff_BottomPos: LREAL:=2;
-	Diff_LeftPos: LREAL:=2;
-	Diff_RightPos: LREAL:=2;
-	Diff_TopVelo: LREAL:=2;
-	Diff_BottomVelo: LREAL:=2;
-	Diff_LeftVelo: LREAL:=2;
-	Diff_RightVelo: LREAL:=2;
 (******************Êµ¼ÊÎó²îGap&SingleCarrier***********************************)
 	Diff_TopPos_actual: LREAL;
 	Diff_BottomPos_actual: LREAL;
@@ -98,15 +144,6 @@ m_restartTC:BOOL;
 	Diff_BottomVelo_actual: LREAL;
 	Diff_LeftVelo_actual: LREAL;
 	Diff_RightVelo_actual:  LREAL;
-(******************Îó²îãÐÖµBCGap********************************)
-	Diff_BCTopPos: LREAL:=0.5;
-	Diff_BCBottomPos: LREAL:=0.5;
-	Diff_BCLeftPos: LREAL:=0.5;
-	Diff_BCRightPos: LREAL:=0.5;
-	Diff_BCTopVelo: LREAL:=0.5;
-	Diff_BCBottomVelo: LREAL:=0.5;
-	Diff_BCLeftVelo: LREAL:=0.5;
-	Diff_BCRightVelo: LREAL:=0.5;
 (*
 	Diff_BCTopPos: LREAL:=1;
 	Diff_BCBottomPos: LREAL:=1;
@@ -126,22 +163,7 @@ m_restartTC:BOOL;
 	Diff_BCBottomVelo_actual: LREAL;
 	Diff_BCLeftVelo_actual: LREAL;
 	Diff_BCRightVelo_actual:  LREAL;
-(***************************Îó²îãÐÖµDebug**********************************)
-	Diff_TopPos_Debug: LREAL:=400 ;
-	Diff_BottomPos_Debug: LREAL:=400 ;
-	Diff_LeftPos_Debug: LREAL:=400 ;
-	Diff_RightPos_Debug: LREAL:=400 ;
-(*************************Îó²îãÐÖµTaper*********************************)
-	Range_TaperPos:LREAL:=5.01;
-	Range_TaperVelo:LREAL:=1.01;
-	Diff_TaperLeftPos:LREAL:=0.01;
-	Diff_TaperLeftVelo:LREAL:=0.2;
-	Diff_TaperRightPos:LREAL:=0.05;
-	Diff_TaperRightVelo:LREAL:=0.5;
-	Taper_BeyondRangePositive:BOOL;
-	Diff_TaperTopPos:LREAL:=0.05;
-	Diff_TaperBottomPos:LREAL:=0.05;
-	Taper_BeyondRangeNegtive:BOOL;
+
 (************************Plc_EmergencyStop ************************)
 	Plc_EmergencyStop  AT %Q*:BOOL:=TRUE;
 (************************LED***********************************************)
@@ -167,27 +189,7 @@ m_restartTC:BOOL;
 	
 (*2020.11.23CPMU¹¤ÒÕÑù»ú*)
 
-	M_Compensation:ARRAY[1..18] OF Struct_M_Compensation:=[
-(Encoder:=0,	LeftTop:=0,	RightTop:=0,		LeftBottom:=0,	RightBottom:=0,	InRange:=FALSE),
-(Encoder:=5.5,	LeftTop:=5.5705,	RightTop:=5.5903,	LeftBottom:=5.5670,	RightBottom:=5.5673,	InRange:=FALSE),
-(Encoder:=6.0,	LeftTop:=6.0527,	RightTop:=6.0690,	LeftBottom:=6.0546,	RightBottom:=6.0524,	InRange:=FALSE),
-(Encoder:=6.5,	LeftTop:=6.5448,	RightTop:=6.5597,	LeftBottom:=6.5488,	RightBottom:=6.5461,	InRange:=FALSE),
-(Encoder:=7.5,	LeftTop:=7.5275,	RightTop:=7.5393,	LeftBottom:=7.5424,	RightBottom:=7.5401,	InRange:=FALSE),
-(Encoder:=8.5,	LeftTop:=8.5148,	RightTop:=8.5252,	LeftBottom:=8.5306,	RightBottom:=8.5282,	InRange:=FALSE),
-(Encoder:=9.5,	LeftTop:=9.5108,	RightTop:=9.5207,	LeftBottom:=9.5263,	RightBottom:=9.5233,	InRange:=FALSE),
-(Encoder:=10.5,	LeftTop:=10.5112,	RightTop:=10.5207,	LeftBottom:=10.5272,	RightBottom:=10.5247,		InRange:=FALSE),
-(Encoder:=11.5,	LeftTop:=11.5131,	RightTop:=11.5216,	LeftBottom:=11.5267,	RightBottom:=11.5227,		InRange:=FALSE),
-(Encoder:=30.0,	LeftTop:=30.0,	RightTop:=30.0,	LeftBottom:=30.0,	RightBottom:=30.0,		InRange:=FALSE),
-(Encoder:=100.0,	LeftTop:=100.0,	RightTop:=100.0,	LeftBottom:=100.0,	RightBottom:=100.0,		InRange:=FALSE),
-(Encoder:=110.0,	LeftTop:=110.0,	RightTop:=110.0,	LeftBottom:=110.0,	RightBottom:=110.0,		InRange:=FALSE),
-(Encoder:=120.0,	LeftTop:=120.0,	RightTop:=120.0,	LeftBottom:=120.0,	RightBottom:=120.0,		InRange:=FALSE),
-(Encoder:=130.0,	LeftTop:=130.0,	RightTop:=130.0,	LeftBottom:=130.0,	RightBottom:=130.0,		InRange:=FALSE),
-(Encoder:=140.0,	LeftTop:=140.0,	RightTop:=140.0,	LeftBottom:=140.0,	RightBottom:=140.0,		InRange:=FALSE),
-(Encoder:=150.0,	LeftTop:=150.0,	RightTop:=150.0,	LeftBottom:=150.0,	RightBottom:=150.0,		InRange:=FALSE),
-(Encoder:=160.0,	LeftTop:=160.0,	RightTop:=160.0,	LeftBottom:=160.0,	RightBottom:=160.0,		InRange:=FALSE),
-(Encoder:=300.001,	LeftTop:=300.001,	RightTop:=300.001,		LeftBottom:=300.001,	RightBottom:=300.001,	InRange:=FALSE)];
 (*														
-
  (Encoder:=5.5,	LeftTop:=5.7810,	RightTop:=5.7137,	LeftBottom:=5.7517,	RightBottom:=5.7361,	InRange:=FALSE),*)
 (*³£ÎÂÏÂ*)
 (**)
