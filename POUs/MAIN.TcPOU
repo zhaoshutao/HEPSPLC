@@ -89,6 +89,7 @@ VAR
 	Read_R_TRIG   : R_TRIG;
 	loadparameterStatus: INT;
 	RecipeBOOL2:BOOL;
+	ReturnDwordLoad: DWORD;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[A_InitRecipeParameters();
@@ -311,8 +312,13 @@ IF Save_R_TRIG.Q THEN  //将plc数据以文件形式保存在工控机中
 	 SaveParameter:=FALSE;
 END_IF
 IF Read_R_TRIG.Q THEN  //将工控机中的文件数据读取到plc中
-     RecipeManCommands.LoadAndWriteRecipe(RecipeDefinitionName:='Recipes' , RecipeName:='MyRecipe');
+     ReturnDwordLoad:=RecipeManCommands.LoadAndWriteRecipe(RecipeDefinitionName:='Recipes' , RecipeName:='MyRecipe');
      LoadParameter:=FALSE;
+	 IF ReturnDwordLoad<>0 THEN
+		 Error:=TRUE;
+		 ErrorId:=1001;
+		 Plc_EmergencyStop:=FALSE;
+	 END_IF
 END_IF 
 ]]></ST>
       </Implementation>
@@ -682,6 +688,9 @@ END_FOR]]></ST>
     <LineIds Name="MAIN.A_InitRecipeParameters">
       <LineId Id="12" Count="0" />
       <LineId Id="2" Count="9" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="37" Count="1" />
+      <LineId Id="33" Count="1" />
       <LineId Id="1" Count="0" />
       <LineId Id="31" Count="0" />
     </LineIds>
