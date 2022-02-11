@@ -44,10 +44,11 @@ VAR_GLOBAL
 	Diff_LeftVelo: LREAL:=2;
 	Diff_RightVelo: LREAL:=2;
 (*Compensation Value*)
-	M_Compensation:ARRAY[1..18] OF Struct_M_Compensation:=[
+	M_Compensation:ARRAY[1..18] OF Struct_M_Compensation;
+(*:=[
 (Encoder:=0,	LeftTop:=0,	RightTop:=0,		LeftBottom:=0,	RightBottom:=0,	InRange:=FALSE),
-(Encoder:=5.5,	LeftTop:=5.5705,	RightTop:=5.5903,	LeftBottom:=5.5670,	RightBottom:=5.5673,	InRange:=FALSE),
-(Encoder:=6.0,	LeftTop:=6.0527,	RightTop:=6.0690,	LeftBottom:=6.0546,	RightBottom:=6.0524,	InRange:=FALSE),
+(Encoder:=5.5,	LeftTop:=5.5,	RightTop:=5.5,	LeftBottom:=5.5,	RightBottom:=5.5,	InRange:=FALSE),
+(Encoder:=6.0,	LeftTop:=6.0,	RightTop:=6.0,	LeftBottom:=6.0,	RightBottom:=6.0,	InRange:=FALSE),
 (Encoder:=6.5,	LeftTop:=6.5448,	RightTop:=6.5597,	LeftBottom:=6.5488,	RightBottom:=6.5461,	InRange:=FALSE),
 (Encoder:=7.5,	LeftTop:=7.5275,	RightTop:=7.5393,	LeftBottom:=7.5424,	RightBottom:=7.5401,	InRange:=FALSE),
 (Encoder:=8.5,	LeftTop:=8.5148,	RightTop:=8.5252,	LeftBottom:=8.5306,	RightBottom:=8.5282,	InRange:=FALSE),
@@ -63,7 +64,7 @@ VAR_GLOBAL
 (Encoder:=150.0,	LeftTop:=150.0,	RightTop:=150.0,	LeftBottom:=150.0,	RightBottom:=150.0,		InRange:=FALSE),
 (Encoder:=160.0,	LeftTop:=160.0,	RightTop:=160.0,	LeftBottom:=160.0,	RightBottom:=160.0,		InRange:=FALSE),
 (Encoder:=300.001,	LeftTop:=300.001,	RightTop:=300.001,		LeftBottom:=300.001,	RightBottom:=300.001,	InRange:=FALSE)];
-
+*)
 (*simulation OR NOT*)
 	simulation:BOOL;
 (*USELinearEncoeder*)
