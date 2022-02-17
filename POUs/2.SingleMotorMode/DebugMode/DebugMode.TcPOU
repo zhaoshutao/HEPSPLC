@@ -7,8 +7,6 @@ VAR
 	d_state: DINT;(*PowerOffState*)
 	InitDone:BOOL;
 	Busy: BOOL;
-	Error:BOOL;
-	ErrorID:DINT;
 	fb_ton: TON;
 	PowerState: INT;(*PowerOnState*)
 	ton_t: TON;

@@ -19,8 +19,6 @@ VAR
 	State:DINT;
 	Busy:BOOL;
 	InitDone:BOOL;
-	Error:BOOL;
-	ErrorID:DINT;
 	(*FB*)
 
 	m_state: DINT;

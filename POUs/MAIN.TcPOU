@@ -11,7 +11,6 @@ VAR
 	fb_led_Show: FB_LedShow;
 	btn_reset: BOOL;
 	CPMU_PLC_Reset: PLC_Reset;
-	tttt:LREAL;
 	d_state: DINT;
 	CPMU_PLC_Start: PLC_Start;
 	powerStatus:BOOL;
@@ -26,7 +25,7 @@ VAR
 
 	FB_ERROR AT%I*:BOOL;
 	COM_ERROR AT%I*:BOOL;
-	OUT_ERROR AT%I*:BOOL;
+	//OUT_ERROR AT%I*:BOOL;
 	Estop_Out AT%I*:BOOL;
 
 	SafeStatus:INT;
@@ -40,8 +39,6 @@ VAR
 	el1808_D1  AT%I* :ARRAY[1..8] OF BOOL;
 	el1008 AT%I*:BOOL;
 	EStopTrig:BOOL;
-	Error:BOOL;
-	ErrorID:DINT;
 (*setAxisPosition*)
 	SetAxisPosState: INT;
 	FB_Set_AxisPosition:FB_SetAxisPosition;
@@ -51,12 +48,8 @@ VAR
 	SerAxisPositionDone: BOOL;
 
 	i: INT;
-
-	t: LREAL;
-	a: DINT;
-	b: LREAL;
 	j: INT;
-	ddd: LREAL;
+
 (****RS232***)
 	fbEL6001	: FB_SerialCom;
 	moveDoneLeftTop: BOOL;
@@ -75,11 +68,13 @@ VAR
 	Torque_RT AT%I*:INT;
 	Torque_LB AT%I*:INT;
 	Torque_RB AT%I*:INT;
+(**)
 	btn_setAxisPosition: BOOL;
 	GapSetValue: LREAL;
+(**)
 	RestartTC: TC_Restart;
 	
-	(**)
+(*recipe*)
 	RecipeINT:INT;
 	RecipeBOOL:BOOL;
 	RecipeManCommands: RecipeManCommands;
@@ -90,8 +85,9 @@ VAR
 	loadparameterStatus: INT;
 	RecipeBOOL2:BOOL;
 	ReturnDwordLoad: DWORD;
-	(**)
 	InsertionDeviceName:STRING;
+(*UserMode*)
+	pbUserMode: BOOL:=FALSE;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[A_InitRecipeParameters();
@@ -115,16 +111,18 @@ IF  btn_setAxisPosition THEN
 END_IF
 (*******³õÊ¼»¯Íê³Éºó£¬Ñ¡Ôñ²»Í¬Ä£Ê½*******)
 IF SafePLCRunOK OR Simulation THEN
-	IF pbSingleCarrierMode AND NOT pbTaperMode AND NOT pbGapMode AND NOT pbDebugMode AND NOT pbBCGapMode THEN
+	IF pbSingleCarrierMode AND NOT pbTaperMode AND NOT pbGapMode AND NOT pbDebugMode AND NOT pbBCGapMode AND NOT pbUserMode THEN
 		SingleCarrierMode();
-	ELSIF pbTaperMode  AND NOT pbSingleCarrierMode AND NOT pbGapMode  AND NOT pbDebugMode AND NOT pbBCGapMode THEN
+	ELSIF pbTaperMode  AND NOT pbSingleCarrierMode AND NOT pbGapMode  AND NOT pbDebugMode AND NOT pbBCGapMode AND NOT pbUserMode THEN
 		TaperMode();
-	ELSIF pbGapMode AND  NOT pbSingleCarrierMode AND NOT pbTaperMode  AND NOT pbDebugMode AND NOT pbBCGapMode THEN
+	ELSIF pbGapMode AND  NOT pbSingleCarrierMode AND NOT pbTaperMode  AND NOT pbDebugMode AND NOT pbBCGapMode AND NOT pbUserMode THEN
 		GapMode();
-	ELSIF NOT pbGapMode AND  NOT pbSingleCarrierMode AND NOT pbTaperMode  AND pbDebugMode AND NOT pbBCGapMode THEN
+	ELSIF pbDebugMode AND NOT pbGapMode AND NOT pbSingleCarrierMode AND NOT pbTaperMode AND NOT pbBCGapMode  AND NOT pbUserMode THEN
 		DebugMode();
-	ELSIF NOT pbGapMode AND  NOT pbSingleCarrierMode AND NOT pbTaperMode  AND NOT pbDebugMode AND  pbBCGapMode THEN
+	ELSIF pbBCGapMode AND NOT pbGapMode AND NOT pbSingleCarrierMode AND NOT pbTaperMode AND NOT pbDebugMode AND NOT pbUserMode THEN
 		BCGapMode();
+	ELSIF pbUserMode AND NOT pbGapMode AND NOT pbSingleCarrierMode AND NOT pbTaperMode AND NOT pbDebugMode AND NOT pbBCGapMode THEN
+		UserMode();
 	END_IF
 END_IF
 (************SetAxisPosition*********************)
@@ -344,6 +342,17 @@ ELSIF PosDiff_LeftBottomLin_actual>PosDiff_LeftBottomLin THEN
 	LED_Error:=TRUE;
 ELSIF PosDiff_RightBottomLin_actual>PosDiff_RightBottomLin THEN
 	ErrorID:=54;
+	Error:=TRUE;
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF ABS(PosDiff_LeftTopLin_actual-PosDiff_RightTopLin_actual)>0.2 THEN
+	ErrorID:=55;
+	Error:=TRUE;
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+ELSIF ABS(PosDiff_LeftBottomLin_actual-PosDiff_RightBottomLin_actual)>0.2 THEN
+	ErrorID:=56;
 	Error:=TRUE;
 	FB_PlcEmergencyStop();
 	LED_Error:=TRUE;
@@ -672,7 +681,9 @@ END_FOR]]></ST>
       <LineId Id="84" Count="0" />
       <LineId Id="269" Count="5" />
       <LineId Id="268" Count="0" />
-      <LineId Id="85" Count="34" />
+      <LineId Id="85" Count="11" />
+      <LineId Id="448" Count="1" />
+      <LineId Id="97" Count="22" />
     </LineIds>
     <LineIds Name="MAIN.A_CheckLimitSwitch">
       <LineId Id="0" Count="0" />
@@ -697,7 +708,12 @@ END_FOR]]></ST>
       <LineId Id="31" Count="0" />
     </LineIds>
     <LineIds Name="MAIN.A_PosDiffDetectiion">
-      <LineId Id="0" Count="21" />
+      <LineId Id="0" Count="20" />
+      <LineId Id="24" Count="2" />
+      <LineId Id="28" Count="4" />
+      <LineId Id="34" Count="1" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="21" Count="0" />
     </LineIds>
     <LineIds Name="MAIN.A_SafePlcStartInit">
       <LineId Id="0" Count="54" />

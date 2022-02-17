@@ -1,0 +1,504 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <POU Name="UserMode" Id="{dbb58c86-3204-4c0e-a297-03b24a68bd10}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM UserMode
+VAR
+(*key Command*)
+	btn_Power:BOOL;
+	btn_PowerOn: BOOL;
+	btn_PowerOff: BOOL;
+(*GapMode*)
+	UserGapPositionNew:LREAL:=20;//target
+	UserGapVelocityNew:LREAL:=1;//target
+	UserGapPositionDisplay:LREAL;//current
+	UserGapVelocityDisplay:LREAL;//current
+	UserTaperPositionNew:LREAL:=1;//target
+	UserTaperVelocityNew:LREAL:=0.1;//target
+	UserTaperPositionDisplay:LREAL;//current
+	UserTaperPositionDisplay_FromRightTop:LREAL;
+	UserTaperPositionDisplay_FromRightBottom:LREAL;
+	UserTaperVelocityDisplay:LREAL:=0.1;//target
+	Pos_LeftTopLin_NoTaper:LREAL;
+	Pos_RightTopLin_NoTaper:LREAL;
+	Pos_LeftBottomLin_NoTaper:LREAL;
+	Pos_RightBottomLin_NoTaper:LREAL;
+	UserGapPositionDisplay_FromLeftTop:LREAL;
+	UserGapPositionDisplay_FromLeftBottom:LREAL;
+	(**)
+	btn_UserGapMove:BOOL;
+	btn_UserGapStop:BOOL;
+	(*Var*)
+	fb_ton1:TON;
+	fb_ton2:TON;
+	fb_ton3:TON;
+	(*Status*)
+	State:DINT;
+	Busy:BOOL;
+	InitPowerDone:BOOL;
+	InitCompensationDatasDone:BOOL;
+	(*FB*)
+	m_state: DINT;
+	s_state: DINT;
+	(*¼ì²âµ½ÏÞÎ»£¬»Ö¸´Move×´Ì¬*)
+	FTrig_ReachLS: F_TRIG;
+	FTrig_btn_GapMove: F_TRIG;
+	GapOutRange: BOOL;
+	(*PowerOff*)
+	d_state: DINT;
+	i: INT;
+	j: INT;
+	k: INT;
+	moni_State:DINT;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[(*btn_PowerOn*)
+IF btn_Power AND st_Power=0 THEN
+	btn_PowerOn:=TRUE;
+	btn_Power:=FALSE;
+END_IF
+IF btn_Power AND st_Power=1 THEN
+	btn_PowerOff:=TRUE;
+	btn_Power:=FALSE;
+END_IF
+//
+IF btn_PowerOn THEN
+	A_PowerOn();
+END_IF
+(*btn_PowerOff*)
+IF btn_PowerOff THEN
+	A_PowerOff();
+END_IF
+(*检查couple状态，不允许couple*)
+IF NOT btn_PowerOff THEN
+	IF st_Power=1 AND st_Couple<>0THEN
+		Error:=TRUE;
+		ErrorID:=101;
+		LeftTopLinMoveIndicator:=0;
+		RightTopLinMoveIndicator:=0;
+		LeftBottomLinMoveIndicator:=0;
+		RightBottomLinMoveIndicator:=0;
+		FB_PlcEmergencyStop();
+		LED_Error:=TRUE;
+	END_IF
+END_IF
+(*监控四轴位置速度等*)
+A_MonitoringAllAxis();
+(*补偿数据处理*)
+A_InitCompensationData();
+(*Move.考虑回程误差，先运到到目标轴位置-回程差的一半，再运到到目标轴位置*)
+IF InitPowerDone AND InitCompensationDatasDone THEN
+	IF btn_UserGapMove THEN
+		CASE m_state OF
+			0:
+				FB_Move.Mode:=5;						//1.gap;2.single;3.taper;4.debug;5.BCGap&UserMode
+				FB_Move.CoupleState:=st_Couple;			
+				FB_Move.PowerState:=st_Power;			
+				FB_Move.BCGapMove:=TRUE;				
+				FB_Move.BCLeftTopPosition:=LeftTopLinPositionNew;
+				FB_Move.BCLeftTopVelocity:=UserGapVelocityNew/2;
+				FB_Move.BCRightTopPosition:=RightTopLinPositionNew;
+				FB_Move.BCRightTopVelocity:=UserGapVelocityNew/2;
+				FB_Move.BCLeftBottomPosition:=LeftBottomLinPositionNew;
+				FB_Move.BCLeftBottomVelocity:=UserGapVelocityNew/2;
+				FB_Move.BCRightBottomPosition:=RightBottomLinPositionNew;
+				FB_Move.BCRightBottomVelocity:=UserGapVelocityNew/2;
+				FB_Move();								(*Æô¶¯FB*)
+				m_state:=1;
+			1:
+				FB_Move();
+				IF NOT FB_Move.BCGapDone THEN			(*ÔË¶¯Î´Íê³É£¬Ñ­»·*)
+					Led_Run:=TRUE;
+					m_state:=1;
+				ELSE									(*ÔË¶¯Íê³É£¬ÏÂÒ»²½*)
+					m_state:=88;
+				END_IF
+			88:
+				btn_UserGapMove:=FALSE;					(*×´Ì¬»Ö¸´*)
+				Led_Run:=FALSE;
+				m_state:=0;
+		END_CASE
+	END_IF
+END_IF]]></ST>
+    </Implementation>
+    <Action Name="A_InitCompensationData" Id="{1e6a9c39-c8a5-4c48-b57c-71effe5e3747}">
+      <Implementation>
+        <ST><![CDATA[IF USE_SingleAxis_Compensation THEN
+	//
+	//1.目标位置解算
+	//
+	(*通过补偿表解算四轴目标位置*)
+		FOR	i:= 1 TO 17 DO
+			IF UserGapPositionNew/2<M_Compensation[i+1].Encoder AND UserGapPositionNew/2>=M_Compensation[i].Encoder THEN
+				IF i<>18 THEN
+					LeftTopLinPositionNew:=(((UserGapPositionNew/2-M_Compensation[i].Encoder)*(M_Compensation[i+1].LeftTop-M_Compensation[i].LeftTop))
+							/(M_Compensation[i+1].Encoder-M_Compensation[i].Encoder))+M_Compensation[i].LeftTop;
+					RightTopLinPositionNew:=(((UserGapPositionNew/2-M_Compensation[i].Encoder)*(M_Compensation[i+1].RightTop-M_Compensation[i].RightTop))
+							/(M_Compensation[i+1].Encoder-M_Compensation[i].Encoder))+M_Compensation[i].RightTop;
+					LeftBottomLinPositionNew:=(((UserGapPositionNew/2-M_Compensation[i].Encoder)*(M_Compensation[i+1].LeftBottom-M_Compensation[i].LeftBottom))
+							/(M_Compensation[i+1].Encoder-M_Compensation[i].Encoder))+M_Compensation[i].LeftBottom;
+					RightBottomLinPositionNew:=(((UserGapPositionNew/2-M_Compensation[i].Encoder)*(M_Compensation[i+1].RightBottom-M_Compensation[i].RightBottom))
+							/(M_Compensation[i+1].Encoder-M_Compensation[i].Encoder))+M_Compensation[i].RightBottom;
+					M_CompensationNumber:=i;
+					InitCompensationDatasDone:=TRUE;
+				ELSIF i=18 AND UserGapPositionNew/2=M_Compensation[i].Encoder THEN		(*Gap=14µÄÌØÊâÇé¿ö*)
+					(**)
+					LeftTopLinPositionNew:=M_Compensation[i].LeftTop;
+					RightTopLinPositionNew:=M_Compensation[i].RightTop;
+					LeftBottomLinPositionNew:=M_Compensation[i].LeftBottom;
+					RightBottomLinPositionNew:=M_Compensation[i].RightBottom;
+					M_CompensationNumber:=i;
+					InitCompensationDatasDone:=TRUE;
+				ELSE
+					LeftTopLinPositionNew:=UserGapPositionNew/2;
+					RightTopLinPositionNew:=UserGapPositionNew/2;
+					LeftBottomLinPositionNew:=UserGapPositionNew/2;
+					RightBottomLinPositionNew:=UserGapPositionNew/2;
+					M_CompensationNumber:=i;
+					InitCompensationDatasDone:=TRUE;
+				END_IF
+			END_IF
+		END_FOR
+	(*在taper模式下，目标四轴位置需要加上taper的量*)
+	IF TaperOrNot THEN
+		RightTopLinPositionNew:=RightTopLinPositionNew+UserTaperPositionNew/2;
+		RightBottomLinPositionNew:=RightBottomLinPositionNew++UserTaperPositionNew/2;
+		InitCompensationDatasDone:=TRUE;
+	END_IF
+	//
+	//2.在非Taper模式下，由四轴位置反向解算四轴显示位置，再进一步计算当前Gap*)
+	//
+	IF NOT TaperOrNot THEN
+		FOR j:= 1 TO 17 DO
+			IF Pos_RightBottomLin<M_Compensation[j+1].RightBottom AND Pos_RightBottomLin>=M_Compensation[j].RightBottom THEN
+				IF j<>18 THEN
+					LeftTopLinPositionDisplay:=(((M_Compensation[j+1].Encoder-M_Compensation[j].Encoder)*(Pos_LeftTopLin-M_Compensation[j].LeftTop))
+							/(M_Compensation[j+1].LeftTop-M_Compensation[j].LeftTop))+M_Compensation[j].Encoder;
+					RightTopLinPositionDisplay:=(((M_Compensation[j+1].Encoder-M_Compensation[j].Encoder)*(Pos_RightTopLin-M_Compensation[j].RightTop))
+							/(M_Compensation[j+1].RightTop-M_Compensation[j].RightTop))+M_Compensation[j].Encoder;
+					LeftBottomLinPositionDisplay:=(((M_Compensation[j+1].Encoder-M_Compensation[j].Encoder)*(Pos_LeftBottomLin-M_Compensation[j].LeftBottom))
+							/(M_Compensation[j+1].LeftBottom-M_Compensation[j].LeftBottom))+M_Compensation[j].Encoder;
+					RightBottomLinPositionDisplay:=(((M_Compensation[j+1].Encoder-M_Compensation[j].Encoder)*(Pos_RightBottomLin-M_Compensation[j].RightBottom))
+							/(M_Compensation[j+1].RightBottom-M_Compensation[j].RightBottom))+M_Compensation[j].Encoder;
+					M_DisplayNumber:=j;
+				ELSIF j=18 AND UserGapPositionNew/2=M_Compensation[j].Encoder THEN		(*Gap=14µÄÌØÊâÇé¿ö*)
+					(**)
+					LeftTopLinPositionDisplay:=(((M_Compensation[j+1].Encoder-M_Compensation[j].Encoder)*(Pos_LeftTopLin-M_Compensation[j].LeftTop))
+							/(M_Compensation[j+1].LeftTop-M_Compensation[j].LeftTop))+M_Compensation[j].Encoder;
+					RightTopLinPositionDisplay:=(((M_Compensation[j+1].Encoder-M_Compensation[j].Encoder)*(Pos_RightTopLin-M_Compensation[j].RightTop))
+							/(M_Compensation[j+1].RightTop-M_Compensation[j].LeftTop))+M_Compensation[j].Encoder;
+					LeftBottomLinPositionDisplay:=(((M_Compensation[j+1].Encoder-M_Compensation[j].Encoder)*(Pos_LeftBottomLin-M_Compensation[j].LeftBottom))
+							/(M_Compensation[j+1].LeftBottom-M_Compensation[j].LeftBottom))+M_Compensation[j].Encoder;
+					RightBottomLinPositionDisplay:=(((M_Compensation[j+1].Encoder-M_Compensation[j].Encoder)*(Pos_RightBottomLin-M_Compensation[j].RightBottom))
+							/(M_Compensation[j+1].RightBottom-M_Compensation[j].RightBottom))+M_Compensation[j].Encoder;
+					M_DisplayNumber:=j;
+				ELSE(*Gap>14µÄÇé¿ö*)
+					(**)
+					LeftTopLinPositionDisplay:=Pos_LeftTopLin;
+					RightTopLinPositionDisplay:=Pos_RightTopLin;
+					LeftBottomLinPositionDisplay:=Pos_LeftBottomLin;
+					RightBottomLinPositionDisplay:=Pos_RightBottomLin;
+					M_DisplayNumber:=j;
+				END_IF
+			END_IF
+		END_FOR
+	END_IF
+	//
+	//3.taper模式下，由当前的四轴位置分别解算出当前的gap和taper
+	//
+	IF TaperOrNot THEN
+		(*首先计算当前的taper。过程为：1.通过左轴位置定位当前gap区间；2.循环计算出当前左轴位置对应的补偿表右轴位置；3.当前实际右轴位置
+		减去补偿表右轴位置，即为当前taper的一半。上一半或者下一半；4.当前taper为两半之和*)
+		FOR k:= 1 TO 17 DO
+			IF Pos_LeftTopLin<M_Compensation[k+1].LeftTop AND Pos_LeftTopLin>=M_Compensation[k].LeftTop THEN
+				//左上和左下轴在taper模式下不会变化，由左上和左下实际轴位置，分别解算当前gap，取平均
+				UserGapPositionDisplay_FromLeftTop:=2*(((Pos_LeftTopLin-M_Compensation[k].LeftTop)*(M_Compensation[k+1].Encoder-M_Compensation[k].Encoder))
+											/(M_Compensation[k+1].LeftTop-M_Compensation[k].LeftTop)+M_Compensation[k].Encoder);
+				UserGapPositionDisplay_FromLeftBottom:=2*(((Pos_LeftBottomLin-M_Compensation[k].LeftBottom)*(M_Compensation[k+1].Encoder-M_Compensation[k].Encoder))
+											/(M_Compensation[k+1].LeftBottom-M_Compensation[k].LeftBottom)+M_Compensation[k].Encoder);
+				UserGapPositionDisplay:=(UserGapPositionDisplay_FromLeftTop+UserGapPositionDisplay_FromLeftBottom)/2;
+				//由当前gap值计算排除taper后的、应该真正算入gap的那部分右上和右下轴位置
+				Pos_RightTopLin_NoTaper:=(((UserGapPositionDisplay/2-M_Compensation[k].Encoder)*(M_Compensation[k+1].RightTop-M_Compensation[k].RightTop))
+							/(M_Compensation[k+1].Encoder-M_Compensation[k].Encoder))+M_Compensation[k].RightTop;
+				Pos_RightBottomLin_NoTaper:=(((UserGapPositionDisplay/2-M_Compensation[k].Encoder)*(M_Compensation[k+1].RightBottom-M_Compensation[k].RightBottom))
+							/(M_Compensation[k+1].Encoder-M_Compensation[k].Encoder))+M_Compensation[k].RightBottom;
+				//
+				Pos_LeftTopLin_NoTaper:=Pos_LeftTopLin;
+				Pos_LeftBottomLin_NoTaper:=Pos_LeftBottomLin;
+				//计算taper
+				UserTaperPositionDisplay_FromRightTop:=Pos_RightTopLin-Pos_RightTopLin_NoTaper;
+				UserTaperPositionDisplay_FromRightBottom:=Pos_RightBottomLin-Pos_RightBottomLin_NoTaper;
+				UserTaperPositionDisplay:=UserTaperPositionDisplay_FromRightTop+UserTaperPositionDisplay_FromRightBottom;
+				InitCompensationDatasDone:=TRUE;
+			END_IF
+		END_FOR
+	END_IF
+ELSE
+	LeftTopLinPositionNew:=UserGapPositionNew/2;
+	RightTopLinPositionNew:=UserGapPositionNew/2;
+	LeftBottomLinPositionNew:=UserGapPositionNew/2;
+	RightBottomLinPositionNew:=UserGapPositionNew/2;
+	LeftTopLinPositionDisplay:=Pos_LeftTopLin;
+	RightTopLinPositionDisplay:=Pos_RightTopLin;
+	LeftBottomLinPositionDisplay:=Pos_LeftBottomLin;
+	RightBottomLinPositionDisplay:=Pos_RightBottomLin;
+	M_CompensationNumber:=0;
+	InitCompensationDatasDone:=TRUE;
+END_IF
+(*速度可以不用解算，直接用即可*)
+LeftTopLinVelocityDisplay:=Velo_LeftTopLin;
+RightTopLinVelocityDisplay:=Velo_RightTopLin;
+LeftBottomLinVelocityDisplay:=Velo_LeftBottomLin;
+RightBottomLinVelocityDisplay:=Velo_RightBottomLin;
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_MonitoringAllAxis" Id="{ca11d2cd-2857-4b76-bcfc-746a563d8a76}">
+      <Implementation>
+        <ST><![CDATA[(****************************************************************
+NAME:			A_MonitoringAllAxis
+DATA:			2018.1.9
+VERSION:		1.0.0
+DESCRIPTION:	
+				Ã¿´ÎÑ­»·¾ùÖ´ÐÐÖáÎ»ÖÃºÍÖáÔË¶¯µÄ¼ì²é
+				2.4Öá¹âÕ¤³ßÎ»ÖÃ¡¢ËÙ¶È¶Ô±È¼ì²é
+HISTORY:
+				2017.1.9		NEW
+
+***************************************************************)
+
+(*************************************************************************************2.4Öá¹âÕ¤³ßÎ»ÖÃ¡¢ËÙ¶È¶Ô±È¼ì²é**********************************************************************)
+IF  st_Power<>0 THEN
+CASE moni_State OF
+(*Top Î»ÖÃºÍËÙ¶È±È¶Ô*)
+0:
+		(*Position*)
+		(*Top*)
+		Diff_UserTopPos_actual:=ABS(Pos_leftTopLin-Pos_RightTopLin);
+		(*Bottom*)
+		Diff_UserBottomPos_actual:=ABS(Pos_LeftBottomLin-Pos_RightBottomLin);
+		(*Left*)
+		Diff_UserLeftPos_actual:=ABS(Pos_LeftTopLin-Pos_LeftBottomLin);
+		(*Right*)
+		Diff_UserRightPos_actual:=ABS(Pos_RightTopLin-Pos_RightBottomLin);
+		(*Velocity*)
+		(*Top*)
+		Diff_UserTopVelo_actual:=ABS(Velo_leftTopLin-Velo_RightTopLin);
+		(*Bottom*)
+		Diff_UserBottomVelo_actual:=ABS(Velo_LeftBottomLin-Velo_RightBottomLin);
+		(*Left*)
+		Diff_UserLeftVelo_actual:=ABS(Velo_LeftTopLin-Velo_LeftBottomLin);
+		(*Right*)
+		Diff_UserRightVelo_actual:=ABS(Velo_RightTopLin-Velo_RightBottomLin);
+		Diff_UserTopPos:=Diff_UserTopPos+UserTaperPositionNew;//Top位置误差=gap运动细微误差+目标taper位置
+		Diff_UserTopVelo:=Diff_UserTopVelo+UserGapVelocityNew;//Top速度误差=gap运动细微误差+gap目标速度。因为可能出现一个轴运动完了，另一个轴还在运动的情况
+		Diff_UserBottomPos:=Diff_UserBottomPos+UserTaperPositionNew;//Bottom同上
+		Diff_UserBottomVelo:=Diff_UserBottomVelo+UserGapVelocityNew;//Bottom同上
+		Diff_UserLeftPos:=Diff_UserLeftPos;//左轴即使在taper时也保持稳定
+		Diff_UserLeftVelo:=Diff_UserLeftVelo;//左轴即使在taper时也保持稳定
+		Diff_UserRightPos:=Diff_UserRightPos+UserTaperPositionNew;//右轴在taper时会随着目标taper，而误差变大
+		Diff_UserRightVelo:=Diff_UserRightVelo+UserGapVelocityNew;
+		IF Diff_UserTopPos_actual >Diff_UserTopPos THEN
+				ErrorID:=11;
+				moni_State:=-100;
+		ELSIF Diff_UserTopVelo_actual>Diff_UserTopVelo  THEN
+				ErrorID:=12;
+				moni_State:=-100;
+		(*Bottom Î»ÖÃºÍËÙ¶È±È¶Ô*)
+		ELSIF Diff_UserBottomPos_actual>Diff_UserBottomPos THEN
+				ErrorID:=13;
+				moni_State:=-100;
+		ELSIF Diff_UserBottomVelo_actual>Diff_UserBottomVelo  THEN
+				ErrorID:=14;
+				moni_State:=-100;
+		(*Left Î»ÖÃºÍËÙ¶È±È¶Ô*)
+		ELSIF Diff_UserLeftPos_actual>Diff_UserLeftPos  THEN
+				ErrorID:=15;
+				moni_State:=-100;
+		ELSIF  Diff_UserLeftVelo_actual>Diff_UserLeftVelo THEN
+				ErrorID:=16;
+				moni_State:=-100;
+		(*Right Î»ÖÃºÍËÙ¶È±È¶Ô*)
+		ELSIF Diff_UserRightPos_actual>Diff_UserRightPos  THEN
+				ErrorID:=17;
+				moni_State:=-100;
+		ELSIF  Diff_UserRightVelo_actual>Diff_UserRightVelo THEN
+				ErrorID:=18;
+				moni_State:=-100;
+		END_IF
+-100:
+		btn_UserGapStop:=TRUE;
+		FB_PlcEmergencyStop();
+		Error:=TRUE;
+		LED_Error:=TRUE;
+END_CASE
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_PowerOff" Id="{e3ff8ae4-6e0c-4bb4-9a62-00e47841163f}">
+      <Implementation>
+        <ST><![CDATA[CASE d_state OF
+		0:(*PowerOff*)
+			FB_Power(Off:=TRUE);
+				d_state:=1;
+		1:
+			IF NOT FB_power.OffStatus THEN
+				d_state:=1;
+			ELSE
+				d_state:=88;
+			END_IF
+		88:(*ResetAllState*)
+			btn_PowerOn:=FALSE;
+			btn_UserGapMove:=FALSE;
+			btn_UserGapStop:=FALSE;
+			LeftTopLinMoveIndicator:=0;
+			RightTopLinMoveIndicator:=0;
+			LeftBottomLinMoveIndicator:=0;
+			RightBottomLinMoveIndicator:=0;
+			fb_ton1.IN:=FALSE;
+			fb_ton2.IN:=FALSE;
+			fb_ton3.IN:=FALSE;
+			State:=0;
+			Busy:=FALSE;
+			InitPowerDone:=FALSE;
+			InitCompensationDatasDone:=FALSE;
+			Error:=FALSE;
+			ErrorID:=0;
+			m_state:=0;
+			s_state:=0;
+			btn_PowerOff:=FALSE;
+			d_state:=0;
+			Led_Run:=FALSE;
+			Led_Error:=FALSE;
+			moni_State:=0;
+			i:=0;
+END_CASE
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_PowerOn" Id="{cacab3c1-f169-458e-acb8-60acf8e4d140}">
+      <Implementation>
+        <ST><![CDATA[(****************************************************************
+NAME:			A_PowerOn
+DATA:			2018.1.9
+VERSION:		1.0.0
+DESCRIPTION:	
+				ÉÏµãÃüÁîºó£¬Ë³ÐòÖ´ÐÐ£º
+				1.FB_PowerOn
+				·µ»ØÖ´ÐÐÊÇ·ñ³É¹¦
+HISTORY:
+				2019.1.9		NEW
+
+***************************************************************)
+fb_ton3(PT:=t#0.5s);
+CASE State OF
+	0:	(*FB_Power_On*)
+		FB_Power(On:=TRUE);
+		fb_ton3.IN:=TRUE;
+		State:=1;
+	1:	(*wait*)
+		FB_power();
+		IF NOT FB_power.OnStatus THEN		(*FB_Power_OnÃ»ÓÐÖ´ÐÐÍê£¬wait£¬³¬Ê±FB Error*)
+			IF NOT fb_ton3.Q THEN
+				State:=1;
+			ELSE
+				ErrorID:=1;
+				State:=99;
+			END_IF
+		ELSE
+			State:=88;
+		END_IF
+	88:	(*All Done*)
+		btn_PowerOn:=FALSE;
+		State:=0;
+		Error:=FALSE;
+		ErrorID:=0;
+		Busy:=FALSE;
+		InitPowerDone:=TRUE;
+		FB_power.On:=FALSE;
+		fb_ton3.IN:=FALSE;
+		LED_Error:=FALSE;
+	99:
+		btn_PowerOn:=FALSE;
+		State:=99;
+		Error:=TRUE;
+		Busy:=FALSE;
+		InitPowerDone:=FALSE;
+		fb_ton3.IN:=FALSE;
+		LED_Error:=TRUE;
+END_CASE]]></ST>
+      </Implementation>
+    </Action>
+    <LineIds Name="UserMode">
+      <LineId Id="40" Count="8" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="52" Count="1" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="55" Count="2" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="59" Count="11" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="81" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="95" Count="16" />
+      <LineId Id="140" Count="5" />
+      <LineId Id="147" Count="6" />
+      <LineId Id="158" Count="1" />
+      <LineId Id="94" Count="0" />
+    </LineIds>
+    <LineIds Name="UserMode.A_InitCompensationData">
+      <LineId Id="17" Count="0" />
+      <LineId Id="161" Count="2" />
+      <LineId Id="18" Count="13" />
+      <LineId Id="43" Count="5" />
+      <LineId Id="59" Count="6" />
+      <LineId Id="72" Count="5" />
+      <LineId Id="145" Count="1" />
+      <LineId Id="149" Count="0" />
+      <LineId Id="195" Count="0" />
+      <LineId Id="147" Count="0" />
+      <LineId Id="164" Count="2" />
+      <LineId Id="158" Count="0" />
+      <LineId Id="78" Count="2" />
+      <LineId Id="82" Count="29" />
+      <LineId Id="159" Count="0" />
+      <LineId Id="168" Count="2" />
+      <LineId Id="151" Count="0" />
+      <LineId Id="156" Count="1" />
+      <LineId Id="172" Count="1" />
+      <LineId Id="183" Count="0" />
+      <LineId Id="174" Count="0" />
+      <LineId Id="179" Count="3" />
+      <LineId Id="184" Count="0" />
+      <LineId Id="186" Count="3" />
+      <LineId Id="197" Count="2" />
+      <LineId Id="191" Count="1" />
+      <LineId Id="190" Count="0" />
+      <LineId Id="194" Count="0" />
+      <LineId Id="196" Count="0" />
+      <LineId Id="175" Count="1" />
+      <LineId Id="112" Count="18" />
+    </LineIds>
+    <LineIds Name="UserMode.A_MonitoringAllAxis">
+      <LineId Id="0" Count="34" />
+      <LineId Id="71" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="80" Count="0" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="82" Count="1" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="36" Count="33" />
+    </LineIds>
+    <LineIds Name="UserMode.A_PowerOff">
+      <LineId Id="0" Count="36" />
+    </LineIds>
+    <LineIds Name="UserMode.A_PowerOn">
+      <LineId Id="0" Count="48" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

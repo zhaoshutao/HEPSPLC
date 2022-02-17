@@ -23,8 +23,6 @@ VAR
 	Busy:BOOL;
 	InitPowerDone:BOOL;
 	InitCompensationDatasDone:BOOL;
-	Error:BOOL;
-	ErrorID:DINT;
 	(*FB*)
 	m_state: DINT;
 	s_state: DINT;
