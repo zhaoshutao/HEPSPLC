@@ -6,24 +6,24 @@
         <o xml:space="preserve" t="RecipeManObject">
           <o n="LMGuids" t="LanguageModelGuidHelper">
             <d n="NamesAndGuids" t="Hashtable" ckt="String" cvt="Guid">
-              <v>RECIPEFACTORYFB_INIT</v>
-              <v>9701c596-8ac5-4544-b1e7-092805c269e8</v>
               <v>GVL_RECIPEMANAGEMENT_3300</v>
               <v>3f2c537f-514a-45f4-b2a3-85271f15fce0</v>
-              <v>RECIPEMANAGEMENTINITFB_INIT</v>
-              <v>a19fceff-70a1-437d-8676-8ed6bc63c683</v>
-              <v>RECIPEFACTORYFREERECIPE</v>
-              <v>d9474b39-00cf-4946-adcd-d1ad2b1f9a0a</v>
               <v>RECIPEFACTORY</v>
               <v>21fac012-0871-415c-bff9-418e71ceb55a</v>
-              <v>RECIPEMANAGEMENTINITFB_REINIT</v>
-              <v>5c13c7ce-efc4-4913-ad21-7188b9088354</v>
               <v>RECIPEMANAGEMENTINIT</v>
               <v>645eb6a4-f0e1-4351-a17c-c1aa6ec53666</v>
-              <v>RECIPEMANAGEMENTINITINITIALIZE</v>
-              <v>4e9bd1eb-2abe-44bd-972e-3911b56f0136</v>
+              <v>RECIPEFACTORYFREERECIPE</v>
+              <v>d9474b39-00cf-4946-adcd-d1ad2b1f9a0a</v>
+              <v>RECIPEFACTORYFB_INIT</v>
+              <v>9701c596-8ac5-4544-b1e7-092805c269e8</v>
               <v>RECIPEFACTORYCREATERECIPE</v>
               <v>df6ed356-178a-461a-8388-2dddfcf5ef91</v>
+              <v>RECIPEMANAGEMENTINITFB_INIT</v>
+              <v>a19fceff-70a1-437d-8676-8ed6bc63c683</v>
+              <v>RECIPEMANAGEMENTINITINITIALIZE</v>
+              <v>4e9bd1eb-2abe-44bd-972e-3911b56f0136</v>
+              <v>RECIPEMANAGEMENTINITFB_REINIT</v>
+              <v>5c13c7ce-efc4-4913-ad21-7188b9088354</v>
             </d>
           </o>
           <o n="StorageSettings" t="RecipeManagerStorageSettings">
@@ -55,7 +55,7 @@
       <XmlArchive>
         <Data>
           <o xml:space="preserve" t="RecipeDefinitionObject">
-            <v n="UniqueIdGenerator">"256"</v>
+            <v n="UniqueIdGenerator">"263"</v>
             <o n="Recipes" t="RecipeList">
               <l n="Recipes" t="ArrayList" />
             </o>
@@ -80,6 +80,20 @@
                   <v n="Id">122</v>
                   <v n="Comment">""</v>
                   <v n="VarUserDefTypeAsString">"BOOL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"TaperOrNot"</v>
+                  <v n="VarType" t="TypeClass">Bool</v>
+                  <v n="VarTypeAsString">"BOOL"</v>
+                  <v n="Name">""</v>
+                  <o n="Boundaries" t="RecipeVariableBoundaries">
+                    <v n="Type" t="TypeClass">Bool</v>
+                    <v n="LowerBound">""</v>
+                    <v n="UpperBound">""</v>
+                  </o>
+                  <v n="Id">262</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"Invalid Type"</v>
                 </o>
                 <o>
                   <v n="VarName">"M_Compensation[1].Encoder"</v>
@@ -1361,6 +1375,16 @@
                   <v n="Comment">""</v>
                   <v n="VarUserDefTypeAsString">"LREAL"</v>
                 </o>
+                <o>
+                  <v n="VarName">"HysteresisError"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">263</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
               </l>
             </o>
             <o n="LMGuids" t="LanguageModelGuidHelper">
@@ -1396,6 +1420,7 @@
           <Type n="RecipeDefinitionObject">{6b3dfb6a-1865-4356-a39b-1fe0ef89651c}</Type>
           <Type n="RecipeList">{361612e3-b6f9-4397-98a8-756875b9e479}</Type>
           <Type n="RecipeVariable">{53eb36d9-3360-453b-901e-ca88bd8f0cba}</Type>
+          <Type n="RecipeVariableBoundaries">{27f9af88-23e7-4a13-82aa-c97c4e06a71a}</Type>
           <Type n="RecipeVariableList">{97841042-ff4f-47b5-923e-538f1387df5a}</Type>
           <Type n="String">System.String</Type>
           <Type n="TypeClass">{16f7aa24-038f-444e-9d81-b001bc091d35}</Type>

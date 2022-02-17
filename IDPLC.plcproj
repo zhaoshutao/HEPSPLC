@@ -35,6 +35,9 @@
     <Compile Include="PlcTask.TcTTO">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="POUs\0.UserMode\UserMode.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="POUs\1.CarrierMode\GapMode\BCGapMode.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -104,13 +107,15 @@
     <Folder Include="POUs\CommonFB\ExternFB" />
     <Folder Include="POUs\CommonFB\MainFB" />
     <Folder Include="POUs\MainPRG" />
+    <Folder Include="POUs\0.UserMode" />
     <Folder Include="POUs\RS232" />
     <Folder Include="VISUs" />
   </ItemGroup>
   <ItemGroup>
     <PlaceholderReference Include="RecipeManagement">
-      <DefaultResolution>Recipe Management, * (System)</DefaultResolution>
+      <DefaultResolution>Recipe Management, 3.3.1.0 (System)</DefaultResolution>
       <Namespace>Recipe_Management</Namespace>
+      <SystemLibrary>true</SystemLibrary>
     </PlaceholderReference>
     <PlaceholderReference Include="Tc2_Drive">
       <DefaultResolution>Tc2_Drive, * (Beckhoff Automation GmbH)</DefaultResolution>
