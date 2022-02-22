@@ -55,7 +55,7 @@
       <XmlArchive>
         <Data>
           <o xml:space="preserve" t="RecipeDefinitionObject">
-            <v n="UniqueIdGenerator">"263"</v>
+            <v n="UniqueIdGenerator">"264"</v>
             <o n="Recipes" t="RecipeList">
               <l n="Recipes" t="ArrayList" />
             </o>
@@ -1382,6 +1382,16 @@
                   <v n="Name">""</v>
                   <n n="Boundaries" />
                   <v n="Id">263</v>
+                  <v n="Comment">""</v>
+                  <v n="VarUserDefTypeAsString">"LREAL"</v>
+                </o>
+                <o>
+                  <v n="VarName">"LEDriftErrorThreshold"</v>
+                  <v n="VarType" t="TypeClass">LReal</v>
+                  <v n="VarTypeAsString">"LREAL"</v>
+                  <v n="Name">""</v>
+                  <n n="Boundaries" />
+                  <v n="Id">264</v>
                   <v n="Comment">""</v>
                   <v n="VarUserDefTypeAsString">"LREAL"</v>
                 </o>
