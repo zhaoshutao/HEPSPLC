@@ -9,6 +9,8 @@ VAR_GLOBAL
 	ErrorDescription:STRING;
 (*回程差*)
 	HysteresisError:LREAL;
+(*光栅漂移误差阈值*)
+	LEDriftErrorThreshold:LREAL:=0.001;
 (*Lag Distance threshold*)
 	PosDiff_LeftTopLin: LREAL:=0.5;
 	PosDiff_RightTopLin:LREAL:=0.5;
@@ -223,6 +225,11 @@ VAR_GLOBAL
 	LeftBottomLinPositionNew:LREAL;
 	RightTopLinPositionNew:LREAL;
 	RightBottomLinPositionNew:LREAL;
+	(*考虑到回程差后，运动到临时位置*)
+	LeftTopLinPositionNew_temporary :LREAL;
+	LeftBottomLinPositionNew_temporary:LREAL;
+	RightTopLinPositionNew_temporary:LREAL;
+	RightBottomLinPositionNew_temporary:LREAL;
 	(*Display Position*)
 	LeftTopLinPositionDisplay:LREAL;
 	LeftBottomLinPositionDisplay:LREAL;
