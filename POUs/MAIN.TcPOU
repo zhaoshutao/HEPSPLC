@@ -325,22 +325,22 @@ END_IF
     </Action>
     <Action Name="A_PosDiffDetectiion" Id="{e857c546-d367-4f19-9434-ed29c144eb6f}">
       <Implementation>
-        <ST><![CDATA[IF PosDiff_LeftTopLin_actual>PosDiff_LeftTopLin THEN
+        <ST><![CDATA[IF ABS(PosDiff_LeftTopLin_actual)>PosDiff_LeftTopLin THEN
 	ErrorID:=51;
 	Error:=TRUE;
 	FB_PlcEmergencyStop();
 	LED_Error:=TRUE;
-ELSIF PosDiff_RightTopLin_actual>PosDiff_RightTopLin THEN
+ELSIF ABS(PosDiff_RightTopLin_actual)>PosDiff_RightTopLin THEN
 	ErrorID:=52;
 	Error:=TRUE;
 	FB_PlcEmergencyStop();
 	LED_Error:=TRUE;
-ELSIF PosDiff_LeftBottomLin_actual>PosDiff_LeftBottomLin THEN
+ELSIF ABS(PosDiff_LeftBottomLin_actual)>PosDiff_LeftBottomLin THEN
 	ErrorID:=53;
 	Error:=TRUE;
 	FB_PlcEmergencyStop();
 	LED_Error:=TRUE;
-ELSIF PosDiff_RightBottomLin_actual>PosDiff_RightBottomLin THEN
+ELSIF ABS(PosDiff_RightBottomLin_actual)>PosDiff_RightBottomLin THEN
 	ErrorID:=54;
 	Error:=TRUE;
 	FB_PlcEmergencyStop();
