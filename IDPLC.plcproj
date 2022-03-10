@@ -35,6 +35,9 @@
     <Compile Include="PlcTask.TcTTO">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="POUs\0.UserMode\F_GetSysTime.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="POUs\0.UserMode\UserMode.TcPOU">
       <SubType>Code</SubType>
     </Compile>
