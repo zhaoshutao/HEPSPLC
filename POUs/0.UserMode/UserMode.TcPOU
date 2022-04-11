@@ -60,7 +60,7 @@ VAR
 	RegularMotionMode:BOOL;
 	SSMotionMode:BOOL;
 	SS_StepSize:LREAL:=0.001;
-	SS_StepNumber:DINT:=10;
+	SS_StepNumber:INT:=10;
 	SS_StepVelocity:LREAL:=1;
 	SS_Move:BOOL;
 	SS_Stop:BOOL;
@@ -70,6 +70,10 @@ VAR
 	SS_StepSystemTime:ARRAY[0..100] OF ULINT;
 	SS_StepCountTime:ARRAY[0..100] OF ULINT;
 	m: INT;
+	SS_TON: TON;
+	StepEachTime:TIME;
+	StepEachTime_ms:INT;//ms
+	SS_OTSTRUCT :OTSTRUCT ;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -649,7 +653,17 @@ END_IF]]></ST>
       <Implementation>
         <ST><![CDATA[(*如果是谱学扫描模式，目标磁间隙会发生变化*)
 //UserGapPositionNew:=UserGapPositionDisplay+SS_StepSize;
-
+//TIME类型转OTSTRUCT类型，再转毫秒
+//SS_OTSTRUCT:=TIME_TO_OTSTRUCT(tIn:=StepEachTime);
+//StepEachTime_ms:=SS_OTSTRUCT.wWeek*7*24*60*60*1000+SS_OTSTRUCT.wDay*24*60*60*1000+
+//				SS_OTSTRUCT.wHour*60*60*1000+SS_OTSTRUCT.wMinute*60*1000+
+//				SS_OTSTRUCT.wSecond*1000+SS_OTSTRUCT.wMilliseconds;
+//毫秒转TRUCT类型，再转TIME
+//SS_OTSTRUCT.wWeek:=StepEachTime_ms/(7*24*60*60*1000);
+//OTSTRUCT_TO_TIME(
+//毫秒转TIME类型
+StepEachTime:=INT_TO_TIME(StepEachTime_ms);
+SS_TON(PT:=StepEachTime);
 IF InitPowerDone AND InitCompensationDatasDone AND SS_Move THEN
 	CASE SS_MoveState OF
 		0:
@@ -671,6 +685,7 @@ IF InitPowerDone AND InitCompensationDatasDone AND SS_Move THEN
 				SS_MoveState:=1;
 				SS_StepSystemTime[SS_currentStep]:=F_GetSysTime();
 		1:
+				SS_TON.IN:=TRUE;
 				FB_Move();
 				IF NOT FB_Move.BCGapDone THEN			
 					Led_Run:=TRUE;
@@ -681,23 +696,29 @@ IF InitPowerDone AND InitCompensationDatasDone AND SS_Move THEN
 		66:
 				SS_currentStep:=SS_currentStep+1;			
 				Led_Run:=FALSE;
-				IF SS_currentStep=SS_StepNumber THEN
+				IF SS_currentStep=SS_StepNumber THEN								
 					SS_MoveState:=88;
 				END_IF
 				IF SS_currentStep<SS_StepNumber THEN
+					SS_MoveState:=77;
+				END_IF
+		77://等待单步时长够
+				IF SS_TON.Q THEN
+					SS_TON.IN:=FALSE;
 					SS_MoveState:=0;
 				END_IF
 		88:
+				SS_TON.IN:=FALSE;
 				SS_Move:=FALSE;	
 				Led_Run:=FALSE;
 				SS_MoveState:=0;
 				SS_currentStep:=0;
-				SS_StepSystemTime[SS_StepNumber]:=F_GetSysTime();
+				//SS_StepSystemTime[SS_StepNumber]:=F_GetSysTime();
 	END_CASE
 END_IF
 (*获取每一步耗时*)
-FOR	m:= 0 TO 99 DO
-	SS_StepCountTime[m+1]:=(SS_StepSystemTime[m+1]-SS_StepSystemTime[m]);
+FOR	m:= 0 TO SS_StepNumber DO
+	SS_StepCountTime[m]:=(SS_StepSystemTime[m+1]-SS_StepSystemTime[m])-INT_TO_ULINT(StepEachTime_ms);
 END_FOR
 
 (*STOP*)
@@ -832,7 +853,15 @@ END_IF
     </LineIds>
     <LineIds Name="UserMode.A_SpectroscopyScanningMotion">
       <LineId Id="24" Count="0" />
-      <LineId Id="26" Count="1" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="127" Count="0" />
+      <LineId Id="122" Count="3" />
+      <LineId Id="128" Count="0" />
+      <LineId Id="130" Count="0" />
+      <LineId Id="126" Count="0" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="120" Count="0" />
       <LineId Id="1" Count="1" />
       <LineId Id="5" Count="0" />
       <LineId Id="28" Count="1" />
@@ -840,12 +869,21 @@ END_IF
       <LineId Id="20" Count="0" />
       <LineId Id="22" Count="0" />
       <LineId Id="43" Count="0" />
-      <LineId Id="58" Count="0" />
-      <LineId Id="32" Count="10" />
+      <LineId Id="150" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="135" Count="0" />
+      <LineId Id="141" Count="0" />
+      <LineId Id="34" Count="8" />
       <LineId Id="45" Count="0" />
-      <LineId Id="51" Count="0" />
+      <LineId Id="137" Count="0" />
       <LineId Id="47" Count="3" />
-      <LineId Id="52" Count="4" />
+      <LineId Id="143" Count="1" />
+      <LineId Id="146" Count="0" />
+      <LineId Id="148" Count="0" />
+      <LineId Id="147" Count="0" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="142" Count="0" />
+      <LineId Id="53" Count="3" />
       <LineId Id="72" Count="0" />
       <LineId Id="6" Count="0" />
       <LineId Id="3" Count="0" />
