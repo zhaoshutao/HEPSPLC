@@ -76,6 +76,7 @@ VAR_OUTPUT
 	GapState:DINT;
 	GapBusy:BOOL;
 	GapDone:BOOL;
+	GapMoving:BOOL;
 
 	BCGapState:DINT;
 	BCGapBusy:BOOL;
@@ -170,6 +171,12 @@ IF LeftTopLin.NcToPlc.CoupleState<>0 OR LeftBottomLin.NcToPlc.CoupleState<>0
 			GapState:=-100;
 END_IF
 A_MoveMC();
+IF  LeftTopLin.Status.Moving AND RightTopLin.Status.Moving
+			 AND LeftBottomLin.Status.Moving AND RightBottomLin.Status.Moving THEN
+	GapMoving:=TRUE;
+ELSE
+	GapMoving:=FALSE;
+END_IF
 CASE BCGapState OF
 	0:
 		IF LeftTopLin.Status.Moving OR RightTopLin.Status.Moving
@@ -2566,7 +2573,11 @@ END_IF
       <LineId Id="139" Count="1" />
     </LineIds>
     <LineIds Name="FB_Move.A_BCGapMove">
-      <LineId Id="0" Count="101" />
+      <LineId Id="0" Count="10" />
+      <LineId Id="103" Count="2" />
+      <LineId Id="107" Count="1" />
+      <LineId Id="106" Count="0" />
+      <LineId Id="11" Count="90" />
     </LineIds>
     <LineIds Name="FB_Move.A_BCGapMove_2">
       <LineId Id="0" Count="101" />

@@ -70,6 +70,7 @@ VAR
 	SS_StepSystemTime_Begin:ARRAY[0..100] OF ULINT;
 	SS_StepSystemTime_End:ARRAY[0..100] OF ULINT;
 	SS_StepCountTime:ARRAY[0..100] OF ULINT;
+	SS_TimeCountBegin:BOOL;
 	m: INT;
 	SS_TON: TON;
 	StepEachTime:TIME;
@@ -686,17 +687,21 @@ IF InitPowerDone AND InitCompensationDatasDone AND SS_Move THEN
 				SS_MoveState:=1;
 		1:
 				SS_TON.IN:=TRUE;
-				SS_StepSystemTime_Begin[SS_currentStep]:=F_GetSysTime();
 				FB_Move();
+				IF FB_Move.GapMoving AND NOT SS_TimeCountBegin THEN
+					SS_StepSystemTime_Begin[SS_currentStep]:=F_GetSysTime();
+					SS_TimeCountBegin:=TRUE;
+				END_IF
 				IF NOT FB_Move.BCGapDone THEN			
 					Led_Run:=TRUE;
 					SS_MoveState:=1;
 				ELSE									
 					SS_MoveState:=66;
+					SS_StepSystemTime_End[SS_currentStep]:=F_GetSysTime();
+					SS_StepCountTime[SS_currentStep]:=SS_StepSystemTime_End[SS_currentStep]-SS_StepSystemTime_Begin[SS_currentStep];
+					SS_TimeCountBegin:=FALSE;
 				END_IF
 		66:
-				SS_StepSystemTime_End[SS_currentStep]:=F_GetSysTime();
-				SS_StepCountTime[SS_currentStep]:=(SS_StepSystemTime_End[SS_currentStep]-SS_StepSystemTime_Begin[SS_currentStep]);
 				SS_currentStep:=SS_currentStep+1;			
 				Led_Run:=FALSE;
 				IF SS_currentStep=SS_StepNumber THEN								
@@ -874,11 +879,14 @@ END_IF
       <LineId Id="43" Count="0" />
       <LineId Id="32" Count="0" />
       <LineId Id="135" Count="0" />
-      <LineId Id="151" Count="0" />
       <LineId Id="141" Count="0" />
-      <LineId Id="34" Count="6" />
-      <LineId Id="157" Count="1" />
-      <LineId Id="41" Count="1" />
+      <LineId Id="162" Count="1" />
+      <LineId Id="165" Count="0" />
+      <LineId Id="164" Count="0" />
+      <LineId Id="34" Count="4" />
+      <LineId Id="160" Count="1" />
+      <LineId Id="168" Count="0" />
+      <LineId Id="39" Count="3" />
       <LineId Id="45" Count="0" />
       <LineId Id="137" Count="0" />
       <LineId Id="47" Count="3" />
