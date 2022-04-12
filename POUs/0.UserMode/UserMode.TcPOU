@@ -67,7 +67,8 @@ VAR
 	SS_MoveState:DINT;
 	SS_StopState:DINT;
 	SS_currentStep:DINT:=0;
-	SS_StepSystemTime:ARRAY[0..100] OF ULINT;
+	SS_StepSystemTime_Begin:ARRAY[0..100] OF ULINT;
+	SS_StepSystemTime_End:ARRAY[0..100] OF ULINT;
 	SS_StepCountTime:ARRAY[0..100] OF ULINT;
 	m: INT;
 	SS_TON: TON;
@@ -683,9 +684,9 @@ IF InitPowerDone AND InitCompensationDatasDone AND SS_Move THEN
 				FB_Move.BCGapMove:=TRUE;
 				FB_Move();
 				SS_MoveState:=1;
-				SS_StepSystemTime[SS_currentStep]:=F_GetSysTime();
 		1:
 				SS_TON.IN:=TRUE;
+				SS_StepSystemTime_Begin[SS_currentStep]:=F_GetSysTime();
 				FB_Move();
 				IF NOT FB_Move.BCGapDone THEN			
 					Led_Run:=TRUE;
@@ -694,6 +695,8 @@ IF InitPowerDone AND InitCompensationDatasDone AND SS_Move THEN
 					SS_MoveState:=66;
 				END_IF
 		66:
+				SS_StepSystemTime_End[SS_currentStep]:=F_GetSysTime();
+				SS_StepCountTime[SS_currentStep]:=(SS_StepSystemTime_End[SS_currentStep]-SS_StepSystemTime_Begin[SS_currentStep]);
 				SS_currentStep:=SS_currentStep+1;			
 				Led_Run:=FALSE;
 				IF SS_currentStep=SS_StepNumber THEN								
@@ -717,9 +720,9 @@ IF InitPowerDone AND InitCompensationDatasDone AND SS_Move THEN
 	END_CASE
 END_IF
 (*获取每一步耗时*)
-FOR	m:= 0 TO SS_StepNumber DO
-	SS_StepCountTime[m]:=(SS_StepSystemTime[m+1]-SS_StepSystemTime[m])-INT_TO_ULINT(StepEachTime_ms);
-END_FOR
+//FOR	m:= 0 TO SS_StepNumber DO
+//	SS_StepCountTime[m]:=(SS_StepSystemTime_End[m]-SS_StepSystemTime_Begin[m]);
+//END_FOR
 
 (*STOP*)
 IF SS_Stop THEN
@@ -869,11 +872,13 @@ END_IF
       <LineId Id="20" Count="0" />
       <LineId Id="22" Count="0" />
       <LineId Id="43" Count="0" />
-      <LineId Id="150" Count="0" />
       <LineId Id="32" Count="0" />
       <LineId Id="135" Count="0" />
+      <LineId Id="151" Count="0" />
       <LineId Id="141" Count="0" />
-      <LineId Id="34" Count="8" />
+      <LineId Id="34" Count="6" />
+      <LineId Id="157" Count="1" />
+      <LineId Id="41" Count="1" />
       <LineId Id="45" Count="0" />
       <LineId Id="137" Count="0" />
       <LineId Id="47" Count="3" />
