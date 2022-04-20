@@ -114,6 +114,32 @@ VAR_GLOBAL
 	LS_RightBottom_Bottom  :BOOL;
 	Unreach_LS_Top:BOOL;
 	Unreach_LS_Bottom:BOOL;
+(*kill switch*)
+	KS_LeftTop_Far_Contact1:BOOL;
+	KS_LeftTop_Far_Contact2:BOOL;
+	KS_RightTop_Far_Contact1:BOOL;
+	KS_RightTop_Far_Contact2:BOOL;
+	KS_LeftBottom_Far_Contact1:BOOL;
+	KS_LeftBottom_Far_Contact2:BOOL;
+	KS_RightBottom_Far_Contact1:BOOL;
+	KS_RightBottom_Far_Contact2:BOOL;
+	
+	KS_LeftTop_Near_Contact1:BOOL;
+	KS_LeftTop_Near_Contact2:BOOL;
+	KS_RightTop_Near_Contact1:BOOL;
+	KS_RightTop_Near_Contact2:BOOL;
+	KS_LeftBottom_Near_Contact1:BOOL;
+	KS_LeftBottom_Near_Contact2:BOOL;
+	KS_RightBottom_Near_Contact1:BOOL;
+	KS_RightBottom_Near_Contact2:BOOL;
+(*E-STOP*)
+	KS_CabinetEmergency_contact1:BOOL;
+	KS_CabinetEmergency_contact2:BOOL;
+	KS_handEmergency1_Contact1:BOOL;
+	KS_handEmergency1_Contact2:BOOL;
+	KS_handEmergency2_Contact1:BOOL;
+	KS_handEmergency2_Contact2:BOOL;
+	KS_softEmergency2_Contact:BOOL;
 (*aixs_ref*)
 	LeftTopLin: axis_ref;
 	RightTopLin:axis_ref;

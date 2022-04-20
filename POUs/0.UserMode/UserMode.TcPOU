@@ -56,6 +56,7 @@ VAR
 	TargetLBPosLessThanCurrentLBPos:BOOL;
 	TargetRBPosLessThanCurrentRBPos:BOOL;
 	HysteresisMoving:BOOL;
+	NoneHysteresisMoving:BOOL;
 	(*Spectroscopy scanning Mode*)
 	RegularMotionMode:BOOL;
 	SSMotionMode:BOOL;
@@ -501,6 +502,7 @@ IF InitPowerDone AND InitCompensationDatasDone THEN
 						FB_Move();
 					END_IF
 				1:
+					btn_UserGapMove:=FALSE;
 					FB_Move();
 					IF NOT FB_Move.BCGapDone THEN			(*ÔË¶¯Î´Íê³É£¬Ñ­»·*)
 						Led_Run:=TRUE;
@@ -558,6 +560,7 @@ IF InitPowerDone AND InitCompensationDatasDone THEN
 						HysteresisMoving:=TRUE;
 					END_IF
 				1:
+					btn_UserGapMove:=FALSE;
 					FB_Move();
 					IF NOT FB_Move.BCGapDone THEN			(*还未运动到位置,运动过程中*)
 						Led_Run:=TRUE;
@@ -853,7 +856,11 @@ END_IF
       <LineId Id="0" Count="48" />
     </LineIds>
     <LineIds Name="UserMode.A_RegularMotion">
-      <LineId Id="2" Count="196" />
+      <LineId Id="2" Count="55" />
+      <LineId Id="216" Count="0" />
+      <LineId Id="58" Count="56" />
+      <LineId Id="218" Count="0" />
+      <LineId Id="115" Count="83" />
       <LineId Id="1" Count="0" />
       <LineId Id="204" Count="0" />
       <LineId Id="200" Count="3" />

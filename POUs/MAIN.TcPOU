@@ -91,6 +91,7 @@ VAR
 	MC_WriteParameter_0: MC_WriteParameter;
 	PositionBias_LeftTopLin: LREAL:=10.33;
 	posBiasSet: BOOL:=TRUE;
+	EL1904 AT%I* :ARRAY[1..24] OF BOOL;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[A_InitRecipeParameters();
@@ -99,6 +100,8 @@ A_RestartTC();
 A_InitAxisParameters();
 (*******¼à²âÏÞÎ»¿ª¹Ø×´Ì¬£¬·½Ïò¿ØÖÆ&½ô¼±Çé¿öÏÂEStop*******)
 A_CheckLimitSwitch();
+(*Check Kill Switch*)
+A_CheckKillSwitch();
 (*******PosDiff¼à¿Ø*******)
 A_PosDiffDetectiion();
 (*******³õÊ¼»¯SafePlc*******)
@@ -153,6 +156,41 @@ BackgroundEL();
 A_SetAxisPositionBias();
 ]]></ST>
     </Implementation>
+    <Action Name="A_CheckKillSwitch" Id="{158eed83-fba1-4051-b569-3585448d2a5a}">
+      <Implementation>
+        <ST><![CDATA[KS_LeftTop_Far_Contact1:=EL1904[1];//c1
+KS_LeftTop_Far_Contact2:=EL1904[2];//c2
+KS_LeftTop_Near_Contact1:=EL1904[3];//c3
+KS_LeftTop_Near_Contact2:=EL1904[4];//c4
+
+KS_RightTop_Far_Contact1:=EL1904[5];
+KS_RightTop_Far_Contact2:=EL1904[6];
+KS_RightTop_Near_Contact1:=EL1904[7];
+KS_RightTop_Near_Contact2:=EL1904[8];
+
+KS_LeftBottom_Far_Contact1:=EL1904[9];
+KS_LeftBottom_Far_Contact2:=EL1904[10];
+KS_LeftBottom_Near_Contact1:=EL1904[11];
+KS_LeftBottom_Near_Contact2:=EL1904[12];
+
+KS_RightBottom_Far_Contact1:=EL1904[13];
+KS_RightBottom_Far_Contact2:=EL1904[14];
+KS_RightBottom_Near_Contact1:=EL1904[15];
+KS_RightBottom_Near_Contact2:=EL1904[16];	
+
+
+(*E-STOP*)
+KS_CabinetEmergency_contact1:=EL1904[17];
+KS_CabinetEmergency_contact2:=EL1904[18];
+
+KS_handEmergency1_Contact1:=EL1904[19];
+KS_handEmergency1_Contact2:=EL1904[20];
+KS_handEmergency2_Contact1:=EL1904[21];
+KS_handEmergency2_Contact2:=EL1904[22];
+
+KS_softEmergency2_Contact:=EL1904[23];]]></ST>
+      </Implementation>
+    </Action>
     <Action Name="A_CheckLimitSwitch" Id="{1026ae85-58e3-4004-8dd3-becfab0085f9}">
       <Implementation>
         <ST><![CDATA[(*******1.´ÓIO»ñÈ¡ÏÞÎ»×´Ì¬******)
@@ -920,7 +958,10 @@ END_FOR]]></ST>
     </Action>
     <LineIds Name="MAIN">
       <LineId Id="352" Count="0" />
-      <LineId Id="74" Count="8" />
+      <LineId Id="74" Count="4" />
+      <LineId Id="634" Count="0" />
+      <LineId Id="633" Count="0" />
+      <LineId Id="79" Count="3" />
       <LineId Id="193" Count="0" />
       <LineId Id="84" Count="0" />
       <LineId Id="269" Count="5" />
@@ -932,6 +973,30 @@ END_FOR]]></ST>
       <LineId Id="539" Count="0" />
       <LineId Id="541" Count="0" />
       <LineId Id="119" Count="0" />
+    </LineIds>
+    <LineIds Name="MAIN.A_CheckKillSwitch">
+      <LineId Id="3" Count="1" />
+      <LineId Id="30" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="7" Count="1" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="9" Count="1" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="19" Count="3" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="23" Count="3" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="2" Count="0" />
     </LineIds>
     <LineIds Name="MAIN.A_CheckLimitSwitch">
       <LineId Id="0" Count="0" />
