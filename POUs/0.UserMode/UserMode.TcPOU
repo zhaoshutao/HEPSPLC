@@ -75,8 +75,41 @@ VAR
 	m: INT;
 	SS_TON: TON;
 	StepEachTime:TIME;
-	StepEachTime_ms:INT;//ms
+	StepEachTime_ms:INT:=1000;//ms
 	SS_OTSTRUCT :OTSTRUCT ;
+	(*input protection*)
+	//
+	min_UserGapPositionNew:LREAL:=10;
+	max_UserGapPositionNew:LREAL:=200;
+	inRange_UserGapPositionNew:BOOL;
+	//
+	min_UserGapVelocityNew:LREAL:=0;
+	max_UserGapVelocityNew:LREAL:=3;
+	inRange_UserGapVelocityNew:BOOL;
+	//
+	min_UserTaperPositionNew: LREAL:=0;;
+	max_UserTaperPositionNew: LREAL:=4;
+	inRange_UserTaperPositionNew: BOOL;
+	//
+	min_UserTaperVelocityNew: LREAL:=0;
+	max_UserTaperVelocityNew: LREAL:=1;
+	inRange_UserTaperVelocityNew: BOOL;
+	//
+	min_SS_StepSize	: LREAL:=0;
+	max_SS_StepSize	: LREAL:=200;
+	inRange_SS_StepSize	: BOOL;
+	//
+	min_SS_StepNumber	: INT:=1;
+	max_SS_StepNumber	: INT:=1000;
+	inRange_SS_StepNumber	: BOOL;
+	//
+	min_SS_StepVelocity:LREAL:=0;
+	max_SS_StepVelocity:LREAL:=1;
+	inRange_SS_StepVelocity:BOOL;
+	//
+	min_StepEachTime_ms:INT:=100;
+	max_StepEachTime_ms:INT:=10000;
+	inRange_StepEachTime_ms:BOOL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -114,22 +147,84 @@ END_IF
 IF	SSMotionMode AND NOT RegularMotionMode THEN
 	A_SpectroscopyScanningMotion();
 END_IF
-]]></ST>
+
+(*CheckInputPosVelo*)
+A_CheckInputPosVelo();]]></ST>
     </Implementation>
     <Action Name="A_CheckCoupleStatus" Id="{ec531655-4226-4156-a0f2-db7d67f06866}">
       <Implementation>
         <ST><![CDATA[IF NOT btn_PowerOff THEN
 	IF st_Power=1 AND st_Couple<>0THEN
 		Error:=TRUE;
-		ErrorID:=101;
+		ErrorID:=501;
 		LeftTopLinMoveIndicator:=0;
 		RightTopLinMoveIndicator:=0;
 		LeftBottomLinMoveIndicator:=0;
 		RightBottomLinMoveIndicator:=0;
 		FB_PlcEmergencyStop();
 		LED_Error:=TRUE;
+		ErrorDescription:='couple stutas error';
 	END_IF
 END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_CheckInputPosVelo" Id="{8153d8d0-8d46-4560-8544-b339b78263b6}">
+      <Implementation>
+        <ST><![CDATA[//gap posiion
+IF UserGapPositionNew<min_UserGapPositionNew OR UserGapPositionNew>max_UserGapPositionNew THEN
+	inRange_UserGapPositionNew:=FALSE;
+END_IF
+IF UserGapPositionNew>=min_UserGapPositionNew AND UserGapPositionNew<=max_UserGapPositionNew THEN
+	inRange_UserGapPositionNew:=TRUE;
+END_IF
+//gap velocity
+IF UserGapVelocityNew<min_UserGapVelocityNew OR UserGapVelocityNew>max_UserGapVelocityNew THEN
+	inRange_UserGapVelocityNew:=FALSE;
+END_IF
+IF UserGapVelocityNew>=min_UserGapVelocityNew AND UserGapVelocityNew<=max_UserGapVelocityNew THEN
+	inRange_UserGapVelocityNew:=TRUE;
+END_IF
+//taper position
+IF UserTaperPositionNew<min_UserTaperPositionNew OR UserTaperPositionNew>max_UserTaperPositionNew THEN
+	inRange_UserTaperPositionNew:=FALSE;
+END_IF
+IF UserTaperPositionNew>=min_UserTaperPositionNew AND UserTaperPositionNew<=max_UserTaperPositionNew THEN
+	inRange_UserTaperPositionNew:=TRUE;
+END_IF
+//taper velocity
+IF UserTaperVelocityNew<min_UserTaperVelocityNew OR UserTaperVelocityNew>max_UserTaperVelocityNew THEN
+	inRange_UserTaperVelocityNew:=FALSE;
+END_IF
+IF UserTaperVelocityNew>=min_UserTaperVelocityNew AND UserTaperVelocityNew<=max_UserTaperVelocityNew THEN
+	inRange_UserTaperVelocityNew:=TRUE;
+END_IF
+//SS Mode
+IF SS_StepSize<min_SS_StepSize OR SS_StepSize>max_SS_StepSize THEN
+	inRange_SS_StepSize:=FALSE;
+END_IF
+IF SS_StepSize>=min_SS_StepSize AND SS_StepSize<=max_SS_StepSize THEN
+	inRange_SS_StepSize:=TRUE;
+END_IF
+IF SS_StepNumber<min_SS_StepNumber OR SS_StepNumber>max_SS_StepNumber THEN
+	inRange_SS_StepNumber:=FALSE;
+END_IF
+IF SS_StepNumber>=min_SS_StepNumber AND SS_StepNumber<=max_SS_StepNumber THEN
+	inRange_SS_StepNumber:=TRUE;
+END_IF
+IF SS_StepVelocity<min_SS_StepVelocity OR SS_StepVelocity>max_SS_StepVelocity THEN
+	inRange_SS_StepVelocity:=FALSE;
+END_IF
+IF SS_StepVelocity>=min_SS_StepVelocity AND SS_StepVelocity<=max_SS_StepVelocity THEN
+	inRange_SS_StepVelocity:=TRUE;
+END_IF
+IF StepEachTime_ms<min_StepEachTime_ms OR StepEachTime_ms>max_StepEachTime_ms THEN
+	inRange_StepEachTime_ms:=FALSE;
+END_IF
+IF StepEachTime_ms>=min_StepEachTime_ms AND StepEachTime_ms<=max_StepEachTime_ms THEN
+	inRange_StepEachTime_ms:=TRUE;
+END_IF
+
+]]></ST>
       </Implementation>
     </Action>
     <Action Name="A_InitCompensationData" Id="{1e6a9c39-c8a5-4c48-b57c-71effe5e3747}">
@@ -313,31 +408,47 @@ CASE moni_State OF
 		Diff_UserRightPos:=Diff_UserRightPos+UserTaperPositionNew;//右轴在taper时会随着目标taper，而误差变大
 		Diff_UserRightVelo:=Diff_UserRightVelo+UserGapVelocityNew;
 		IF Diff_UserTopPos_actual >Diff_UserTopPos THEN
-				ErrorID:=11;
+				Error:=TRUE;
+				ErrorID:=601;
+				ErrorDescription:='Diff_UserTopPos_actual >Diff_UserTopPos';
 				moni_State:=-100;
 		ELSIF Diff_UserTopVelo_actual>Diff_UserTopVelo  THEN
-				ErrorID:=12;
+				Error:=TRUE;
+				ErrorID:=602;
+				ErrorDescription:='Diff_UserTopVelo_actual>Diff_UserTopVelo';
 				moni_State:=-100;
 		(*Bottom Î»ÖÃºÍËÙ¶È±È¶Ô*)
 		ELSIF Diff_UserBottomPos_actual>Diff_UserBottomPos THEN
-				ErrorID:=13;
+				Error:=TRUE;
+				ErrorID:=6032;
+				ErrorDescription:='Diff_UserBottomPos_actual>Diff_UserBottomPos';
 				moni_State:=-100;
 		ELSIF Diff_UserBottomVelo_actual>Diff_UserBottomVelo  THEN
-				ErrorID:=14;
+				Error:=TRUE;
+				ErrorID:=604;
+				ErrorDescription:='Diff_UserBottomVelo_actual>Diff_UserBottomVelo';
 				moni_State:=-100;
 		(*Left Î»ÖÃºÍËÙ¶È±È¶Ô*)
 		ELSIF Diff_UserLeftPos_actual>Diff_UserLeftPos  THEN
-				ErrorID:=15;
+				Error:=TRUE;
+				ErrorID:=605;
+				ErrorDescription:='Diff_UserLeftPos_actual>Diff_UserLeftPos';
 				moni_State:=-100;
 		ELSIF  Diff_UserLeftVelo_actual>Diff_UserLeftVelo THEN
-				ErrorID:=16;
+				Error:=TRUE;
+				ErrorID:=606;
+				ErrorDescription:='Diff_UserLeftVelo_actual>Diff_UserLeftVelo';
 				moni_State:=-100;
 		(*Right Î»ÖÃºÍËÙ¶È±È¶Ô*)
 		ELSIF Diff_UserRightPos_actual>Diff_UserRightPos  THEN
-				ErrorID:=17;
+				Error:=TRUE;
+				ErrorID:=607;
+				ErrorDescription:='Diff_UserRightPos_actual>Diff_UserRightPos';
 				moni_State:=-100;
 		ELSIF  Diff_UserRightVelo_actual>Diff_UserRightVelo THEN
-				ErrorID:=18;
+				Error:=TRUE;
+				ErrorID:=608;
+				ErrorDescription:='Diff_UserRightVelo_actual>Diff_UserRightVelo';
 				moni_State:=-100;
 		END_IF
 -100:
@@ -434,9 +545,11 @@ CASE State OF
 		fb_ton3.IN:=FALSE;
 		LED_Error:=FALSE;
 	99:
+		Error:=TRUE;
+		ErrorID:=701;
+		ErrorDescription:='power on error';		
 		btn_PowerOn:=FALSE;
 		State:=99;
-		Error:=TRUE;
 		Busy:=FALSE;
 		InitPowerDone:=FALSE;
 		fb_ton3.IN:=FALSE;
@@ -446,7 +559,62 @@ END_CASE]]></ST>
     </Action>
     <Action Name="A_RegularMotion" Id="{79d2706f-89ad-4612-adf2-c80c9fc85b18}">
       <Implementation>
-        <ST><![CDATA[(*分别比较四轴目标位置与当前位置的差，如果目标位置比当前位置低，则需要运动到更低-回程差一半；再运动至最终目标位置*)
+        <ST><![CDATA[(*输入保护*)
+IF btn_UserGapMove AND NOT SSMotionMode AND RegularMotionMode THEN
+	IF NOT inRange_UserGapPositionNew THEN
+		btn_UserGapStop:=TRUE;
+		btn_UserGapMove:=FALSE;
+		Error:=TRUE;
+		ErrorId:=801;
+		ErrorDescription:='target Gap position out of range,please check';
+		RETURN;
+	ELSE
+		btn_UserGapStop:=FALSE;
+		Error:=FALSE;
+		ErrorId:=0;
+		ErrorDescription:='';	
+	END_IF
+	IF NOT inRange_UserGapVelocityNew THEN
+		btn_UserGapStop:=TRUE;
+		btn_UserGapMove:=FALSE;
+		Error:=TRUE;
+		ErrorId:=802;
+		ErrorDescription:='target Gap velocity out of range,please check';
+		RETURN;
+	ELSE
+		btn_UserGapStop:=FALSE;
+		Error:=FALSE;
+		ErrorId:=0;
+		ErrorDescription:='';
+	END_IF
+	IF NOT inRange_UserTaperPositionNew AND TaperOrNot THEN
+		btn_UserGapStop:=TRUE;
+		btn_UserGapMove:=FALSE;
+		Error:=TRUE;
+		ErrorId:=803;
+		ErrorDescription:='target Taper Position out of range,please check';
+		RETURN;
+	ELSE
+		btn_UserGapStop:=FALSE;
+		Error:=FALSE;
+		ErrorId:=0;
+		ErrorDescription:='';
+	END_IF
+	IF NOT inRange_UserTaperVelocityNew AND TaperOrNot THEN
+		btn_UserGapStop:=TRUE;
+		btn_UserGapMove:=FALSE;
+		Error:=TRUE;
+		ErrorId:=804;
+		ErrorDescription:='target Taper velocity out of range,please check';
+		RETURN;
+	ELSE
+		btn_UserGapStop:=FALSE;
+		Error:=FALSE;
+		ErrorId:=0;
+		ErrorDescription:='';
+	END_IF
+END_IF
+(*分别比较四轴目标位置与当前位置的差，如果目标位置比当前位置低，则需要运动到更低-回程差一半；再运动至最终目标位置*)
 (*
 IF LeftTopLinPositionNew-Pos_LeftTopLin>LEDriftErrorThreshold AND RightTopLinPositionNew-Pos_RightTopLin>LEDriftErrorThreshold 
 	AND LeftBottomLinPositionNew-Pos_LeftBottomLin>LEDriftErrorThreshold AND RightBottomLinPositionNew-Pos_RightBottomLin>LEDriftErrorThreshold THEN
@@ -656,17 +824,63 @@ END_IF]]></ST>
     </Action>
     <Action Name="A_SpectroscopyScanningMotion" Id="{6676a965-5ff1-46e4-b651-02d2762b99bc}">
       <Implementation>
-        <ST><![CDATA[(*如果是谱学扫描模式，目标磁间隙会发生变化*)
-//UserGapPositionNew:=UserGapPositionDisplay+SS_StepSize;
-//TIME类型转OTSTRUCT类型，再转毫秒
-//SS_OTSTRUCT:=TIME_TO_OTSTRUCT(tIn:=StepEachTime);
-//StepEachTime_ms:=SS_OTSTRUCT.wWeek*7*24*60*60*1000+SS_OTSTRUCT.wDay*24*60*60*1000+
-//				SS_OTSTRUCT.wHour*60*60*1000+SS_OTSTRUCT.wMinute*60*1000+
-//				SS_OTSTRUCT.wSecond*1000+SS_OTSTRUCT.wMilliseconds;
-//毫秒转TRUCT类型，再转TIME
-//SS_OTSTRUCT.wWeek:=StepEachTime_ms/(7*24*60*60*1000);
-//OTSTRUCT_TO_TIME(
-//毫秒转TIME类型
+        <ST><![CDATA[(*输入保护*)
+IF SS_Move AND SSMotionMode AND NOT RegularMotionMode THEN
+	IF NOT inRange_SS_StepSize THEN
+		SS_Stop:=TRUE;
+		SS_Move:=FALSE;
+		Error:=TRUE;
+		ErrorId:=805;
+		ErrorDescription:='target StepSize out of range,please check';
+		RETURN;
+	ELSE
+		SS_Stop:=FALSE;
+		Error:=FALSE;
+		ErrorId:=0;
+		ErrorDescription:='';	
+	END_IF
+	//
+	IF NOT inRange_SS_StepNumber THEN
+		SS_Stop:=TRUE;
+		SS_Move:=FALSE;
+		Error:=TRUE;
+		ErrorId:=806;
+		ErrorDescription:='target StepNumber out of range,please check';
+		RETURN;
+	ELSE
+		SS_Stop:=FALSE;
+		Error:=FALSE;
+		ErrorId:=0;
+		ErrorDescription:='';	
+	END_IF
+	IF NOT inRange_SS_StepVelocity THEN
+		SS_Stop:=TRUE;
+		SS_Move:=FALSE;
+		Error:=TRUE;
+		ErrorId:=807;
+		ErrorDescription:='target StepVelocity out of range,please check';
+		RETURN;
+	ELSE
+		SS_Stop:=FALSE;
+		Error:=FALSE;
+		ErrorId:=0;
+		ErrorDescription:='';	
+	END_IF
+	IF NOT inRange_StepEachTime_ms THEN
+		SS_Stop:=TRUE;
+		SS_Move:=FALSE;
+		Error:=TRUE;
+		ErrorId:=808;
+		ErrorDescription:='target StepEachTime_ms out of range,please check';
+		RETURN;
+	ELSE
+		SS_Stop:=FALSE;
+		Error:=FALSE;
+		ErrorId:=0;
+		ErrorDescription:='';	
+	END_IF
+END_IF
+(*单步时长转换*)
 StepEachTime:=INT_TO_TIME(StepEachTime_ms);
 SS_TON(PT:=StepEachTime);
 IF InitPowerDone AND InitCompensationDatasDone AND SS_Move THEN
@@ -793,11 +1007,38 @@ END_IF
       <LineId Id="550" Count="0" />
       <LineId Id="528" Count="0" />
       <LineId Id="551" Count="0" />
+      <LineId Id="655" Count="0" />
       <LineId Id="570" Count="0" />
+      <LineId Id="656" Count="0" />
     </LineIds>
     <LineIds Name="UserMode.A_CheckCoupleStatus">
-      <LineId Id="2" Count="10" />
+      <LineId Id="2" Count="9" />
+      <LineId Id="13" Count="0" />
+      <LineId Id="12" Count="0" />
       <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="UserMode.A_CheckInputPosVelo">
+      <LineId Id="23" Count="0" />
+      <LineId Id="1" Count="6" />
+      <LineId Id="9" Count="4" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="18" Count="4" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="26" Count="4" />
+      <LineId Id="25" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="35" Count="4" />
+      <LineId Id="34" Count="0" />
+      <LineId Id="42" Count="4" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="48" Count="4" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="55" Count="4" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="32" Count="0" />
     </LineIds>
     <LineIds Name="UserMode.A_InitCompensationData">
       <LineId Id="206" Count="0" />
@@ -845,7 +1086,25 @@ END_IF
       <LineId Id="79" Count="0" />
       <LineId Id="82" Count="1" />
       <LineId Id="77" Count="0" />
-      <LineId Id="36" Count="33" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="86" Count="1" />
+      <LineId Id="37" Count="1" />
+      <LineId Id="88" Count="1" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="41" Count="1" />
+      <LineId Id="91" Count="2" />
+      <LineId Id="44" Count="1" />
+      <LineId Id="94" Count="2" />
+      <LineId Id="47" Count="2" />
+      <LineId Id="97" Count="2" />
+      <LineId Id="51" Count="1" />
+      <LineId Id="100" Count="2" />
+      <LineId Id="54" Count="2" />
+      <LineId Id="103" Count="2" />
+      <LineId Id="58" Count="1" />
+      <LineId Id="106" Count="2" />
+      <LineId Id="61" Count="8" />
     </LineIds>
     <LineIds Name="UserMode.A_PowerOff">
       <LineId Id="0" Count="27" />
@@ -853,9 +1112,46 @@ END_IF
       <LineId Id="28" Count="8" />
     </LineIds>
     <LineIds Name="UserMode.A_PowerOn">
-      <LineId Id="0" Count="48" />
+      <LineId Id="0" Count="40" />
+      <LineId Id="51" Count="1" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="44" Count="4" />
     </LineIds>
     <LineIds Name="UserMode.A_RegularMotion">
+      <LineId Id="225" Count="0" />
+      <LineId Id="239" Count="0" />
+      <LineId Id="219" Count="0" />
+      <LineId Id="236" Count="0" />
+      <LineId Id="247" Count="0" />
+      <LineId Id="237" Count="1" />
+      <LineId Id="232" Count="0" />
+      <LineId Id="220" Count="0" />
+      <LineId Id="241" Count="0" />
+      <LineId Id="252" Count="2" />
+      <LineId Id="242" Count="0" />
+      <LineId Id="221" Count="0" />
+      <LineId Id="227" Count="0" />
+      <LineId Id="255" Count="3" />
+      <LineId Id="233" Count="0" />
+      <LineId Id="228" Count="0" />
+      <LineId Id="260" Count="3" />
+      <LineId Id="259" Count="0" />
+      <LineId Id="226" Count="0" />
+      <LineId Id="222" Count="0" />
+      <LineId Id="264" Count="4" />
+      <LineId Id="234" Count="0" />
+      <LineId Id="270" Count="3" />
+      <LineId Id="269" Count="0" />
+      <LineId Id="224" Count="0" />
+      <LineId Id="230" Count="0" />
+      <LineId Id="274" Count="4" />
+      <LineId Id="231" Count="0" />
+      <LineId Id="280" Count="3" />
+      <LineId Id="279" Count="0" />
+      <LineId Id="229" Count="0" />
+      <LineId Id="240" Count="0" />
       <LineId Id="2" Count="55" />
       <LineId Id="216" Count="0" />
       <LineId Id="58" Count="56" />
@@ -867,13 +1163,25 @@ END_IF
       <LineId Id="199" Count="0" />
     </LineIds>
     <LineIds Name="UserMode.A_SpectroscopyScanningMotion">
-      <LineId Id="24" Count="0" />
-      <LineId Id="26" Count="0" />
-      <LineId Id="127" Count="0" />
-      <LineId Id="122" Count="3" />
-      <LineId Id="128" Count="0" />
-      <LineId Id="130" Count="0" />
-      <LineId Id="126" Count="0" />
+      <LineId Id="171" Count="0" />
+      <LineId Id="186" Count="1" />
+      <LineId Id="189" Count="0" />
+      <LineId Id="294" Count="0" />
+      <LineId Id="190" Count="9" />
+      <LineId Id="238" Count="0" />
+      <LineId Id="242" Count="0" />
+      <LineId Id="295" Count="0" />
+      <LineId Id="244" Count="9" />
+      <LineId Id="241" Count="0" />
+      <LineId Id="255" Count="0" />
+      <LineId Id="296" Count="0" />
+      <LineId Id="257" Count="9" />
+      <LineId Id="254" Count="0" />
+      <LineId Id="268" Count="0" />
+      <LineId Id="297" Count="0" />
+      <LineId Id="270" Count="9" />
+      <LineId Id="267" Count="0" />
+      <LineId Id="185" Count="0" />
       <LineId Id="134" Count="0" />
       <LineId Id="133" Count="0" />
       <LineId Id="120" Count="0" />

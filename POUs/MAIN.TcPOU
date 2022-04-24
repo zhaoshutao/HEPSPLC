@@ -92,6 +92,7 @@ VAR
 	PositionBias_LeftTopLin: LREAL:=10.33;
 	posBiasSet: BOOL:=TRUE;
 	EL1904 AT%I* :ARRAY[1..24] OF BOOL;
+	setAxisPositionEnable: BOOL;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[A_InitRecipeParameters();
@@ -109,7 +110,7 @@ IF NOT simulation THEN
 A_SafePlcStartInit();
 END_IF
 (************SetAxisPosition*********************)
-IF  btn_setAxisPosition THEN
+IF  setAxisPositionEnable AND btn_setAxisPosition THEN
 	//IF NOT SerAxisPositionDone THEN
 		FB_Set_AxisPosition.GapValueSet:=GapSetValue;
 		A_SetAxisPosition();
@@ -360,7 +361,8 @@ IF Read_R_TRIG.Q THEN  //将工控机中的文件数据读取到plc中
      LoadParameter:=FALSE;
 	 IF ReturnDwordLoad<>0 THEN
 		 Error:=TRUE;
-		 ErrorId:=1001;
+		 ErrorId:=101;
+		 ErrorDescription:='LoadRecipeParameters Error';
 		 Plc_EmergencyStop:=FALSE;
 	 END_IF
 END_IF 
@@ -370,33 +372,39 @@ END_IF
     <Action Name="A_PosDiffDetectiion" Id="{e857c546-d367-4f19-9434-ed29c144eb6f}">
       <Implementation>
         <ST><![CDATA[IF ABS(PosDiff_LeftTopLin_actual)>PosDiff_LeftTopLin THEN
-	ErrorID:=51;
+	ErrorID:=201;
 	Error:=TRUE;
+	ErrorDescription:='ABS(PosDiff_LeftTopLin_actual)>PosDiff_LeftTopLin';
 	FB_PlcEmergencyStop();
 	LED_Error:=TRUE;
 ELSIF ABS(PosDiff_RightTopLin_actual)>PosDiff_RightTopLin THEN
-	ErrorID:=52;
+	ErrorID:=202;
 	Error:=TRUE;
+	ErrorDescription:='ABS(PosDiff_RightTopLin_actual)>PosDiff_RightTopLin';
 	FB_PlcEmergencyStop();
 	LED_Error:=TRUE;
 ELSIF ABS(PosDiff_LeftBottomLin_actual)>PosDiff_LeftBottomLin THEN
-	ErrorID:=53;
+	ErrorID:=203;
 	Error:=TRUE;
+	ErrorDescription:='ABS(PosDiff_LeftBottomLin_actual)>PosDiff_LeftBottomLin';
 	FB_PlcEmergencyStop();
 	LED_Error:=TRUE;
 ELSIF ABS(PosDiff_RightBottomLin_actual)>PosDiff_RightBottomLin THEN
-	ErrorID:=54;
+	ErrorID:=204;
+	ErrorDescription:='ABS(PosDiff_RightBottomLin_actual)>PosDiff_RightBottomLin';
 	Error:=TRUE;
 	FB_PlcEmergencyStop();
 	LED_Error:=TRUE;
 END_IF
 IF ABS(PosDiff_LeftTopLin_actual-PosDiff_RightTopLin_actual)>0.2 THEN
-	ErrorID:=55;
+	ErrorID:=205;
+	ErrorDescription:='ABS(PosDiff_LeftTopLin_actual-PosDiff_RightTopLin_actual)>0.2';
 	Error:=TRUE;
 	FB_PlcEmergencyStop();
 	LED_Error:=TRUE;
 ELSIF ABS(PosDiff_LeftBottomLin_actual-PosDiff_RightBottomLin_actual)>0.2 THEN
-	ErrorID:=56;
+	ErrorID:=206;
+	ErrorDescription:='ABS(PosDiff_LeftBottomLin_actual-PosDiff_RightBottomLin_actual)>0.2';
 	Error:=TRUE;
 	FB_PlcEmergencyStop();
 	LED_Error:=TRUE;
@@ -651,6 +659,9 @@ CASE SafeStatus OF
 				SafeStatus:=0;
 			ELSE
 				SafePLCRunOK:=FALSE;
+				Error:=TRUE;
+				ErrorId:=301;
+				ErrorDescription:='SafePLCRunOK fail';
 			END_IF
 		fb_ton0.IN:=FALSE;
 		fb_ton1.IN:=FALSE;
@@ -676,7 +687,6 @@ CASE SetAxisPosState OF
 			IF NOT fb_ton4.Q THEN
 				SetAxisPosState:=1;
 			ELSE
-				ErrorID:=1;
 				SetAxisPosState:=99;
 			END_IF
 		ELSE
@@ -696,6 +706,8 @@ CASE SetAxisPosState OF
 		FB_Set_AxisPosition.Execute:=FALSE;
 		fb_ton4.IN:=FALSE;
 		LED_Error:=TRUE;
+		ErrorID:=401;
+		ErrorDescription:='SerAxisPosition fail';
 END_CASE
 ]]></ST>
       </Implementation>
@@ -1015,24 +1027,41 @@ END_FOR]]></ST>
       <LineId Id="12" Count="0" />
       <LineId Id="2" Count="9" />
       <LineId Id="32" Count="0" />
-      <LineId Id="37" Count="1" />
+      <LineId Id="37" Count="2" />
       <LineId Id="33" Count="1" />
       <LineId Id="1" Count="0" />
       <LineId Id="31" Count="0" />
     </LineIds>
     <LineIds Name="MAIN.A_PosDiffDetectiion">
-      <LineId Id="0" Count="20" />
-      <LineId Id="24" Count="2" />
-      <LineId Id="28" Count="4" />
+      <LineId Id="0" Count="2" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="3" Count="4" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="8" Count="4" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="13" Count="3" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="17" Count="3" />
+      <LineId Id="24" Count="1" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="26" Count="0" />
+      <LineId Id="28" Count="3" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="32" Count="0" />
       <LineId Id="34" Count="1" />
       <LineId Id="23" Count="0" />
       <LineId Id="21" Count="0" />
     </LineIds>
     <LineIds Name="MAIN.A_SafePlcStartInit">
-      <LineId Id="0" Count="54" />
+      <LineId Id="0" Count="45" />
+      <LineId Id="56" Count="2" />
+      <LineId Id="46" Count="8" />
     </LineIds>
     <LineIds Name="MAIN.A_SetAxisPosition">
-      <LineId Id="0" Count="33" />
+      <LineId Id="0" Count="11" />
+      <LineId Id="13" Count="18" />
+      <LineId Id="35" Count="1" />
+      <LineId Id="32" Count="1" />
     </LineIds>
     <LineIds Name="MAIN.A_TemperatureInit">
       <LineId Id="0" Count="13" />
