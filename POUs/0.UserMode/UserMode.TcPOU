@@ -113,7 +113,13 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[(*btn_Power On/Off*)
+      <ST><![CDATA[IF NOT PositionBiasDone THEN
+	RETURN;
+END_IF
+IF NOT loadParametersDone THEN
+	RETURN;
+END_IF
+(*btn_Power On/Off*)
 IF btn_Power AND st_Power=0 THEN
 	btn_PowerOn:=TRUE;
 	btn_Power:=FALSE;
@@ -983,6 +989,10 @@ END_IF
       </Implementation>
     </Action>
     <LineIds Name="UserMode">
+      <LineId Id="767" Count="1" />
+      <LineId Id="770" Count="0" />
+      <LineId Id="883" Count="1" />
+      <LineId Id="882" Count="0" />
       <LineId Id="40" Count="8" />
       <LineId Id="52" Count="1" />
       <LineId Id="51" Count="0" />
