@@ -7,6 +7,11 @@ VAR_GLOBAL
 	Error:BOOL;
 	ErrorID:DINT;
 	ErrorDescription:STRING;
+(*加载配方参数*)
+	LoadRecipeParameters:BOOL;
+	loadParametersDone:BOOL;
+(*设置光栅bias done *)	
+	PositionBiasDone:BOOL;
 (*回程差*)
 	HysteresisError:LREAL;
 (*光栅漂移误差阈值*)

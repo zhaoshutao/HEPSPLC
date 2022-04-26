@@ -14,3 +14,8 @@ HEPS PLC code
 2.加入输入保护
 3.加入Error和描述，重新梳理了ErrorId
 #
+# 2022.04.26
+1.recipe加入参数表修改后PLC自动加载参数
+2.加入光栅positionBias PLC程序和配方
+3.emergencyStop加入HMI
+# 
