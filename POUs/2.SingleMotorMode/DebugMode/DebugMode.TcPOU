@@ -425,7 +425,7 @@ END_IF
 (*************************************************************************************2.4Öá¹âÕ¤³ßÎ»ÖÃ¡¢ËÙ¶È¶Ô±È¼ì²é**********************************************************************)
 IF st_power<>0 THEN
 (*×óÖáÉÏÏÂÎ»ÖÃ¶Ô±È£¬³¬³öESTOP*)
-IF ABS(Pos_LeftTopLin-Pos_LeftBottomLin)>Diff_LeftPos_Debug  THEN
+IF ABS(Pos_LeftTopLin-Pos_LeftBottomLin)>Threshold_LeftPos_Debug  THEN
 		btn_LeftTopLinStop:=TRUE;
 		btn_RightTopLinStop:=TRUE;
 		btn_LeftBottomLinStop:=TRUE;
@@ -436,7 +436,7 @@ IF ABS(Pos_LeftTopLin-Pos_LeftBottomLin)>Diff_LeftPos_Debug  THEN
 		LED_Error:=TRUE;
 END_IF
 (*ÓÒÖáÉÏÏÂÎ»ÖÃËÙ¶È¶Ô±È£¬³¬³öESTOP*)
-IF ABS(Pos_RightTopLin-Pos_RightBottomLin)>Diff_RightPos_Debug  THEN
+IF ABS(Pos_RightTopLin-Pos_RightBottomLin)>Threshold_RightPos_Debug  THEN
 		btn_LeftTopLinStop:=TRUE;
 		btn_RightTopLinStop:=TRUE;
 		btn_LeftBottomLinStop:=TRUE;
@@ -447,7 +447,7 @@ IF ABS(Pos_RightTopLin-Pos_RightBottomLin)>Diff_RightPos_Debug  THEN
 		LED_Error:=TRUE;
 END_IF
 (*ÉÏÖá×óÓÒÎ»ÖÃ¶Ô±È£¬³¬³öESTOP*)
-IF ABS(Pos_LeftTopLin-Pos_RightTopLin)>Diff_TopPos_Debug  THEN
+IF ABS(Pos_LeftTopLin-Pos_RightTopLin)>Threshold_TopPos_Debug  THEN
 		btn_LeftTopLinStop:=TRUE;
 		btn_RightTopLinStop:=TRUE;
 		btn_LeftBottomLinStop:=TRUE;
@@ -458,7 +458,7 @@ IF ABS(Pos_LeftTopLin-Pos_RightTopLin)>Diff_TopPos_Debug  THEN
 		LED_Error:=TRUE;
 END_IF
 (*ÏÂÖá×óÓÒÎ»ÖÃ¶Ô±È£¬³¬³öESTOP*)
-IF ABS(Pos_LeftBottomLin-Pos_RightBottomLin)>Diff_BottomPos_Debug  THEN
+IF ABS(Pos_LeftBottomLin-Pos_RightBottomLin)>Threshold_BottomPos_Debug  THEN
 		btn_LeftTopLinStop:=TRUE;
 		btn_RightTopLinStop:=TRUE;
 		btn_LeftBottomLinStop:=TRUE;

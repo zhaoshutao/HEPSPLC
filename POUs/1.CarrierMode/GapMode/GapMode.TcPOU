@@ -335,52 +335,52 @@ IF  st_Power<>0 THEN
 (*Top Î»ÖÃºÍËÙ¶È±È¶Ô*)
 		Diff_TopPos_actual:=Pos_leftTopLin-Pos_RightTopLin;
 		Diff_TopVelo_actual:=Velo_leftTopLin-Velo_RightTopLin;
-IF ABS(Pos_leftTopLin-Pos_RightTopLin)>Diff_TopPos THEN
+IF ABS(Pos_leftTopLin-Pos_RightTopLin)>Threshold_BCTopPos THEN
 		btn_GapStop:=TRUE;
 		FB_PlcEmergencyStop();
 		Error:=TRUE;
 		ErrorID:=14;
 		LED_Error:=TRUE;
-ELSIF ABS(Velo_leftTopLin-Velo_RightTopLin)>Diff_TopVelo  THEN
+ELSIF ABS(Velo_leftTopLin-Velo_RightTopLin)>Threshold_BCTopVelo  THEN
 		(*btn_GapStop:=TRUE;
 		FB_PlcEmergencyStop();*)
 		AA:=Velo_leftTopLin-Velo_RightTopLin;
 		Error:=TRUE;
 		ErrorID:=15;
 (*Bottom Î»ÖÃºÍËÙ¶È±È¶Ô*)
-ELSIF ABS(Pos_LeftBottomLin-Pos_RightBottomLin)>Diff_BottomPos THEN
+ELSIF ABS(Pos_LeftBottomLin-Pos_RightBottomLin)>Threshold_BCBottomPos THEN
 		btn_GapStop:=TRUE;
 		FB_PlcEmergencyStop();
 		Error:=TRUE;
 		ErrorID:=16;
 		LED_Error:=TRUE;
-ELSIF ABS(Velo_leftBottomLin-Velo_RightBottomLin)>Diff_BottomVelo  THEN
+ELSIF ABS(Velo_leftBottomLin-Velo_RightBottomLin)>Threshold_BCBottomVelo  THEN
 		(*btn_GapStop:=TRUE;
 		FB_PlcEmergencyStop();*)
 		BB:=Velo_leftBottomLin-Velo_RightBottomLin;
 		Error:=TRUE;
 		ErrorID:=17;
 (*Left Î»ÖÃºÍËÙ¶È±È¶Ô*)
-ELSIF ABS(Pos_LeftTopLin-Pos_LeftBottomLin)>Diff_LeftPos  THEN
+ELSIF ABS(Pos_LeftTopLin-Pos_LeftBottomLin)>Threshold_BCLeftPos  THEN
 		btn_GapStop:=TRUE;
 		FB_PlcEmergencyStop();
 		Error:=TRUE;
 		ErrorID:=18;
 		LED_Error:=TRUE;
-ELSIF  ABS(Velo_LeftTopLin-Velo_LeftBottomLin)>Diff_LeftVelo THEN
+ELSIF  ABS(Velo_LeftTopLin-Velo_LeftBottomLin)>Threshold_BCLeftVelo THEN
 		(*btn_GapStop:=TRUE;
 		FB_PlcEmergencyStop();*)
 		CC:=Velo_LeftTopLin-Velo_LeftBottomLin;
 		Error:=TRUE;
 		ErrorID:=19;
 (*Right Î»ÖÃºÍËÙ¶È±È¶Ô*)
-ELSIF ABS(Pos_RightTopLin-Pos_RightBottomLin)>Diff_RightPos  THEN
+ELSIF ABS(Pos_RightTopLin-Pos_RightBottomLin)>Threshold_BCRightPos  THEN
 		btn_GapStop:=TRUE;
 		FB_PlcEmergencyStop();
 		Error:=TRUE;
 		ErrorID:=20;
 		LED_Error:=TRUE;
-ELSIF  ABS(Velo_RightTopLin-Velo_RightBottomLin)>Diff_RightVelo THEN
+ELSIF  ABS(Velo_RightTopLin-Velo_RightBottomLin)>Threshold_BCRightVelo THEN
 		(*btn_GapStop:=TRUE;
 		FB_PlcEmergencyStop();*)
 		DD:=Velo_RightTopLin-Velo_RightBottomLin;

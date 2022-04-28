@@ -189,32 +189,32 @@ ELSE
 	Taper_BeyondRangePositive:=FALSE;
 END_IF
 (*TopÓÒÐ¡ÓÚ×óºÍBottomÓÒÐ¡ÓÚ×ó£¬ Î»ÖÃ±È¶Ô£¬³¬³öDiffÊ±£¬µç»úEnable_Negtive=false*)
-IF  (Pos_leftTopLin-Pos_RightTopLin>Diff_TaperTopPos) OR (Pos_leftBottomLin-Pos_RightBottomLin>Diff_TaperBottomPos) THEN
+IF  (Pos_leftTopLin-Pos_RightTopLin>Threshold_TaperTopPos) OR (Pos_leftBottomLin-Pos_RightBottomLin>Threshold_TaperBottomPos) THEN
 	Taper_BeyondRangeNegtive:=TRUE;
 ELSE
 	Taper_BeyondRangeNegtive:=FALSE;
 END_IF
 (*×óÖáÉÏÏÂÎ»ÖÃËÙ¶È¶Ô±È£¬³¬³öESTOP*)
-IF ABS(Pos_LeftTopLin-Pos_LeftBottomLin)>Diff_TaperLeftPos  THEN
+IF ABS(Pos_LeftTopLin-Pos_LeftBottomLin)>Threshold_TaperLeftPos  THEN
 	btn_TaperStop:=TRUE;
 	FB_PlcEmergencyStop();
 	Error:=TRUE;
 	ErrorID:=13;
 	LED_Error:=TRUE;
-ELSIF  ABS(Velo_leftTopLin-Velo_LeftBottomLin)>Diff_TaperLeftVelo THEN
+ELSIF  ABS(Velo_leftTopLin-Velo_LeftBottomLin)>Threshold_TaperLeftVelo THEN
 	(*btn_TaperStop:=TRUE;
 	FB_PlcEmergencyStop();*)
 	Error:=TRUE;
 	ErrorID:=14;
 END_IF
 (*ÓÒÖáÉÏÏÂÎ»ÖÃËÙ¶È¶Ô±È£¬³¬³öESTOP*)
-IF ABS(Pos_RightTopLin-Pos_RightBottomLin)>Diff_TaperRightPos  THEN
+IF ABS(Pos_RightTopLin-Pos_RightBottomLin)>Threshold_TaperRightPos  THEN
 	btn_TaperStop:=TRUE;
 	FB_PlcEmergencyStop();
 	Error:=TRUE;
 	ErrorID:=15;
 	LED_Error:=TRUE;
-ELSIF  ABS(Velo_RightTopLin-Velo_RightBottomLin)>Diff_TaperRightVelo THEN
+ELSIF  ABS(Velo_RightTopLin-Velo_RightBottomLin)>Threshold_TaperRightVelo THEN
 	(*btn_TaperStop:=TRUE;
 	FB_PlcEmergencyStop();*)
 	Error:=TRUE;
