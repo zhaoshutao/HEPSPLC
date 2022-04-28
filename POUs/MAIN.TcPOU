@@ -105,6 +105,10 @@ VAR
 
 	LoadLEPB_R_TRIG: R_TRIG;
 	PositionBiasTON: TON;
+	
+	//
+	{attribute 'OPC.UA.DA' := '1'} 
+	OPC_TEST_Bi:BOOL;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[A_InitRecipeParameters();

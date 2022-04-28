@@ -15,15 +15,22 @@ VAR
 	UserTaperPositionNew:LREAL:=0;//target
 	UserTaperVelocityNew:LREAL:=0.1;//target
 	UserTaperPositionDisplay:LREAL;//current
-	UserTaperPositionDisplay_FromRightTop:LREAL;
-	UserTaperPositionDisplay_FromRightBottom:LREAL;
+	//UserTaperPositionDisplay_FromRightTop:LREAL;
+	//UserTaperPositionDisplay_FromRightBottom:LREAL;
 	UserTaperVelocityDisplay:LREAL:=0.1;//target
-	Pos_LeftTopLin_NoTaper:LREAL;
-	Pos_RightTopLin_NoTaper:LREAL;
-	Pos_LeftBottomLin_NoTaper:LREAL;
-	Pos_RightBottomLin_NoTaper:LREAL;
+	//Pos_LeftTopLin_NoTaper:LREAL;
+	//Pos_RightTopLin_NoTaper:LREAL;
+	//Pos_LeftBottomLin_NoTaper:LREAL;
+	//Pos_RightBottomLin_NoTaper:LREAL;
 	UserGapPositionDisplay_FromLeftTop:LREAL;
 	UserGapPositionDisplay_FromLeftBottom:LREAL;
+	//
+	UserRightGapPositionNew:LREAL;
+	UserRightGapVelocityNew:LREAL;
+	UserRightGapPositionDisplay:LREAL;
+	UserRightGapVelocityDisplay:LREAL;
+	UserRightGapPositionDisplay_FromRightTop:LREAL;
+	UserRightGapPositionDisplay_FromRightBottom:LREAL;
 	(**)
 	btn_UserGapMove:BOOL;
 	btn_UserGapStop:BOOL;
@@ -110,6 +117,15 @@ VAR
 	min_StepEachTime_ms:INT:=100;
 	max_StepEachTime_ms:INT:=10000;
 	inRange_StepEachTime_ms:BOOL;
+	l: INT;
+	Diff_UserTopPos_PLC: LREAL;
+	Diff_UserTopVelo_PLC: LREAL;
+	Diff_UserBottomPos_PLC: LREAL;
+	Diff_UserBottomVelo_PLC: LREAL;
+	Diff_UserLeftPos_PLC: LREAL;
+	Diff_UserLeftVelo_PLC: LREAL;
+	Diff_UserRightPos_PLC: LREAL;
+	Diff_UserRightVelo_PLC: LREAL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -241,130 +257,92 @@ IF USE_SingleAxis_Compensation THEN
 	//1.目标位置解算
 	//
 	(*通过补偿表解算四轴目标位置*)
-		FOR	i:= 1 TO 17 DO
+	//左轴位置由Gap定，右轴位置由右gap定。右gap值=左gap+taper。taper模式和非taper模式一样，非taper模式只是一种特例存在
+	//左轴目标位置解算
+	IF NOT TaperOrNot THEN
+		UserTaperPositionNew:=0;
+		UserTaperPositionDisplay:=0;
+	END_IF
+	UserRightGapPositionNew:=UserGapPositionNew+UserTaperPositionNew;
+	//左轴目标位置解算
+	FOR	i:= 1 TO 17 DO
 			IF UserGapPositionNew/2<M_Compensation[i+1].Encoder AND UserGapPositionNew/2>=M_Compensation[i].Encoder THEN
 				IF i<>18 THEN
 					LeftTopLinPositionNew:=(((UserGapPositionNew/2-M_Compensation[i].Encoder)*(M_Compensation[i+1].LeftTop-M_Compensation[i].LeftTop))
 							/(M_Compensation[i+1].Encoder-M_Compensation[i].Encoder))+M_Compensation[i].LeftTop;
-					RightTopLinPositionNew:=(((UserGapPositionNew/2-M_Compensation[i].Encoder)*(M_Compensation[i+1].RightTop-M_Compensation[i].RightTop))
-							/(M_Compensation[i+1].Encoder-M_Compensation[i].Encoder))+M_Compensation[i].RightTop;
 					LeftBottomLinPositionNew:=(((UserGapPositionNew/2-M_Compensation[i].Encoder)*(M_Compensation[i+1].LeftBottom-M_Compensation[i].LeftBottom))
 							/(M_Compensation[i+1].Encoder-M_Compensation[i].Encoder))+M_Compensation[i].LeftBottom;
-					RightBottomLinPositionNew:=(((UserGapPositionNew/2-M_Compensation[i].Encoder)*(M_Compensation[i+1].RightBottom-M_Compensation[i].RightBottom))
-							/(M_Compensation[i+1].Encoder-M_Compensation[i].Encoder))+M_Compensation[i].RightBottom;
 					M_CompensationNumber:=i;
 					InitCompensationDatasDone:=TRUE;
 				ELSIF i=18 AND UserGapPositionNew/2=M_Compensation[i].Encoder THEN		(*Gap=14µÄÌØÊâÇé¿ö*)
 					(**)
 					LeftTopLinPositionNew:=M_Compensation[i].LeftTop;
-					RightTopLinPositionNew:=M_Compensation[i].RightTop;
 					LeftBottomLinPositionNew:=M_Compensation[i].LeftBottom;
-					RightBottomLinPositionNew:=M_Compensation[i].RightBottom;
 					M_CompensationNumber:=i;
 					InitCompensationDatasDone:=TRUE;
 				ELSE
 					LeftTopLinPositionNew:=UserGapPositionNew/2;
-					RightTopLinPositionNew:=UserGapPositionNew/2;
 					LeftBottomLinPositionNew:=UserGapPositionNew/2;
-					RightBottomLinPositionNew:=UserGapPositionNew/2;
 					M_CompensationNumber:=i;
 					InitCompensationDatasDone:=TRUE;
 				END_IF
 			END_IF
-		END_FOR
-	(*在taper模式下，目标四轴位置需要加上taper的量*)
-	IF TaperOrNot THEN
-		RightTopLinPositionNew:=RightTopLinPositionNew+UserTaperPositionNew/2;
-		RightBottomLinPositionNew:=RightBottomLinPositionNew++UserTaperPositionNew/2;
-		InitCompensationDatasDone:=TRUE;
-	END_IF
-	//
-	//2.在非Taper模式下，由四轴位置反向解算四轴显示位置，再进一步计算当前Gap*)
-	//
-	IF NOT TaperOrNot THEN
-		FOR j:= 1 TO 17 DO
-			IF Pos_RightBottomLin<M_Compensation[j+1].RightBottom AND Pos_RightBottomLin>=M_Compensation[j].RightBottom THEN
-				IF j<>18 THEN
-					LeftTopLinPositionDisplay:=(((M_Compensation[j+1].Encoder-M_Compensation[j].Encoder)*(Pos_LeftTopLin-M_Compensation[j].LeftTop))
-							/(M_Compensation[j+1].LeftTop-M_Compensation[j].LeftTop))+M_Compensation[j].Encoder;
-					RightTopLinPositionDisplay:=(((M_Compensation[j+1].Encoder-M_Compensation[j].Encoder)*(Pos_RightTopLin-M_Compensation[j].RightTop))
-							/(M_Compensation[j+1].RightTop-M_Compensation[j].RightTop))+M_Compensation[j].Encoder;
-					LeftBottomLinPositionDisplay:=(((M_Compensation[j+1].Encoder-M_Compensation[j].Encoder)*(Pos_LeftBottomLin-M_Compensation[j].LeftBottom))
-							/(M_Compensation[j+1].LeftBottom-M_Compensation[j].LeftBottom))+M_Compensation[j].Encoder;
-					RightBottomLinPositionDisplay:=(((M_Compensation[j+1].Encoder-M_Compensation[j].Encoder)*(Pos_RightBottomLin-M_Compensation[j].RightBottom))
-							/(M_Compensation[j+1].RightBottom-M_Compensation[j].RightBottom))+M_Compensation[j].Encoder;
-					M_DisplayNumber:=j;
-				ELSIF j=18 AND UserGapPositionNew/2=M_Compensation[j].Encoder THEN		(*Gap=14µÄÌØÊâÇé¿ö*)
-					(**)
-					LeftTopLinPositionDisplay:=(((M_Compensation[j+1].Encoder-M_Compensation[j].Encoder)*(Pos_LeftTopLin-M_Compensation[j].LeftTop))
-							/(M_Compensation[j+1].LeftTop-M_Compensation[j].LeftTop))+M_Compensation[j].Encoder;
-					RightTopLinPositionDisplay:=(((M_Compensation[j+1].Encoder-M_Compensation[j].Encoder)*(Pos_RightTopLin-M_Compensation[j].RightTop))
-							/(M_Compensation[j+1].RightTop-M_Compensation[j].LeftTop))+M_Compensation[j].Encoder;
-					LeftBottomLinPositionDisplay:=(((M_Compensation[j+1].Encoder-M_Compensation[j].Encoder)*(Pos_LeftBottomLin-M_Compensation[j].LeftBottom))
-							/(M_Compensation[j+1].LeftBottom-M_Compensation[j].LeftBottom))+M_Compensation[j].Encoder;
-					RightBottomLinPositionDisplay:=(((M_Compensation[j+1].Encoder-M_Compensation[j].Encoder)*(Pos_RightBottomLin-M_Compensation[j].RightBottom))
-							/(M_Compensation[j+1].RightBottom-M_Compensation[j].RightBottom))+M_Compensation[j].Encoder;
-					M_DisplayNumber:=j;
-				ELSE(*Gap>14µÄÇé¿ö*)
-					(**)
-					LeftTopLinPositionDisplay:=Pos_LeftTopLin;
-					RightTopLinPositionDisplay:=Pos_RightTopLin;
-					LeftBottomLinPositionDisplay:=Pos_LeftBottomLin;
-					RightBottomLinPositionDisplay:=Pos_RightBottomLin;
-					M_DisplayNumber:=j;
-				END_IF
+	END_FOR
+	//右轴目标位置解算
+	FOR	j:= 1 TO 17 DO
+		IF UserRightGapPositionNew/2<M_Compensation[j+1].Encoder AND UserRightGapPositionNew/2>=M_Compensation[j].Encoder THEN
+			IF j<>18 THEN
+				RightTopLinPositionNew:=(((UserRightGapPositionNew/2-M_Compensation[j].Encoder)*(M_Compensation[j+1].RightTop-M_Compensation[j].RightTop))
+						/(M_Compensation[j+1].Encoder-M_Compensation[j].Encoder))+M_Compensation[j].RightTop;
+				RightBottomLinPositionNew:=(((UserRightGapPositionNew/2-M_Compensation[j].Encoder)*(M_Compensation[j+1].RightBottom-M_Compensation[j].RightBottom))
+						/(M_Compensation[j+1].Encoder-M_Compensation[j].Encoder))+M_Compensation[j].RightBottom;
+				M_CompensationNumber:=j;
+				InitCompensationDatasDone:=TRUE;
+			ELSIF j=18 AND UserRightGapPositionNew/2=M_Compensation[i].Encoder THEN		(*Gap=14µÄÌØÊâÇé¿ö*)
+				(**)
+				RightTopLinPositionNew:=M_Compensation[i].RightTop;
+				RightBottomLinPositionNew:=M_Compensation[i].RightBottom;
+				M_CompensationNumber:=j;
+				InitCompensationDatasDone:=TRUE;
+			ELSE
+				RightTopLinPositionNew:=UserGapPositionNew/2;
+				RightBottomLinPositionNew:=UserGapPositionNew/2;
+				M_CompensationNumber:=j;
+				InitCompensationDatasDone:=TRUE;
 			END_IF
-			UserGapPositionDisplay:=(LeftTopLinPositionDisplay+RightTopLinPositionDisplay+LeftBottomLinPositionDisplay+RightBottomLinPositionDisplay)/2;
-			UserGapVelocityDisplay:=(LeftTopLinVelocityDisplay+RightTopLinVelocityDisplay+LeftBottomLinVelocityDisplay+RightBottomLinVelocityDisplay)/2;
-		END_FOR
-	END_IF
+		END_IF
+	END_FOR
 	//
-	//3.taper模式下，由当前的四轴位置分别解算出当前的gap和taper
+	//2.不论taper还是非taper模式，左轴gap都有左轴发推算，右轴gap由右轴反推算。taper为右gap-左gap
 	//
-	IF TaperOrNot THEN
-		(*首先计算当前的taper。过程为：1.通过左轴位置定位当前gap区间；2.循环计算出当前左轴位置对应的补偿表右轴位置；3.当前实际右轴位置
-		减去补偿表右轴位置，即为当前taper的一半。上一半或者下一半；4.当前taper为两半之和*)
-		FOR k:= 1 TO 17 DO
+	//左轴显示位置反结算
+	FOR k:= 1 TO 17 DO
 			IF Pos_LeftTopLin<M_Compensation[k+1].LeftTop AND Pos_LeftTopLin>=M_Compensation[k].LeftTop THEN
-				//左上和左下轴在taper模式下不会变化，由左上和左下实际轴位置，分别解算当前gap，取平均
 				UserGapPositionDisplay_FromLeftTop:=2*(((Pos_LeftTopLin-M_Compensation[k].LeftTop)*(M_Compensation[k+1].Encoder-M_Compensation[k].Encoder))
 											/(M_Compensation[k+1].LeftTop-M_Compensation[k].LeftTop)+M_Compensation[k].Encoder);
 				UserGapPositionDisplay_FromLeftBottom:=2*(((Pos_LeftBottomLin-M_Compensation[k].LeftBottom)*(M_Compensation[k+1].Encoder-M_Compensation[k].Encoder))
 											/(M_Compensation[k+1].LeftBottom-M_Compensation[k].LeftBottom)+M_Compensation[k].Encoder);
 				UserGapPositionDisplay:=(UserGapPositionDisplay_FromLeftTop+UserGapPositionDisplay_FromLeftBottom)/2;
-				//由当前gap值计算排除taper后的、应该真正算入gap的那部分右上和右下轴位置
-				Pos_RightTopLin_NoTaper:=(((UserGapPositionDisplay/2-M_Compensation[k].Encoder)*(M_Compensation[k+1].RightTop-M_Compensation[k].RightTop))
-							/(M_Compensation[k+1].Encoder-M_Compensation[k].Encoder))+M_Compensation[k].RightTop;
-				Pos_RightBottomLin_NoTaper:=(((UserGapPositionDisplay/2-M_Compensation[k].Encoder)*(M_Compensation[k+1].RightBottom-M_Compensation[k].RightBottom))
-							/(M_Compensation[k+1].Encoder-M_Compensation[k].Encoder))+M_Compensation[k].RightBottom;
-				//
-				Pos_LeftTopLin_NoTaper:=Pos_LeftTopLin;
-				Pos_LeftBottomLin_NoTaper:=Pos_LeftBottomLin;
-				//计算taper
-				UserTaperPositionDisplay_FromRightTop:=Pos_RightTopLin-Pos_RightTopLin_NoTaper;
-				UserTaperPositionDisplay_FromRightBottom:=Pos_RightBottomLin-Pos_RightBottomLin_NoTaper;
-				UserTaperPositionDisplay:=UserTaperPositionDisplay_FromRightTop+UserTaperPositionDisplay_FromRightBottom;
-				InitCompensationDatasDone:=TRUE;
 			END_IF
-		END_FOR
-	END_IF
-ELSE
-	LeftTopLinPositionNew:=UserGapPositionNew/2;
-	RightTopLinPositionNew:=UserGapPositionNew/2;
-	LeftBottomLinPositionNew:=UserGapPositionNew/2;
-	RightBottomLinPositionNew:=UserGapPositionNew/2;
-	LeftTopLinPositionDisplay:=Pos_LeftTopLin;
-	RightTopLinPositionDisplay:=Pos_RightTopLin;
-	LeftBottomLinPositionDisplay:=Pos_LeftBottomLin;
-	RightBottomLinPositionDisplay:=Pos_RightBottomLin;
-	M_CompensationNumber:=0;
-	InitCompensationDatasDone:=TRUE;
+	END_FOR
+	//右轴显示位置反结算
+	FOR m:= 1 TO 17 DO
+			IF Pos_RightTopLin<M_Compensation[m+1].RightTop AND Pos_RightTopLin>=M_Compensation[m].RightTop THEN
+				UserRightGapPositionDisplay_FromRightTop:=2*(((Pos_RightTopLin-M_Compensation[m].RightTop)*(M_Compensation[m+1].Encoder-M_Compensation[m].Encoder))
+											/(M_Compensation[m+1].RightTop-M_Compensation[m].RightTop)+M_Compensation[m].Encoder);
+				UserRightGapPositionDisplay_FromRightBottom:=2*(((Pos_RightBottomLin-M_Compensation[m].RightBottom)*(M_Compensation[m+1].Encoder-M_Compensation[m].Encoder))
+											/(M_Compensation[m+1].RightBottom-M_Compensation[m].RightBottom)+M_Compensation[m].Encoder);
+				UserRightGapPositionDisplay:=(UserRightGapPositionDisplay_FromRightTop+UserRightGapPositionDisplay_FromRightBottom)/2;
+			END_IF
+	END_FOR
+	UserTaperPositionDisplay:=UserRightGapPositionDisplay-UserGapPositionDisplay;
 END_IF
 (*速度可以不用解算，直接用即可*)
 LeftTopLinVelocityDisplay:=Velo_LeftTopLin;
 RightTopLinVelocityDisplay:=Velo_RightTopLin;
 LeftBottomLinVelocityDisplay:=Velo_LeftBottomLin;
 RightBottomLinVelocityDisplay:=Velo_RightBottomLin;
+
 ]]></ST>
       </Implementation>
     </Action>
@@ -387,7 +365,7 @@ IF  st_Power<>0 THEN
 CASE moni_State OF
 (*Top Î»ÖÃºÍËÙ¶È±È¶Ô*)
 0:
-		(*Position*)
+		//实际(*Position*)
 		(*Top*)
 		Diff_UserTopPos_actual:=ABS(Pos_leftTopLin-Pos_RightTopLin);
 		(*Bottom*)
@@ -405,56 +383,62 @@ CASE moni_State OF
 		Diff_UserLeftVelo_actual:=ABS(Velo_LeftTopLin-Velo_LeftBottomLin);
 		(*Right*)
 		Diff_UserRightVelo_actual:=ABS(Velo_RightTopLin-Velo_RightBottomLin);
-		Diff_UserTopPos:=Diff_UserTopPos+UserTaperPositionNew;//Top位置误差=gap运动细微误差+目标taper位置
-		Diff_UserTopVelo:=Diff_UserTopVelo+UserGapVelocityNew;//Top速度误差=gap运动细微误差+gap目标速度。因为可能出现一个轴运动完了，另一个轴还在运动的情况
-		Diff_UserBottomPos:=Diff_UserBottomPos+UserTaperPositionNew;//Bottom同上
-		Diff_UserBottomVelo:=Diff_UserBottomVelo+UserGapVelocityNew;//Bottom同上
-		Diff_UserLeftPos:=Diff_UserLeftPos;//左轴即使在taper时也保持稳定
-		Diff_UserLeftVelo:=Diff_UserLeftVelo;//左轴即使在taper时也保持稳定
-		Diff_UserRightPos:=Diff_UserRightPos+UserTaperPositionNew;//右轴在taper时会随着目标taper，而误差变大
-		Diff_UserRightVelo:=Diff_UserRightVelo+UserGapVelocityNew;
-		IF Diff_UserTopPos_actual >Diff_UserTopPos THEN
+		//阈值
+		IF NOT TaperOrNot THEN
+			UserTaperPositionNew:=0;
+			UserGapVelocityNew:=0;
+		END_IF
+		Diff_UserTopPos_PLC:=Threshold_UserTopPos+UserTaperPositionNew;//Top位置误差=gap运动细微误差+目标taper位置
+		Diff_UserTopVelo_PLC:=Threshold_UserTopVelo+UserGapVelocityNew;//Top速度误差=gap运动细微误差+gap目标速度。因为可能出现一个轴运动完了，另一个轴还在运动的情况
+		Diff_UserBottomPos_PLC:=Threshold_UserBottomPos+UserTaperPositionNew;//Bottom同上
+		Diff_UserBottomVelo_PLC:=Threshold_UserBottomVelo+UserGapVelocityNew;//Bottom同上
+		Diff_UserLeftPos_PLC:=Threshold_UserLeftPos+UserTaperPositionNew;
+		Diff_UserLeftVelo_PLC:=Threshold_UserLeftVelo+UserGapVelocityNew;
+		Diff_UserRightPos_PLC:=Threshold_UserRightPos+UserTaperPositionNew;
+		Diff_UserRightVelo_PLC:=Threshold_UserRightVelo+UserGapVelocityNew;
+		//比较
+		IF Diff_UserTopPos_actual >Diff_UserTopPos_PLC THEN
 				Error:=TRUE;
 				ErrorID:=601;
-				ErrorDescription:='Diff_UserTopPos_actual >Diff_UserTopPos';
+				ErrorDescription:='Diff_UserTopPos_actual >Diff_UserTopPos_PLC';
 				moni_State:=-100;
-		ELSIF Diff_UserTopVelo_actual>Diff_UserTopVelo  THEN
+		ELSIF Diff_UserTopVelo_actual>Diff_UserTopVelo_PLC  THEN
 				Error:=TRUE;
 				ErrorID:=602;
-				ErrorDescription:='Diff_UserTopVelo_actual>Diff_UserTopVelo';
+				ErrorDescription:='Diff_UserTopVelo_actual>Diff_UserTopVelo_PLC';
 				moni_State:=-100;
 		(*Bottom Î»ÖÃºÍËÙ¶È±È¶Ô*)
-		ELSIF Diff_UserBottomPos_actual>Diff_UserBottomPos THEN
+		ELSIF Diff_UserBottomPos_actual>Diff_UserBottomPos_PLC THEN
 				Error:=TRUE;
-				ErrorID:=6032;
-				ErrorDescription:='Diff_UserBottomPos_actual>Diff_UserBottomPos';
+				ErrorID:=603;
+				ErrorDescription:='Diff_UserBottomPos_actual>Diff_UserBottomPos_PLC';
 				moni_State:=-100;
-		ELSIF Diff_UserBottomVelo_actual>Diff_UserBottomVelo  THEN
+		ELSIF Diff_UserBottomVelo_actual>Diff_UserBottomVelo_PLC  THEN
 				Error:=TRUE;
 				ErrorID:=604;
-				ErrorDescription:='Diff_UserBottomVelo_actual>Diff_UserBottomVelo';
+				ErrorDescription:='Diff_UserBottomVelo_actual>Diff_UserBottomVelo_PLC';
 				moni_State:=-100;
 		(*Left Î»ÖÃºÍËÙ¶È±È¶Ô*)
-		ELSIF Diff_UserLeftPos_actual>Diff_UserLeftPos  THEN
+		ELSIF Diff_UserLeftPos_actual>Diff_UserLeftPos_PLC  THEN
 				Error:=TRUE;
 				ErrorID:=605;
-				ErrorDescription:='Diff_UserLeftPos_actual>Diff_UserLeftPos';
+				ErrorDescription:='Diff_UserLeftPos_actual>Diff_UserLeftPos_PLC';
 				moni_State:=-100;
-		ELSIF  Diff_UserLeftVelo_actual>Diff_UserLeftVelo THEN
+		ELSIF  Diff_UserLeftVelo_actual>Diff_UserLeftVelo_PLC THEN
 				Error:=TRUE;
 				ErrorID:=606;
-				ErrorDescription:='Diff_UserLeftVelo_actual>Diff_UserLeftVelo';
+				ErrorDescription:='Diff_UserLeftVelo_actual>Diff_UserLeftVelo_PLC';
 				moni_State:=-100;
 		(*Right Î»ÖÃºÍËÙ¶È±È¶Ô*)
-		ELSIF Diff_UserRightPos_actual>Diff_UserRightPos  THEN
+		ELSIF Diff_UserRightPos_actual>Diff_UserRightPos_PLC  THEN
 				Error:=TRUE;
 				ErrorID:=607;
-				ErrorDescription:='Diff_UserRightPos_actual>Diff_UserRightPos';
+				ErrorDescription:='Diff_UserRightPos_actual>Diff_UserRightPos_PLC';
 				moni_State:=-100;
-		ELSIF  Diff_UserRightVelo_actual>Diff_UserRightVelo THEN
+		ELSIF  Diff_UserRightVelo_actual>Diff_UserRightVelo_PLC THEN
 				Error:=TRUE;
 				ErrorID:=608;
-				ErrorDescription:='Diff_UserRightVelo_actual>Diff_UserRightVelo';
+				ErrorDescription:='Diff_UserRightVelo_actual>Diff_UserRightVelo_PLC';
 				moni_State:=-100;
 		END_IF
 -100:
@@ -1054,40 +1038,56 @@ END_IF
       <LineId Id="206" Count="0" />
       <LineId Id="17" Count="0" />
       <LineId Id="161" Count="2" />
-      <LineId Id="18" Count="13" />
-      <LineId Id="43" Count="5" />
-      <LineId Id="59" Count="6" />
-      <LineId Id="72" Count="5" />
-      <LineId Id="145" Count="1" />
-      <LineId Id="149" Count="0" />
-      <LineId Id="195" Count="0" />
-      <LineId Id="147" Count="0" />
-      <LineId Id="164" Count="2" />
-      <LineId Id="158" Count="0" />
-      <LineId Id="78" Count="2" />
-      <LineId Id="82" Count="28" />
-      <LineId Id="200" Count="1" />
-      <LineId Id="111" Count="0" />
-      <LineId Id="159" Count="0" />
-      <LineId Id="168" Count="2" />
-      <LineId Id="151" Count="0" />
-      <LineId Id="156" Count="1" />
-      <LineId Id="172" Count="1" />
-      <LineId Id="183" Count="0" />
-      <LineId Id="174" Count="0" />
-      <LineId Id="179" Count="3" />
-      <LineId Id="184" Count="0" />
-      <LineId Id="186" Count="3" />
-      <LineId Id="197" Count="2" />
-      <LineId Id="191" Count="1" />
-      <LineId Id="190" Count="0" />
-      <LineId Id="194" Count="0" />
-      <LineId Id="196" Count="0" />
-      <LineId Id="175" Count="1" />
-      <LineId Id="112" Count="18" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="211" Count="1" />
+      <LineId Id="246" Count="0" />
+      <LineId Id="250" Count="0" />
+      <LineId Id="252" Count="0" />
+      <LineId Id="251" Count="0" />
+      <LineId Id="249" Count="0" />
+      <LineId Id="253" Count="0" />
+      <LineId Id="245" Count="0" />
+      <LineId Id="20" Count="3" />
+      <LineId Id="26" Count="1" />
+      <LineId Id="30" Count="1" />
+      <LineId Id="43" Count="2" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="59" Count="3" />
+      <LineId Id="64" Count="0" />
+      <LineId Id="72" Count="4" />
+      <LineId Id="213" Count="0" />
+      <LineId Id="215" Count="2" />
+      <LineId Id="220" Count="1" />
+      <LineId Id="224" Count="5" />
+      <LineId Id="231" Count="0" />
+      <LineId Id="233" Count="3" />
+      <LineId Id="238" Count="0" />
+      <LineId Id="240" Count="4" />
+      <LineId Id="214" Count="0" />
+      <LineId Id="164" Count="1" />
+      <LineId Id="254" Count="0" />
+      <LineId Id="300" Count="0" />
+      <LineId Id="278" Count="1" />
+      <LineId Id="281" Count="4" />
+      <LineId Id="299" Count="0" />
+      <LineId Id="277" Count="0" />
+      <LineId Id="302" Count="2" />
+      <LineId Id="313" Count="1" />
+      <LineId Id="308" Count="2" />
+      <LineId Id="312" Count="0" />
+      <LineId Id="301" Count="0" />
+      <LineId Id="315" Count="0" />
+      <LineId Id="317" Count="0" />
+      <LineId Id="319" Count="3" />
+      <LineId Id="318" Count="0" />
+      <LineId Id="129" Count="1" />
     </LineIds>
     <LineIds Name="UserMode.A_MonitoringAllAxis">
       <LineId Id="0" Count="34" />
+      <LineId Id="109" Count="0" />
+      <LineId Id="112" Count="1" />
+      <LineId Id="115" Count="0" />
+      <LineId Id="114" Count="0" />
       <LineId Id="71" Count="0" />
       <LineId Id="73" Count="0" />
       <LineId Id="78" Count="0" />
@@ -1096,6 +1096,7 @@ END_IF
       <LineId Id="79" Count="0" />
       <LineId Id="82" Count="1" />
       <LineId Id="77" Count="0" />
+      <LineId Id="110" Count="0" />
       <LineId Id="36" Count="0" />
       <LineId Id="86" Count="1" />
       <LineId Id="37" Count="1" />
@@ -1114,7 +1115,8 @@ END_IF
       <LineId Id="103" Count="2" />
       <LineId Id="58" Count="1" />
       <LineId Id="106" Count="2" />
-      <LineId Id="61" Count="8" />
+      <LineId Id="111" Count="0" />
+      <LineId Id="62" Count="7" />
     </LineIds>
     <LineIds Name="UserMode.A_PowerOff">
       <LineId Id="0" Count="27" />

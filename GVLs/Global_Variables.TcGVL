@@ -22,14 +22,14 @@ VAR_GLOBAL
 	PosDiff_LeftBottomLin:LREAL:=0.5;
 	PosDiff_RightBottomLin:LREAL:=0.5;
 (*UserMode Threshold*)
-	Diff_UserTopPos: LREAL:=0.5;
-	Diff_UserBottomPos: LREAL:=0.5;
-	Diff_UserLeftPos: LREAL:=0.5;
-	Diff_UserRightPos: LREAL:=0.5;
-	Diff_UserTopVelo: LREAL:=0.5;
-	Diff_UserBottomVelo: LREAL:=0.5;
-	Diff_UserLeftVelo: LREAL:=0.5;
-	Diff_UserRightVelo: LREAL:=0.5;
+	Threshold_UserTopPos: LREAL:=0.5;
+	Threshold_UserBottomPos: LREAL:=0.5;
+	Threshold_UserLeftPos: LREAL:=0.5;
+	Threshold_UserRightPos: LREAL:=0.5;
+	Threshold_UserTopVelo: LREAL:=0.5;
+	Threshold_UserBottomVelo: LREAL:=0.5;
+	Threshold_UserLeftVelo: LREAL:=0.5;
+	Threshold_UserRightVelo: LREAL:=0.5;
 	//
 	Range_UserTaperPos:LREAL:=4.01;
 	Range_UserTaperVelo:LREAL:=1.01;
@@ -42,39 +42,39 @@ VAR_GLOBAL
 	//Diff_TaperBottomPos:LREAL:=0.05;
 	//Taper_BeyondRangeNegtive:BOOL;
 (*BCGap Threshold*)
-	Diff_BCTopPos: LREAL:=0.5;
-	Diff_BCBottomPos: LREAL:=0.5;
-	Diff_BCLeftPos: LREAL:=0.5;
-	Diff_BCRightPos: LREAL:=0.5;
-	Diff_BCTopVelo: LREAL:=0.5;
-	Diff_BCBottomVelo: LREAL:=0.5;
-	Diff_BCLeftVelo: LREAL:=0.5;
-	Diff_BCRightVelo: LREAL:=0.5;
+	Threshold_BCTopPos: LREAL:=0.5;
+	Threshold_BCBottomPos: LREAL:=0.5;
+	Threshold_BCLeftPos: LREAL:=0.5;
+	Threshold_BCRightPos: LREAL:=0.5;
+	Threshold_BCTopVelo: LREAL:=0.5;
+	Threshold_BCBottomVelo: LREAL:=0.5;
+	Threshold_BCLeftVelo: LREAL:=0.5;
+	Threshold_BCRightVelo: LREAL:=0.5;
 (*DebugMode Threshold*)
-	Diff_TopPos_Debug: LREAL:=400 ;
-	Diff_BottomPos_Debug: LREAL:=400 ;
-	Diff_LeftPos_Debug: LREAL:=400 ;
-	Diff_RightPos_Debug: LREAL:=400 ;
+	Threshold_TopPos_Debug: LREAL:=4;
+	Threshold_BottomPos_Debug: LREAL:=4;
+	Threshold_LeftPos_Debug: LREAL:=4;
+	Threshold_RightPos_Debug: LREAL:=4;
 (*Taper Mode Threshold*)
 	Range_TaperPos:LREAL:=5.01;
 	Range_TaperVelo:LREAL:=1.01;
-	Diff_TaperLeftPos:LREAL:=0.01;
-	Diff_TaperLeftVelo:LREAL:=0.2;
-	Diff_TaperRightPos:LREAL:=0.05;
-	Diff_TaperRightVelo:LREAL:=0.5;
+	Threshold_TaperLeftPos:LREAL:=0.01;
+	Threshold_TaperLeftVelo:LREAL:=0.2;
+	Threshold_TaperRightPos:LREAL:=0.05;
+	Threshold_TaperRightVelo:LREAL:=0.5;
 	Taper_BeyondRangePositive:BOOL;
-	Diff_TaperTopPos:LREAL:=0.05;
-	Diff_TaperBottomPos:LREAL:=0.05;
+	Threshold_TaperTopPos:LREAL:=0.05;
+	Threshold_TaperBottomPos:LREAL:=0.05;
 	Taper_BeyondRangeNegtive:BOOL;
 (*SingleCarrierMode threshold*)
-	Diff_TopPos: LREAL:=2;
-	Diff_BottomPos: LREAL:=2;
-	Diff_LeftPos: LREAL:=2;
-	Diff_RightPos: LREAL:=2;
-	Diff_TopVelo: LREAL:=2;
-	Diff_BottomVelo: LREAL:=2;
-	Diff_LeftVelo: LREAL:=2;
-	Diff_RightVelo: LREAL:=2;
+	Threshold_TopPos_SingleCarrier: LREAL:=2;
+	Threshold_BottomPos_SingleCarrier: LREAL:=2;
+	Threshold_LeftPos_SingleCarrier: LREAL:=2;
+	Threshold_RightPos_SingleCarrier: LREAL:=2;
+	Threshold_TopVelo_SingleCarrier: LREAL:=2;
+	Threshold_BottomVelo_SingleCarrier: LREAL:=2;
+	Threshold_LeftVelo_SingleCarrier: LREAL:=2;
+	Threshold_RightVelo_SingleCarrier: LREAL:=2;
 (*Compensation Value*)
 	M_Compensation:ARRAY[1..18] OF Struct_M_Compensation
 :=[

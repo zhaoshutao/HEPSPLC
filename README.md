@@ -18,4 +18,8 @@ HEPS PLC code
 1.recipe加入参数表修改后PLC自动加载参数
 2.加入光栅positionBias PLC程序和配方
 3.emergencyStop加入HMI
-# 
+#
+# 2022.04.28
+ 1.taper模式下代码更改，补偿方式由简单地1/2Taper，到右轴由补偿表解算
+ 2.更改了位置和速度的Threshold，并更新了配方
+ #

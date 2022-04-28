@@ -361,31 +361,31 @@ CASE moni_State OF
 		Diff_BCLeftVelo_actual:=ABS(Velo_LeftTopLin-Velo_LeftBottomLin);
 		(*Right*)
 		Diff_BCRightVelo_actual:=ABS(Velo_RightTopLin-Velo_RightBottomLin);
-		IF Diff_BCTopPos_actual >Diff_BCTopPos THEN
+		IF Diff_BCTopPos_actual >Threshold_BCTopPos THEN
 				ErrorID:=11;
 				moni_State:=-100;
-		ELSIF Diff_BCTopVelo_actual>Diff_BCTopVelo  THEN
+		ELSIF Diff_BCTopVelo_actual>Threshold_BCTopVelo  THEN
 				ErrorID:=12;
 				moni_State:=-100;
 		(*Bottom Î»ÖÃºÍËÙ¶È±È¶Ô*)
-		ELSIF Diff_BCBottomPos_actual>Diff_BCBottomPos THEN
+		ELSIF Diff_BCBottomPos_actual>Threshold_BCBottomPos THEN
 				ErrorID:=13;
 				moni_State:=-100;
-		ELSIF Diff_BCBottomVelo_actual>Diff_BCBottomVelo  THEN
+		ELSIF Diff_BCBottomVelo_actual>Threshold_BCBottomVelo  THEN
 				ErrorID:=14;
 				moni_State:=-100;
 		(*Left Î»ÖÃºÍËÙ¶È±È¶Ô*)
-		ELSIF Diff_BCLeftPos_actual>Diff_BCLeftPos  THEN
+		ELSIF Diff_BCLeftPos_actual>Threshold_BCLeftPos  THEN
 				ErrorID:=15;
 				moni_State:=-100;
-		ELSIF  Diff_BCLeftVelo_actual>Diff_BCLeftVelo THEN
+		ELSIF  Diff_BCLeftVelo_actual>Threshold_BCLeftVelo THEN
 				ErrorID:=16;
 				moni_State:=-100;
 		(*Right Î»ÖÃºÍËÙ¶È±È¶Ô*)
-		ELSIF Diff_BCRightPos_actual>Diff_BCRightPos  THEN
+		ELSIF Diff_BCRightPos_actual>Threshold_BCRightPos  THEN
 				ErrorID:=17;
 				moni_State:=-100;
-		ELSIF  Diff_BCRightVelo_actual>Diff_BCRightVelo THEN
+		ELSIF  Diff_BCRightVelo_actual>Threshold_BCRightVelo THEN
 				ErrorID:=18;
 				moni_State:=-100;
 		END_IF

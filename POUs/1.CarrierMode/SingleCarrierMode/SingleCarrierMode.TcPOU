@@ -421,28 +421,28 @@ IF  st_Power<>0 THEN
 (*Top Î»ÖÃºÍËÙ¶È±È¶Ô*)
 		Diff_TopPos_actual:=Pos_leftTopLin-Pos_RightTopLin;
 		Diff_TopVelo_actual:=Velo_leftTopLin-Velo_RightTopLin;
-IF ABS(Pos_leftTopLin-Pos_RightTopLin)>Diff_TopPos THEN
+IF ABS(Pos_leftTopLin-Pos_RightTopLin)>Threshold_TopPos_SingleCarrier THEN
 		btn_TopStop:=TRUE;
 		btn_BottomStop:=TRUE;
 		FB_PlcEmergencyStop();
 		Error:=TRUE;
 		ErrorID:=14;
 		LED_Error:=TRUE;
-ELSIF ABS(Velo_leftTopLin-Velo_RightTopLin)>Diff_TopVelo  THEN
+ELSIF ABS(Velo_leftTopLin-Velo_RightTopLin)>Threshold_TopVelo_SingleCarrier  THEN
 		(*btn_TopStop:=TRUE;
 		btn_BottomStop:=TRUE;
 		FB_PlcEmergencyStop();*)
 		Error:=TRUE;
 		ErrorID:=15;
 (*Bottom Î»ÖÃºÍËÙ¶È±È¶Ô*)
-ELSIF ABS(Pos_LeftBottomLin-Pos_RightBottomLin)>Diff_BottomPos THEN
+ELSIF ABS(Pos_LeftBottomLin-Pos_RightBottomLin)>Threshold_BottomPos_SingleCarrier THEN
 		btn_TopStop:=TRUE;
 		btn_BottomStop:=TRUE;
 		FB_PlcEmergencyStop();
 		Error:=TRUE;
 		ErrorID:=16;
 		LED_Error:=TRUE;
-ELSIF ABS(Velo_leftBottomLin-Velo_RightBottomLin)>Diff_BottomVelo  THEN
+ELSIF ABS(Velo_leftBottomLin-Velo_RightBottomLin)>Threshold_BottomVelo_SingleCarrier  THEN
 		(*btn_TopStop:=TRUE;
 		btn_BottomStop:=TRUE;
 		FB_PlcEmergencyStop();*)
