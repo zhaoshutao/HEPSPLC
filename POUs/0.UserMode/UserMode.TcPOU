@@ -13,11 +13,11 @@ VAR
 	UserGapPositionDisplay:LREAL;//current
 	UserGapVelocityDisplay:LREAL;//current
 	UserTaperPositionNew:LREAL:=0;//target
-	UserTaperVelocityNew:LREAL:=0.1;//target
+	UserTaperVelocityNew:LREAL:=1;//target
 	UserTaperPositionDisplay:LREAL;//current
 	//UserTaperPositionDisplay_FromRightTop:LREAL;
 	//UserTaperPositionDisplay_FromRightBottom:LREAL;
-	UserTaperVelocityDisplay:LREAL:=0.1;//target
+	UserTaperVelocityDisplay:LREAL;//target
 	//Pos_LeftTopLin_NoTaper:LREAL;
 	//Pos_RightTopLin_NoTaper:LREAL;
 	//Pos_LeftBottomLin_NoTaper:LREAL;
@@ -342,6 +342,8 @@ LeftTopLinVelocityDisplay:=Velo_LeftTopLin;
 RightTopLinVelocityDisplay:=Velo_RightTopLin;
 LeftBottomLinVelocityDisplay:=Velo_LeftBottomLin;
 RightBottomLinVelocityDisplay:=Velo_RightBottomLin;
+UserGapVelocityDisplay:=(LeftTopLinVelocityDisplay+RightTopLinVelocityDisplay+
+	LeftBottomLinVelocityDisplay+RightBottomLinVelocityDisplay)/2;
 
 ]]></ST>
       </Implementation>
@@ -384,18 +386,14 @@ CASE moni_State OF
 		(*Right*)
 		Diff_UserRightVelo_actual:=ABS(Velo_RightTopLin-Velo_RightBottomLin);
 		//阈值
-		IF NOT TaperOrNot THEN
-			UserTaperPositionNew:=0;
-			UserGapVelocityNew:=0;
-		END_IF
-		Diff_UserTopPos_PLC:=Threshold_UserTopPos+UserTaperPositionNew;//Top位置误差=gap运动细微误差+目标taper位置
-		Diff_UserTopVelo_PLC:=Threshold_UserTopVelo+UserGapVelocityNew;//Top速度误差=gap运动细微误差+gap目标速度。因为可能出现一个轴运动完了，另一个轴还在运动的情况
-		Diff_UserBottomPos_PLC:=Threshold_UserBottomPos+UserTaperPositionNew;//Bottom同上
-		Diff_UserBottomVelo_PLC:=Threshold_UserBottomVelo+UserGapVelocityNew;//Bottom同上
-		Diff_UserLeftPos_PLC:=Threshold_UserLeftPos+UserTaperPositionNew;
-		Diff_UserLeftVelo_PLC:=Threshold_UserLeftVelo+UserGapVelocityNew;
-		Diff_UserRightPos_PLC:=Threshold_UserRightPos+UserTaperPositionNew;
-		Diff_UserRightVelo_PLC:=Threshold_UserRightVelo+UserGapVelocityNew;
+		Diff_UserTopPos_PLC:=Threshold_UserTopPos+UserTaperPositionDisplay;//Top位置误差=gap运动细微误差+目标taper位置
+		Diff_UserTopVelo_PLC:=Threshold_UserTopVelo+ABS(UserGapVelocityDisplay);//Top速度误差=gap运动细微误差+gap目标速度。因为可能出现一个轴运动完了，另一个轴还在运动的情况
+		Diff_UserBottomPos_PLC:=Threshold_UserBottomPos+UserTaperPositionDisplay;//Bottom同上
+		Diff_UserBottomVelo_PLC:=Threshold_UserBottomVelo+ABS(UserGapVelocityDisplay);//Bottom同上
+		Diff_UserLeftPos_PLC:=Threshold_UserLeftPos+UserTaperPositionDisplay;
+		Diff_UserLeftVelo_PLC:=Threshold_UserLeftVelo+ABS(UserGapVelocityDisplay);
+		Diff_UserRightPos_PLC:=Threshold_UserRightPos+UserTaperPositionDisplay;
+		Diff_UserRightVelo_PLC:=Threshold_UserRightVelo+ABS(UserGapVelocityDisplay);
 		//比较
 		IF Diff_UserTopPos_actual >Diff_UserTopPos_PLC THEN
 				Error:=TRUE;
@@ -577,7 +575,7 @@ IF btn_UserGapMove AND NOT SSMotionMode AND RegularMotionMode THEN
 		ErrorId:=0;
 		ErrorDescription:='';
 	END_IF
-	IF NOT inRange_UserTaperPositionNew AND TaperOrNot THEN
+	IF NOT inRange_UserTaperPositionNew THEN
 		btn_UserGapStop:=TRUE;
 		btn_UserGapMove:=FALSE;
 		Error:=TRUE;
@@ -590,7 +588,7 @@ IF btn_UserGapMove AND NOT SSMotionMode AND RegularMotionMode THEN
 		ErrorId:=0;
 		ErrorDescription:='';
 	END_IF
-	IF NOT inRange_UserTaperVelocityNew AND TaperOrNot THEN
+	IF NOT inRange_UserTaperVelocityNew THEN
 		btn_UserGapStop:=TRUE;
 		btn_UserGapMove:=FALSE;
 		Error:=TRUE;
@@ -1080,14 +1078,12 @@ END_IF
       <LineId Id="317" Count="0" />
       <LineId Id="319" Count="3" />
       <LineId Id="318" Count="0" />
+      <LineId Id="323" Count="1" />
       <LineId Id="129" Count="1" />
     </LineIds>
     <LineIds Name="UserMode.A_MonitoringAllAxis">
       <LineId Id="0" Count="34" />
       <LineId Id="109" Count="0" />
-      <LineId Id="112" Count="1" />
-      <LineId Id="115" Count="0" />
-      <LineId Id="114" Count="0" />
       <LineId Id="71" Count="0" />
       <LineId Id="73" Count="0" />
       <LineId Id="78" Count="0" />

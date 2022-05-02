@@ -701,9 +701,9 @@ CASE SafeStatus OF
 				SafeStatus:=0;
 			ELSE
 				SafePLCRunOK:=FALSE;
-				Error:=TRUE;
-				ErrorId:=301;
-				ErrorDescription:='SafePLCRunOK fail';
+				//Error:=TRUE;
+				//ErrorId:=301;
+				//ErrorDescription:='SafePLCRunOK fail';
 			END_IF
 		fb_ton0.IN:=FALSE;
 		fb_ton1.IN:=FALSE;
