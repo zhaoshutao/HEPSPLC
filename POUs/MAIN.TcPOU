@@ -171,7 +171,9 @@ BackgroundEL();
 
 (*设置position bias*)
 A_SetLinearEncoderPositionBias();
-]]></ST>
+
+(*检查光栅读数是否在范围内*)
+A_CheckLinearEncoder();]]></ST>
     </Implementation>
     <Action Name="A_CheckKillSwitch" Id="{158eed83-fba1-4051-b569-3585448d2a5a}">
       <Implementation>
@@ -324,6 +326,67 @@ END_IF
 *)]]></ST>
       </Implementation>
     </Action>
+    <Action Name="A_CheckLinearEncoder" Id="{04ef6a41-e2ba-498d-aa00-f823237bb5de}">
+      <Implementation>
+        <ST><![CDATA[IF Pos_LeftTopLin <=0 THEN
+	ErrorID:=1101;
+	Error:=TRUE;
+	ErrorDescription:='Pos_LeftTopLin <=0';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF Pos_RightTopLin <=0 THEN
+	ErrorID:=1102;
+	Error:=TRUE;
+	ErrorDescription:='Pos_RightTopLin <=0';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF Pos_LeftBottomLin <=0 THEN
+	ErrorID:=1103;
+	Error:=TRUE;
+	ErrorDescription:='Pos_LeftBottomLin <=0';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF Pos_RightBottomLin <=0 THEN
+	ErrorID:=1104;
+	Error:=TRUE;
+	ErrorDescription:='Pos_RightBottomLin <=0';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+//
+IF Pos_LeftTopLin >UserMode.max_UserGapPositionNew THEN
+	ErrorID:=1105;
+	Error:=TRUE;
+	ErrorDescription:='Pos_LeftTopLin >UserMode.max_UserGapPositionNew';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF Pos_RightTopLin >UserMode.max_UserGapPositionNew THEN
+	ErrorID:=1106;
+	Error:=TRUE;
+	ErrorDescription:='Pos_RightTopLin>UserMode.max_UserGapPositionNew';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF Pos_LeftBottomLin >UserMode.max_UserGapPositionNew THEN
+	ErrorID:=1107;
+	Error:=TRUE;
+	ErrorDescription:='Pos_LeftBottomLin >UserMode.max_UserGapPositionNew';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF Pos_RightBottomLin >UserMode.max_UserGapPositionNew THEN
+	ErrorID:=1108;
+	Error:=TRUE;
+	ErrorDescription:='Pos_RightBottomLin >UserMode.max_UserGapPositionNew';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF]]></ST>
+      </Implementation>
+    </Action>
     <Action Name="A_InitAxisParameters" Id="{a92c2dd6-12b0-4a71-a4bc-d7afbc965cb4}">
       <Implementation>
         <ST><![CDATA[(*ÖáÎ»ÖÃ¡¢ËÙ¶È¡¢PosDiff*)
@@ -419,34 +482,38 @@ END_CASE
 	ErrorDescription:='ABS(PosDiff_LeftTopLin_actual)>PosDiff_LeftTopLin';
 	FB_PlcEmergencyStop();
 	LED_Error:=TRUE;
-ELSIF ABS(PosDiff_RightTopLin_actual)>PosDiff_RightTopLin THEN
+END_IF
+IF ABS(PosDiff_RightTopLin_actual)>PosDiff_RightTopLin THEN
 	ErrorID:=202;
 	Error:=TRUE;
 	ErrorDescription:='ABS(PosDiff_RightTopLin_actual)>PosDiff_RightTopLin';
 	FB_PlcEmergencyStop();
 	LED_Error:=TRUE;
-ELSIF ABS(PosDiff_LeftBottomLin_actual)>PosDiff_LeftBottomLin THEN
+END_IF
+IF ABS(PosDiff_LeftBottomLin_actual)>PosDiff_LeftBottomLin THEN
 	ErrorID:=203;
 	Error:=TRUE;
 	ErrorDescription:='ABS(PosDiff_LeftBottomLin_actual)>PosDiff_LeftBottomLin';
 	FB_PlcEmergencyStop();
 	LED_Error:=TRUE;
-ELSIF ABS(PosDiff_RightBottomLin_actual)>PosDiff_RightBottomLin THEN
+END_IF
+IF ABS(PosDiff_RightBottomLin_actual)>PosDiff_RightBottomLin THEN
 	ErrorID:=204;
 	ErrorDescription:='ABS(PosDiff_RightBottomLin_actual)>PosDiff_RightBottomLin';
 	Error:=TRUE;
 	FB_PlcEmergencyStop();
 	LED_Error:=TRUE;
 END_IF
-IF ABS(PosDiff_LeftTopLin_actual-PosDiff_RightTopLin_actual)>0.2 THEN
+//
+IF ABS(PosDiff_LeftTopLin_actual-PosDiff_RightTopLin_actual)>0.1 THEN
 	ErrorID:=205;
-	ErrorDescription:='ABS(PosDiff_LeftTopLin_actual-PosDiff_RightTopLin_actual)>0.2';
+	ErrorDescription:='ABS(PosDiff_LeftTopLin_actual-PosDiff_RightTopLin_actual)>0.1';
 	Error:=TRUE;
 	FB_PlcEmergencyStop();
 	LED_Error:=TRUE;
-ELSIF ABS(PosDiff_LeftBottomLin_actual-PosDiff_RightBottomLin_actual)>0.2 THEN
+ELSIF ABS(PosDiff_LeftBottomLin_actual-PosDiff_RightBottomLin_actual)>0.1 THEN
 	ErrorID:=206;
-	ErrorDescription:='ABS(PosDiff_LeftBottomLin_actual-PosDiff_RightBottomLin_actual)>0.2';
+	ErrorDescription:='ABS(PosDiff_LeftBottomLin_actual-PosDiff_RightBottomLin_actual)>0.1';
 	Error:=TRUE;
 	FB_PlcEmergencyStop();
 	LED_Error:=TRUE;
@@ -1691,7 +1758,9 @@ END_FOR]]></ST>
       <LineId Id="540" Count="0" />
       <LineId Id="539" Count="0" />
       <LineId Id="541" Count="0" />
+      <LineId Id="743" Count="0" />
       <LineId Id="119" Count="0" />
+      <LineId Id="744" Count="0" />
     </LineIds>
     <LineIds Name="MAIN.A_CheckKillSwitch">
       <LineId Id="3" Count="1" />
@@ -1727,6 +1796,20 @@ END_FOR]]></ST>
       <LineId Id="112" Count="0" />
       <LineId Id="21" Count="79" />
     </LineIds>
+    <LineIds Name="MAIN.A_CheckLinearEncoder">
+      <LineId Id="1" Count="0" />
+      <LineId Id="4" Count="3" />
+      <LineId Id="2" Count="1" />
+      <LineId Id="9" Count="5" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="16" Count="5" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="23" Count="5" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="31" Count="26" />
+      <LineId Id="30" Count="0" />
+    </LineIds>
     <LineIds Name="MAIN.A_InitAxisParameters">
       <LineId Id="0" Count="33" />
     </LineIds>
@@ -1756,13 +1839,21 @@ END_FOR]]></ST>
     <LineIds Name="MAIN.A_PosDiffDetectiion">
       <LineId Id="0" Count="2" />
       <LineId Id="36" Count="0" />
-      <LineId Id="3" Count="4" />
+      <LineId Id="3" Count="1" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="5" Count="2" />
       <LineId Id="37" Count="0" />
-      <LineId Id="8" Count="4" />
+      <LineId Id="8" Count="1" />
+      <LineId Id="44" Count="0" />
+      <LineId Id="10" Count="2" />
       <LineId Id="39" Count="0" />
-      <LineId Id="13" Count="3" />
+      <LineId Id="13" Count="1" />
+      <LineId Id="45" Count="0" />
+      <LineId Id="15" Count="1" />
       <LineId Id="40" Count="0" />
-      <LineId Id="17" Count="3" />
+      <LineId Id="17" Count="2" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="20" Count="0" />
       <LineId Id="24" Count="1" />
       <LineId Id="41" Count="0" />
       <LineId Id="26" Count="0" />
