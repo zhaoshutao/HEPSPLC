@@ -171,7 +171,9 @@ IF	SSMotionMode AND NOT RegularMotionMode THEN
 END_IF
 
 (*CheckInputPosVelo*)
-A_CheckInputPosVelo();]]></ST>
+A_CheckInputPosVelo();
+(*检查光栅读数是否在范围内*)
+A_CheckLinearEncoder();]]></ST>
     </Implementation>
     <Action Name="A_CheckCoupleStatus" Id="{ec531655-4226-4156-a0f2-db7d67f06866}">
       <Implementation>
@@ -247,6 +249,67 @@ IF StepEachTime_ms>=min_StepEachTime_ms AND StepEachTime_ms<=max_StepEachTime_ms
 END_IF
 
 ]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_CheckLinearEncoder" Id="{04ef6a41-e2ba-498d-aa00-f823237bb5de}">
+      <Implementation>
+        <ST><![CDATA[IF Pos_LeftTopLin <=0 THEN
+	ErrorID:=1101;
+	Error:=TRUE;
+	ErrorDescription:='Pos_LeftTopLin <=0';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF Pos_RightTopLin <=0 THEN
+	ErrorID:=1102;
+	Error:=TRUE;
+	ErrorDescription:='Pos_RightTopLin <=0';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF Pos_LeftBottomLin <=0 THEN
+	ErrorID:=1103;
+	Error:=TRUE;
+	ErrorDescription:='Pos_LeftBottomLin <=0';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF Pos_RightBottomLin <=0 THEN
+	ErrorID:=1104;
+	Error:=TRUE;
+	ErrorDescription:='Pos_RightBottomLin <=0';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+//
+IF Pos_LeftTopLin >UserMode.max_UserGapPositionNew THEN
+	ErrorID:=1105;
+	Error:=TRUE;
+	ErrorDescription:='Pos_LeftTopLin >UserMode.max_UserGapPositionNew';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF Pos_RightTopLin >UserMode.max_UserGapPositionNew THEN
+	ErrorID:=1106;
+	Error:=TRUE;
+	ErrorDescription:='Pos_RightTopLin>UserMode.max_UserGapPositionNew';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF Pos_LeftBottomLin >UserMode.max_UserGapPositionNew THEN
+	ErrorID:=1107;
+	Error:=TRUE;
+	ErrorDescription:='Pos_LeftBottomLin >UserMode.max_UserGapPositionNew';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF Pos_RightBottomLin >UserMode.max_UserGapPositionNew THEN
+	ErrorID:=1108;
+	Error:=TRUE;
+	ErrorDescription:='Pos_RightBottomLin >UserMode.max_UserGapPositionNew';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF]]></ST>
       </Implementation>
     </Action>
     <Action Name="A_InitCompensationData" Id="{1e6a9c39-c8a5-4c48-b57c-71effe5e3747}">
@@ -1002,6 +1065,8 @@ END_IF
       <LineId Id="655" Count="0" />
       <LineId Id="570" Count="0" />
       <LineId Id="656" Count="0" />
+      <LineId Id="1012" Count="0" />
+      <LineId Id="1011" Count="0" />
     </LineIds>
     <LineIds Name="UserMode.A_CheckCoupleStatus">
       <LineId Id="2" Count="9" />
@@ -1031,6 +1096,20 @@ END_IF
       <LineId Id="54" Count="0" />
       <LineId Id="40" Count="0" />
       <LineId Id="32" Count="0" />
+    </LineIds>
+    <LineIds Name="UserMode.A_CheckLinearEncoder">
+      <LineId Id="1" Count="0" />
+      <LineId Id="4" Count="3" />
+      <LineId Id="2" Count="1" />
+      <LineId Id="9" Count="5" />
+      <LineId Id="8" Count="0" />
+      <LineId Id="16" Count="5" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="23" Count="5" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="29" Count="0" />
+      <LineId Id="31" Count="26" />
+      <LineId Id="30" Count="0" />
     </LineIds>
     <LineIds Name="UserMode.A_InitCompensationData">
       <LineId Id="206" Count="0" />
