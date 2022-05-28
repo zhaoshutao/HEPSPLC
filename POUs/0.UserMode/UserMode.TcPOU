@@ -253,7 +253,11 @@ END_IF
     </Action>
     <Action Name="A_CheckLinearEncoder" Id="{04ef6a41-e2ba-498d-aa00-f823237bb5de}">
       <Implementation>
-        <ST><![CDATA[IF Pos_LeftTopLin <=0 THEN
+        <ST><![CDATA[//如果没有光栅，则不判断四轴位置
+IF NOT USELinearEncoeder THEN
+	RETURN;
+END_IF
+IF Pos_LeftTopLin <=0 THEN
 	ErrorID:=1101;
 	Error:=TRUE;
 	ErrorDescription:='Pos_LeftTopLin <=0';
@@ -1098,6 +1102,8 @@ END_IF
       <LineId Id="32" Count="0" />
     </LineIds>
     <LineIds Name="UserMode.A_CheckLinearEncoder">
+      <LineId Id="61" Count="0" />
+      <LineId Id="58" Count="2" />
       <LineId Id="1" Count="0" />
       <LineId Id="4" Count="3" />
       <LineId Id="2" Count="1" />

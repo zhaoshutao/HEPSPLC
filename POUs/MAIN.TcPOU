@@ -126,7 +126,7 @@ IF NOT simulation THEN
 A_SafePlcStartInit();
 END_IF
 (************SetAxisPosition*********************)
-IF  setAxisPositionEnable AND btn_setAxisPosition THEN
+IF  NOT USELinearEncoeder AND setAxisPositionEnable AND btn_setAxisPosition THEN
 	//IF NOT SerAxisPositionDone THEN
 		FB_Set_AxisPosition.GapValueSet:=GapSetValue;
 		A_SetAxisPosition();
@@ -149,11 +149,11 @@ IF SafePLCRunOK OR Simulation THEN
 	END_IF
 END_IF
 (************SetAxisPosition*********************)
-IF NOT USELinearEncoeder THEN
-	IF NOT SerAxisPositionDone THEN
-		A_SetAxisPosition();
-	END_IF
-END_IF
+//IF NOT USELinearEncoeder THEN
+//	IF NOT SerAxisPositionDone THEN
+//		A_SetAxisPosition();
+//	END_IF
+//END_IF
 (*******Led Show******)
 fb_led_Show();
 (*******Check Power status£¬¸³Öµ¸øÈ«¾Ö±äÁ¿st_Power*******)
