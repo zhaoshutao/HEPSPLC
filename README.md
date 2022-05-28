@@ -27,3 +27,10 @@ HEPS PLC code
  1.更新了Possdiff程序的漏洞
  2.加入光栅位置监控保护
 #
+#
+#2022.05.27 配方中加入USELinearEncoeder
+//如果没有光栅，则不判断四轴位置
+IF NOT USELinearEncoeder THEN
+	RETURN;
+END_IF
+#
