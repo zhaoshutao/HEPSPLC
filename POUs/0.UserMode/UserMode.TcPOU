@@ -84,6 +84,9 @@ VAR
 	StepEachTime:TIME;
 	StepEachTime_ms:INT:=1000;//ms
 	SS_OTSTRUCT :OTSTRUCT ;
+	SS_StartPositionDisplay:LREAL;
+	RTRG_SS_StartPositionDisplay:R_TRIG;
+	SS_InitStartPositionDone:BOOL;
 	(*input protection*)
 	//
 	min_UserGapPositionNew:LREAL:=10;
@@ -938,10 +941,18 @@ END_IF
 (*单步时长转换*)
 StepEachTime:=INT_TO_TIME(StepEachTime_ms);
 SS_TON(PT:=StepEachTime);
-IF InitPowerDone AND InitCompensationDatasDone AND SS_Move THEN
+(*上升沿触发，初始SS位置=当前磁间隙*)
+RTRG_SS_StartPositionDisplay(CLK:=SS_Move);
+IF RTRG_SS_StartPositionDisplay.Q THEN
+	SS_StartPositionDisplay:=UserGapPositionDisplay;
+	SS_InitStartPositionDone:=TRUE;
+END_IF
+(*SS主程序*)
+IF InitPowerDone AND InitCompensationDatasDone AND SS_Move AND SS_InitStartPositionDone THEN
 	CASE SS_MoveState OF
 		0:
-				UserGapPositionNew:=UserGapPositionDisplay+SS_StepSize;
+				//UserGapPositionNew:=UserGapPositionDisplay+SS_StepSize;
+				UserGapPositionNew:=SS_StartPositionDisplay+SS_StepSize*(SS_currentStep+1);
 				A_InitCompensationData();
 				FB_Move.Mode:=5;						//1.gap;2.single;3.taper;4.debug;5.BCGap&UserMode
 				FB_Move.CoupleState:=st_Couple;			
@@ -993,6 +1004,7 @@ IF InitPowerDone AND InitCompensationDatasDone AND SS_Move THEN
 				Led_Run:=FALSE;
 				SS_MoveState:=0;
 				SS_currentStep:=0;
+				SS_InitStartPositionDone:=FALSE;
 				//SS_StepSystemTime[SS_StepNumber]:=F_GetSysTime();
 	END_CASE
 END_IF
@@ -1278,9 +1290,16 @@ END_IF
       <LineId Id="134" Count="0" />
       <LineId Id="133" Count="0" />
       <LineId Id="120" Count="0" />
+      <LineId Id="298" Count="0" />
+      <LineId Id="300" Count="2" />
+      <LineId Id="305" Count="0" />
+      <LineId Id="303" Count="0" />
+      <LineId Id="299" Count="0" />
       <LineId Id="1" Count="1" />
       <LineId Id="5" Count="0" />
-      <LineId Id="28" Count="1" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="304" Count="0" />
+      <LineId Id="29" Count="0" />
       <LineId Id="8" Count="10" />
       <LineId Id="20" Count="0" />
       <LineId Id="22" Count="0" />
@@ -1305,6 +1324,7 @@ END_IF
       <LineId Id="52" Count="0" />
       <LineId Id="142" Count="0" />
       <LineId Id="53" Count="3" />
+      <LineId Id="306" Count="0" />
       <LineId Id="72" Count="0" />
       <LineId Id="6" Count="0" />
       <LineId Id="3" Count="0" />
