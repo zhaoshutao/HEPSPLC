@@ -329,11 +329,12 @@ END_IF
       <Implementation>
         <ST><![CDATA[(*ÖáÎ»ÖÃ¡¢ËÙ¶È¡¢PosDiff*)
 
-	Pos_LeftTopLin:=LeftTopLin.NcToPlc.ActPos;
-	Pos_RightTopLin:=RightTopLin.NcToPlc.ActPos;
-	Pos_LeftBottomLin:=LeftBottomLin.NcToPlc.ActPos;
-	Pos_RightBottomLin:=RightBottomLin.NcToPlc.ActPos;
+	Pos_LeftTopLin:=DINT_TO_LREAL(LREAL_TO_DINT(LeftTopLin.NcToPlc.ActPos*100000))/100000;
+	Pos_RightTopLin:=DINT_TO_LREAL(LREAL_TO_DINT(RightTopLin.NcToPlc.ActPos*100000))/100000;
+	Pos_LeftBottomLin:=DINT_TO_LREAL(LREAL_TO_DINT(LeftBottomLin.NcToPlc.ActPos*100000))/100000;
+	Pos_RightBottomLin:=DINT_TO_LREAL(LREAL_TO_DINT(RightBottomLin.NcToPlc.ActPos*100000))/100000;
 
+	
 	LB_TestRecord:=Pos_LeftBottomLin-5;
 	RB_TestRecord:=Pos_RightBottomLin-5;
 	moveStatusLeftTop:=LeftTopLin.Status.Moving;
@@ -342,10 +343,10 @@ END_IF
 	moveStatusRightBottom:=RightBottomLin.Status.Moving;
 	moveStatusAllAxis:=moveStatusLeftTop AND moveStatusRightTop AND moveStatusLeftBottom AND moveStatusRightBottom;
 
-	Velo_LeftTopLin:=LeftTopLin.NcToPlc.ActVelo;
-	Velo_RightTopLin:=RightTopLin.NcToPlc.ActVelo;
-	Velo_LeftBottomLin:=LeftBottomLin.NcToPlc.ActVelo;
-	Velo_RightBottomLin:=RightBottomLin.NcToPlc.ActVelo;
+	Velo_LeftTopLin:=DINT_TO_LREAL(LREAL_TO_DINT(LeftTopLin.NcToPlc.ActVelo*100000))/100000;
+	Velo_RightTopLin:=DINT_TO_LREAL(LREAL_TO_DINT(RightTopLin.NcToPlc.ActVelo*100000))/100000;
+	Velo_LeftBottomLin:=DINT_TO_LREAL(LREAL_TO_DINT(LeftBottomLin.NcToPlc.ActVelo*100000))/100000;
+	Velo_RightBottomLin:=DINT_TO_LREAL(LREAL_TO_DINT(RightBottomLin.NcToPlc.ActVelo*100000))/100000;
 
 	PosDiff_LeftTopLin_actual:=LeftTopLin.NcToPlc.PosDiff;
 	PosDiff_RightTopLin_actual:=RightTopLin.NcToPlc.PosDiff;
@@ -1733,7 +1734,11 @@ END_FOR]]></ST>
       <LineId Id="21" Count="79" />
     </LineIds>
     <LineIds Name="MAIN.A_InitAxisParameters">
-      <LineId Id="0" Count="33" />
+      <LineId Id="0" Count="2" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="4" Count="1" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="6" Count="27" />
     </LineIds>
     <LineIds Name="MAIN.A_InitRecipeParameters">
       <LineId Id="78" Count="5" />

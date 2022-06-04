@@ -392,7 +392,7 @@ IF USE_SingleAxis_Compensation THEN
 											/(M_Compensation[k+1].LeftTop-M_Compensation[k].LeftTop)+M_Compensation[k].Encoder);
 				UserGapPositionDisplay_FromLeftBottom:=2*(((Pos_LeftBottomLin-M_Compensation[k].LeftBottom)*(M_Compensation[k+1].Encoder-M_Compensation[k].Encoder))
 											/(M_Compensation[k+1].LeftBottom-M_Compensation[k].LeftBottom)+M_Compensation[k].Encoder);
-				UserGapPositionDisplay:=(UserGapPositionDisplay_FromLeftTop+UserGapPositionDisplay_FromLeftBottom)/2;
+				UserGapPositionDisplay:=DINT_TO_LREAL(LREAL_TO_DINT(((UserGapPositionDisplay_FromLeftTop+UserGapPositionDisplay_FromLeftBottom)/2)*100000))/100000;
 			END_IF
 	END_FOR
 	//右轴显示位置反结算
@@ -405,7 +405,7 @@ IF USE_SingleAxis_Compensation THEN
 				UserRightGapPositionDisplay:=(UserRightGapPositionDisplay_FromRightTop+UserRightGapPositionDisplay_FromRightBottom)/2;
 			END_IF
 	END_FOR
-	UserTaperPositionDisplay:=UserRightGapPositionDisplay-UserGapPositionDisplay;
+	UserTaperPositionDisplay:=DINT_TO_LREAL(LREAL_TO_DINT((UserRightGapPositionDisplay-UserGapPositionDisplay)*100000))/100000;
 END_IF
 (*速度可以不用解算，直接用即可*)
 LeftTopLinVelocityDisplay:=Velo_LeftTopLin;
