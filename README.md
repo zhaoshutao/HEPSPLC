@@ -34,3 +34,8 @@ IF NOT USELinearEncoeder THEN
 	RETURN;
 END_IF
 #
+# 2022.06.04
+Ver.25
+add dicimal cut to 5
+位置速度等小数位数在PLC程序中减少为5位
+#
