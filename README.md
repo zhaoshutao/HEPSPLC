@@ -39,3 +39,9 @@ Ver.25
 add dicimal cut to 5
 位置速度等小数位数在PLC程序中减少为5位
 #
+# 2022.06.20
+Ver.26 modified bug on Hysteresis Mode
+·修改了程序BUG：磁间隙先打开，后拉近时，不能回城走的问题
+·问题原因是在拉开磁间隙时，m_State不能回到0，这一问题是由于targetPosLessThanCurrentPos在磁间隙到位后立即变化
+·修改方法为：targetPosLessThanCurrentPos判断方向，只在m_State=0 AND n_State=0的时候做
+#
