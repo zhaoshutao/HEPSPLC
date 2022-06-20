@@ -62,6 +62,7 @@ VAR
 	TargetRTPosLessThanCurrentRTPos:BOOL;
 	TargetLBPosLessThanCurrentLBPos:BOOL;
 	TargetRBPosLessThanCurrentRBPos:BOOL;
+	PositiveMoving:BOOL;
 	HysteresisMoving:BOOL;
 	NoneHysteresisMoving:BOOL;
 	(*Spectroscopy scanning Mode*)
@@ -679,31 +680,35 @@ IF LeftTopLinPositionNew-Pos_LeftTopLin>LEDriftErrorThreshold AND RightTopLinPos
 		TargetPosLessThanCurrentPos:=FALSE;//四轴目标位置都大于当前位置，直接走到目标位置即可，不需要先走到考虑回城误差的临时位置
 END_IF
 *)
-TargetPosLessThanCurrentPos:=FALSE;
-IF LeftTopLinPositionNew-Pos_LeftTopLin<-LEDriftErrorThreshold THEN
-		TargetPosLessThanCurrentPos:=TRUE;
-		TargetLTPosLessThanCurrentLTPos:=TRUE;
-ELSE
-			TargetLTPosLessThanCurrentLTPos:=FALSE;
+//只在m=和n=0的时候判断，否则会出现一些BUG，比如往大间隙开时，运动到位后m不能回到0.
+IF m_state=0 AND n_state=0 THEN
+		TargetPosLessThanCurrentPos:=FALSE;
+	IF LeftTopLinPositionNew-Pos_LeftTopLin<-LEDriftErrorThreshold THEN
+			TargetPosLessThanCurrentPos:=TRUE;
+			TargetLTPosLessThanCurrentLTPos:=TRUE;
+	ELSE
+				TargetLTPosLessThanCurrentLTPos:=FALSE;
+	END_IF
+	IF RightTopLinPositionNew-Pos_RightTopLin<-LEDriftErrorThreshold THEN
+			TargetPosLessThanCurrentPos:=TRUE;
+			TargetRTPosLessThanCurrentRTPos:=TRUE;
+	ELSE
+			TargetRTPosLessThanCurrentRTPos:=FALSE;
+	END_IF
+	IF LeftBottomLinPositionNew-Pos_LeftBottomLin<-LEDriftErrorThreshold THEN
+			TargetPosLessThanCurrentPos:=TRUE;
+			TargetLBPosLessThanCurrentLBPos:=TRUE;
+	ELSE
+			TargetLBPosLessThanCurrentLBPos:=FALSE;
+	END_IF
+	IF RightBottomLinPositionNew-Pos_RightBottomLin<-LEDriftErrorThreshold THEN
+			TargetPosLessThanCurrentPos:=TRUE;
+			TargetRBPosLessThanCurrentRBPos:=TRUE;
+	ELSE
+			TargetRBPosLessThanCurrentRBPos:=FALSE;
+	END_IF
 END_IF
-IF RightTopLinPositionNew-Pos_RightTopLin<-LEDriftErrorThreshold THEN
-		TargetPosLessThanCurrentPos:=TRUE;
-		TargetRTPosLessThanCurrentRTPos:=TRUE;
-ELSE
-		TargetRTPosLessThanCurrentRTPos:=FALSE;
-END_IF
-IF LeftBottomLinPositionNew-Pos_LeftBottomLin<-LEDriftErrorThreshold THEN
-		TargetPosLessThanCurrentPos:=TRUE;
-		TargetLBPosLessThanCurrentLBPos:=TRUE;
-ELSE
-		TargetLBPosLessThanCurrentLBPos:=FALSE;
-END_IF
-IF RightBottomLinPositionNew-Pos_RightBottomLin<-LEDriftErrorThreshold THEN
-		TargetPosLessThanCurrentPos:=TRUE;
-		TargetRBPosLessThanCurrentRBPos:=TRUE;
-ELSE
-		TargetRBPosLessThanCurrentRBPos:=FALSE;
-END_IF
+
 (*Move*)
 IF InitPowerDone AND InitCompensationDatasDone THEN
 	//IF btn_UserGapMove THEN
@@ -1257,7 +1262,12 @@ END_IF
       <LineId Id="279" Count="0" />
       <LineId Id="229" Count="0" />
       <LineId Id="240" Count="0" />
-      <LineId Id="2" Count="55" />
+      <LineId Id="288" Count="5" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="294" Count="1" />
+      <LineId Id="298" Count="23" />
+      <LineId Id="296" Count="1" />
+      <LineId Id="33" Count="24" />
       <LineId Id="216" Count="0" />
       <LineId Id="58" Count="56" />
       <LineId Id="218" Count="0" />
