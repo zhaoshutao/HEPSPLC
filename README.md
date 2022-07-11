@@ -45,3 +45,6 @@ Ver.26 modified bug on Hysteresis Mode
 ·问题原因是在拉开磁间隙时，m_State不能回到0，这一问题是由于targetPosLessThanCurrentPos在磁间隙到位后立即变化
 ·修改方法为：targetPosLessThanCurrentPos判断方向，只在m_State=0 AND n_State=0的时候做
 #
+# 2022.07.11
+Ver.27 add temperature reading from lakeshore
+#
