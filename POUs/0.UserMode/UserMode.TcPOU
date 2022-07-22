@@ -130,6 +130,8 @@ VAR
 	Diff_UserLeftVelo_PLC: LREAL;
 	Diff_UserRightPos_PLC: LREAL;
 	Diff_UserRightVelo_PLC: LREAL;
+	testa: BOOL;
+	testb: BOOL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -290,34 +292,66 @@ IF Pos_RightBottomLin <=0 THEN
 	LED_Error:=TRUE;
 END_IF
 //
-IF Pos_LeftTopLin >UserMode.max_UserGapPositionNew THEN
+IF Pos_LeftTopLin >UserMode.max_UserGapPositionNew/2 THEN
 	ErrorID:=1105;
 	Error:=TRUE;
 	ErrorDescription:='Pos_LeftTopLin >UserMode.max_UserGapPositionNew';
 	FB_PlcEmergencyStop();
 	LED_Error:=TRUE;
 END_IF
-IF Pos_RightTopLin >UserMode.max_UserGapPositionNew THEN
+IF Pos_RightTopLin >UserMode.max_UserGapPositionNew/2 THEN
 	ErrorID:=1106;
 	Error:=TRUE;
 	ErrorDescription:='Pos_RightTopLin>UserMode.max_UserGapPositionNew';
 	FB_PlcEmergencyStop();
 	LED_Error:=TRUE;
 END_IF
-IF Pos_LeftBottomLin >UserMode.max_UserGapPositionNew THEN
+IF Pos_LeftBottomLin >UserMode.max_UserGapPositionNew/2 THEN
 	ErrorID:=1107;
 	Error:=TRUE;
 	ErrorDescription:='Pos_LeftBottomLin >UserMode.max_UserGapPositionNew';
 	FB_PlcEmergencyStop();
 	LED_Error:=TRUE;
 END_IF
-IF Pos_RightBottomLin >UserMode.max_UserGapPositionNew THEN
+IF Pos_RightBottomLin >UserMode.max_UserGapPositionNew/2 THEN
 	ErrorID:=1108;
 	Error:=TRUE;
 	ErrorDescription:='Pos_RightBottomLin >UserMode.max_UserGapPositionNew';
 	FB_PlcEmergencyStop();
 	LED_Error:=TRUE;
-END_IF]]></ST>
+END_IF
+
+//
+IF Pos_LeftTopLin <UserMode.min_UserGapPositionNew/2 THEN
+	ErrorID:=1109;
+	Error:=TRUE;
+	ErrorDescription:='Pos_LeftTopLin <UserMode.min_UserGapPositionNew/2';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF Pos_RightTopLin <UserMode.min_UserGapPositionNew/2 THEN
+	ErrorID:=1110;
+	Error:=TRUE;
+	ErrorDescription:='Pos_RightTopLin<UserMode.min_UserGapPositionNew/2';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF Pos_LeftBottomLin <UserMode.min_UserGapPositionNew/2 THEN
+	ErrorID:=1111;
+	Error:=TRUE;
+	ErrorDescription:='Pos_LeftBottomLin <UserMode.min_UserGapPositionNew';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF Pos_RightBottomLin <UserMode.min_UserGapPositionNew/2 THEN
+	ErrorID:=1112;
+	Error:=TRUE;
+	ErrorDescription:='Pos_RightBottomLin <UserMode.min_UserGapPositionNew';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+
+]]></ST>
       </Implementation>
     </Action>
     <Action Name="A_InitCompensationData" Id="{1e6a9c39-c8a5-4c48-b57c-71effe5e3747}">
@@ -605,8 +639,8 @@ CASE State OF
 		LED_Error:=FALSE;
 	99:
 		Error:=TRUE;
-		ErrorID:=701;
-		ErrorDescription:='power on error';		
+		//ErrorID:=701;
+		//ErrorDescription:='power on error';		
 		btn_PowerOn:=FALSE;
 		State:=99;
 		Busy:=FALSE;
@@ -1133,6 +1167,10 @@ END_IF
       <LineId Id="29" Count="0" />
       <LineId Id="31" Count="26" />
       <LineId Id="30" Count="0" />
+      <LineId Id="69" Count="28" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="104" Count="0" />
     </LineIds>
     <LineIds Name="UserMode.A_InitCompensationData">
       <LineId Id="206" Count="0" />
