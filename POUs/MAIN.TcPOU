@@ -861,7 +861,7 @@ CASE SetAxisPosState OF
 		fb_ton4.IN:=FALSE;
 		LED_Error:=TRUE;
 		ErrorID:=401;
-		ErrorDescription:='SerAxisPosition fail';
+		ErrorDescription:='SetAxisPosition fail';
 END_CASE
 ]]></ST>
       </Implementation>
