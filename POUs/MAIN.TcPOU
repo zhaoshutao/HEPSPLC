@@ -417,8 +417,8 @@ temperature_gradient_2_To_1:=ABS(TemperatureSensors_2-TemperatureSensors_1);
 temperature_gradient_3_To_2:=ABS(TemperatureSensors_3-TemperatureSensors_2);
 temperature_gradient_5_To_4:=ABS(TemperatureSensors_5-TemperatureSensors_4);
 temperature_gradient_6_To_5:=ABS(TemperatureSensors_6-TemperatureSensors_5);
-temperature_gradient_max:=MAX(temperature_gradient_2_To_1,temperature_gradient_3_To_2,
-							temperature_gradient_5_To_4,temperature_gradient_6_To_5);
+temperature_gradient_max:=DINT_TO_LREAL(LREAL_TO_DINT(MAX(temperature_gradient_2_To_1,temperature_gradient_3_To_2,
+							temperature_gradient_5_To_4,temperature_gradient_6_To_5)*100))/100;
 //计算大梁上的温度平均值
 temperature_average:=DINT_TO_LREAL(LREAL_TO_DINT((TemperatureSensors_1+TemperatureSensors_2+TemperatureSensors_3+TemperatureSensors_4
 					+TemperatureSensors_5+TemperatureSensors_6)/6*100))/100;
