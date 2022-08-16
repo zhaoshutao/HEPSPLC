@@ -891,7 +891,7 @@ CASE state_setLEPosBias OF
 			state_setLEPosBias:=-100;
 		END_IF
 	2:
-		IF MC_SetLEPosBias_LeftTop.Done OR NOT MC_SetLEPosBias_RightTop.Done OR 
+		IF NOT MC_SetLEPosBias_LeftTop.Done OR NOT MC_SetLEPosBias_RightTop.Done OR 
 			NOT MC_SetLEPosBias_LeftBottom.Done OR NOT MC_SetLEPosBias_RightBottom.Done THEN
 			IF NOT PositionBiasTON.Q THEN
 				state_setLEPosBias:=2;
@@ -1950,7 +1950,7 @@ END_FOR]]></ST>
       <LineId Id="215" Count="0" />
       <LineId Id="213" Count="1" />
       <LineId Id="208" Count="0" />
-      <LineId Id="216" Count="0" />
+      <LineId Id="250" Count="0" />
       <LineId Id="218" Count="1" />
       <LineId Id="223" Count="1" />
       <LineId Id="222" Count="0" />
