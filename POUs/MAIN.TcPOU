@@ -145,6 +145,7 @@ VAR
 	temperature_gradient_max:LREAL;
 	//
 	temperature_average:LREAL;
+	A_SetLinearEncoderPositionBias_Enable: BOOL;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[A_InitRecipeParameters();
@@ -206,8 +207,12 @@ BackgroundEL();
 (*fbEL6001(TxBuffer:=TxBufferEL, RxBuffer:=RxBufferEL);*)
 
 (*设置position bias*)
-A_SetLinearEncoderPositionBias();
-
+IF loadParametersDone THEN 
+	A_SetLinearEncoderPositionBias_Enable:=TRUE;
+END_IF
+IF  A_SetLinearEncoderPositionBias_Enable THEN
+	A_SetLinearEncoderPositionBias();
+END_IF
 (*获取温度传感器数据*)
 A_GetTemperatureSensorsData();]]></ST>
     </Implementation>
@@ -902,7 +907,12 @@ CASE state_setLEPosBias OF
 		IF  MC_SetLEPosBias_LeftTop.Done AND MC_SetLEPosBias_RightTop.Done AND
 			MC_SetLEPosBias_LeftBottom.Done AND MC_SetLEPosBias_RightBottom.Done THEN
 			state_setLEPosBias:=88;
-		END_IF
+		END_IF	
+		IF MC_SetLEPosBias_LeftTop.Error OR MC_SetLEPosBias_RightTop.Error OR 
+			MC_SetLEPosBias_LeftBottom.Error OR MC_SetLEPosBias_RightBottom.Error THEN
+			state_setLEPosBias:=-100;
+		END_IF 
+		
 	88:
 		PositionBiasTON.IN:=FALSE;
 		PositionBiasDone:=TRUE;
@@ -1802,6 +1812,8 @@ END_FOR]]></ST>
       <LineId Id="97" Count="21" />
       <LineId Id="540" Count="0" />
       <LineId Id="539" Count="0" />
+      <LineId Id="1013" Count="2" />
+      <LineId Id="1011" Count="0" />
       <LineId Id="541" Count="0" />
       <LineId Id="743" Count="1" />
       <LineId Id="866" Count="0" />
@@ -1950,7 +1962,7 @@ END_FOR]]></ST>
       <LineId Id="215" Count="0" />
       <LineId Id="213" Count="1" />
       <LineId Id="208" Count="0" />
-      <LineId Id="250" Count="0" />
+      <LineId Id="251" Count="0" />
       <LineId Id="218" Count="1" />
       <LineId Id="223" Count="1" />
       <LineId Id="222" Count="0" />
@@ -1959,7 +1971,10 @@ END_FOR]]></ST>
       <LineId Id="221" Count="0" />
       <LineId Id="227" Count="0" />
       <LineId Id="230" Count="0" />
-      <LineId Id="232" Count="0" />
+      <LineId Id="255" Count="0" />
+      <LineId Id="257" Count="2" />
+      <LineId Id="256" Count="0" />
+      <LineId Id="261" Count="0" />
       <LineId Id="107" Count="0" />
       <LineId Id="234" Count="0" />
       <LineId Id="108" Count="0" />
