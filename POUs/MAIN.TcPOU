@@ -220,20 +220,16 @@ A_TemperatureInit();
 BackgroundEL();
 (*fbEL6001(TxBuffer:=TxBufferEL, RxBuffer:=RxBufferEL);*)
 
-(*设置position bias*)
-IF loadParametersDone THEN 
-	A_SetLinearEncoderPositionBias_Enable:=TRUE;
-END_IF
-IF  A_SetLinearEncoderPositionBias_Enable THEN
-	A_SetLinearEncoderPositionBias();
-END_IF
+
 (*获取温度传感器数据*)
 A_GetTemperatureSensorsData();
 (*低温补偿监控*)
 A_CryogenicCompensationMonitoring();
 
 (*设置position bias*)
-A_SetLinearEncoderPositionBias();]]></ST>
+IF loadParametersDone THEN 
+	A_SetLinearEncoderPositionBias();
+END_IF]]></ST>
     </Implementation>
     <Action Name="A_CheckKillSwitch" Id="{158eed83-fba1-4051-b569-3585448d2a5a}">
       <Implementation>
@@ -389,7 +385,7 @@ END_IF
     <Action Name="A_CryogenicCompensationMonitoring" Id="{196f46d5-b4be-43fe-a564-735eda66c49f}">
       <Implementation>
         <ST><![CDATA[//没有传感器OR不是CPMU不低温补偿OR低温不到位，均不补偿
-IF NOT HasTemperatureSensorOrNot OR NOT CryogenicCompensationOn OR temperatureStatus<>2 THEN
+IF NOT HasTemperatureSensorOrNot OR NOT CryogenicCompensationOn THEN //OR temperatureStatus<>2 THEN
 	//不补偿
 	CryogenicCompensation_LeftTop:=0;
 	CryogenicCompensation_RightTop:=0;
@@ -424,12 +420,14 @@ ELSE
 	END_IF
 END_IF
 //若在低温补偿模式，但是温度没到低温区间，则Emergency，不允许启动
+(*
 IF CryogenicCompensationOn AND temperatureStatus<>2 THEN
 			Error:=TRUE;
 			ErrorID:=1205;
 			ErrorDescription:='CryogenicCompensationOn AND temperatureStatus<>2';
 			FB_PlcEmergencyStop();
-END_IF]]></ST>
+END_IF
+*)]]></ST>
       </Implementation>
     </Action>
     <Action Name="A_GetTemperatureSensorsData" Id="{d73fb87c-9e06-4b36-8cf6-68d5032eab30}">
@@ -959,9 +957,9 @@ END_CASE
         <ST><![CDATA[//光栅positionBias补偿低温收缩量
 IF CryogenicCompensationConditionsReady AND NOT CryogenicCompensationDone THEN
 	PositionBias_LeftTop:=PositionBias_LeftTop+CryogenicCompensation_LeftTop;
-	PositionBias_RightTop:=PositionBias_LeftTop+CryogenicCompensation_LeftTop;
-	PositionBias_LeftTop:=PositionBias_LeftTop+CryogenicCompensation_LeftTop;
-	PositionBias_LeftTop:=PositionBias_LeftTop+CryogenicCompensation_LeftTop;
+	PositionBias_RightTop:=PositionBias_RightTop+CryogenicCompensation_RightTop;
+	PositionBias_LeftBottom:=PositionBias_LeftBottom+CryogenicCompensation_LeftBottom;
+	PositionBias_RightBottom:=PositionBias_RightBottom+CryogenicCompensation_RightBottom;
 	CryogenicCompensationDone:=TRUE;
 END_IF
 //设置bias开始
@@ -1903,12 +1901,10 @@ END_FOR]]></ST>
       <LineId Id="448" Count="1" />
       <LineId Id="97" Count="21" />
       <LineId Id="540" Count="0" />
-      <LineId Id="539" Count="0" />
-      <LineId Id="1013" Count="2" />
-      <LineId Id="1011" Count="0" />
-      <LineId Id="541" Count="0" />
       <LineId Id="743" Count="0" />
-      <LineId Id="1174" Count="5" />
+      <LineId Id="1174" Count="4" />
+      <LineId Id="1339" Count="1" />
+      <LineId Id="1344" Count="0" />
       <LineId Id="866" Count="0" />
     </LineIds>
     <LineIds Name="MAIN.A_CheckKillSwitch">
@@ -1946,8 +1942,11 @@ END_FOR]]></ST>
       <LineId Id="21" Count="79" />
     </LineIds>
     <LineIds Name="MAIN.A_CryogenicCompensationMonitoring">
-      <LineId Id="2" Count="40" />
+      <LineId Id="2" Count="35" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="38" Count="4" />
       <LineId Id="1" Count="0" />
+      <LineId Id="44" Count="0" />
     </LineIds>
     <LineIds Name="MAIN.A_GetTemperatureSensorsData">
       <LineId Id="37" Count="0" />
