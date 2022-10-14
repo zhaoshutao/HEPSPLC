@@ -105,6 +105,8 @@ VAR_GLOBAL
 	m_restartTC:BOOL;
 (*Plc_EmergencyStop *)
 	Plc_EmergencyStop  AT %Q*:BOOL:=TRUE;
+(*硬急停*)
+	Hardware_EmergencyStop :BOOL:=TRUE;
 (*LED*)
 	Led_Run  AT %Q*:BOOL;
 	Led_Error  AT %Q*:BOOL;
