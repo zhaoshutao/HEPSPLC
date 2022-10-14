@@ -495,12 +495,35 @@ END_IF
     </Action>
     <Action Name="A_GetDriverStatus" Id="{e05cf975-7b3e-4430-bb2e-a308f4391f1b}">
       <Implementation>
-        <ST><![CDATA[CASE m_GetDriveStatusState OF
+        <ST><![CDATA[A_GetDriverStatusMC();
+CASE m_GetDriveStatusState OF
 	0:
-		bDriveDiagMessageAndNumber:=TRUE;
-		A_GetDriverStatusMC();
-		m_GetDriveStatusState:=1;
+		IF 	fb_SoEReadDiagMessage_LeftTop.bError
+			OR fb_SoEReadDiagMessage_RightTop.bError
+			OR fb_SoEReadDiagMessage_LeftBottom.bError
+			OR fb_SoEReadDiagMessage_RightBottom.bError
+			OR FB_SoEReadDiagNumber_LeftTop.bError
+			OR FB_SoEReadDiagNumber_RightTop.bError
+			OR FB_SoEReadDiagNumber_LeftBottom.bError
+			OR FB_SoEReadDiagNumber_RightBottom.bError THEN
+			m_GetDriveStatusState:=-100;
+		ELSE
+			m_GetDriveStatusState:=1;
+		END_IF
 	1:
+		bDriveDiagMessageAndNumber:=TRUE;
+		m_GetDriveStatusState:=2;
+	2:
+		DriveDiagMessage_LeftTop:=fb_SoEReadDiagMessage_LeftTop.sDiagMessage.strData;
+		DriveDiagMessage_RightTop:=fb_SoEReadDiagMessage_RightTop.sDiagMessage.strData;
+		DriveDiagMessage_LeftBottom:=fb_SoEReadDiagMessage_LeftBottom.sDiagMessage.strData;
+		DriveDiagMessage_RightBottom:=fb_SoEReadDiagMessage_RightBottom.sDiagMessage.strData;
+		//
+		DriveDiagNumber_LeftTop:=FB_SoEReadDiagNumber_LeftTop.iDiagNumber;
+		DriveDiagNumber_RightTop:=FB_SoEReadDiagNumber_RightTop.iDiagNumber;
+		DriveDiagNumber_LeftBottom:=FB_SoEReadDiagNumber_LeftBottom.iDiagNumber;
+		DriveDiagNumber_RightBottom:=FB_SoEReadDiagNumber_RightBottom.iDiagNumber;
+		//
 		IF 	NOT fb_SoEReadDiagMessage_LeftTop.bBusy
 			AND NOT fb_SoEReadDiagMessage_RightTop.bBusy
 			AND NOT fb_SoEReadDiagMessage_LeftBottom.bBusy
@@ -509,7 +532,7 @@ END_IF
 			AND NOT  FB_SoEReadDiagNumber_RightTop.bBusy
 			AND NOT FB_SoEReadDiagNumber_LeftBottom.bBusy
 			AND NOT FB_SoEReadDiagNumber_RightBottom.bBusy THEN
-			m_GetDriveStatusState:=2;
+			m_GetDriveStatusState:=88;
 		END_IF
 		IF 	fb_SoEReadDiagMessage_LeftTop.bError
 			OR fb_SoEReadDiagMessage_RightTop.bError
@@ -521,18 +544,6 @@ END_IF
 			OR FB_SoEReadDiagNumber_RightBottom.bError THEN
 			m_GetDriveStatusState:=-100;
 		END_IF
-	2:
-		A_GetDriverStatusMC();
-		DriveDiagMessage_LeftTop:=fb_SoEReadDiagMessage_LeftTop.sDiagMessage.strData;
-		DriveDiagMessage_RightTop:=fb_SoEReadDiagMessage_RightTop.sDiagMessage.strData;
-		DriveDiagMessage_LeftBottom:=fb_SoEReadDiagMessage_LeftBottom.sDiagMessage.strData;
-		DriveDiagMessage_RightBottom:=fb_SoEReadDiagMessage_RightBottom.sDiagMessage.strData;
-		//
-		DriveDiagNumber_LeftTop:=FB_SoEReadDiagNumber_LeftTop.iDiagNumber;
-		DriveDiagNumber_RightTop:=FB_SoEReadDiagNumber_RightTop.iDiagNumber;
-		DriveDiagNumber_LeftBottom:=FB_SoEReadDiagNumber_LeftBottom.iDiagNumber;
-		DriveDiagNumber_RightBottom:=FB_SoEReadDiagNumber_RightBottom.iDiagNumber;
-		m_GetDriveStatusState:=88;
 	88:
 		bDriveDiagMessageAndNumber:=FALSE;
 		A_GetDriverStatusMC();
@@ -4069,42 +4080,8 @@ END_FOR]]></ST>
       <LineId Id="44" Count="0" />
     </LineIds>
     <LineIds Name="MAIN.A_GetDriverStatus">
-      <LineId Id="40" Count="0" />
-      <LineId Id="43" Count="0" />
-      <LineId Id="45" Count="0" />
-      <LineId Id="47" Count="2" />
-      <LineId Id="51" Count="2" />
-      <LineId Id="50" Count="0" />
-      <LineId Id="90" Count="2" />
-      <LineId Id="89" Count="0" />
-      <LineId Id="54" Count="1" />
-      <LineId Id="63" Count="3" />
-      <LineId Id="94" Count="2" />
-      <LineId Id="93" Count="0" />
-      <LineId Id="67" Count="0" />
-      <LineId Id="62" Count="0" />
-      <LineId Id="73" Count="0" />
-      <LineId Id="78" Count="0" />
-      <LineId Id="75" Count="2" />
-      <LineId Id="74" Count="0" />
-      <LineId Id="81" Count="0" />
-      <LineId Id="86" Count="2" />
-      <LineId Id="85" Count="0" />
-      <LineId Id="100" Count="0" />
-      <LineId Id="56" Count="0" />
-      <LineId Id="59" Count="0" />
-      <LineId Id="46" Count="0" />
-      <LineId Id="60" Count="1" />
-      <LineId Id="68" Count="0" />
-      <LineId Id="70" Count="2" />
-      <LineId Id="69" Count="0" />
-      <LineId Id="44" Count="0" />
-      <LineId Id="41" Count="1" />
-      <LineId Id="2" Count="10" />
-      <LineId Id="1" Count="0" />
-      <LineId Id="15" Count="0" />
-      <LineId Id="27" Count="11" />
-      <LineId Id="14" Count="0" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="104" Count="86" />
       <LineId Id="39" Count="0" />
     </LineIds>
     <LineIds Name="MAIN.A_GetTemperatureSensorsData">
