@@ -291,6 +291,8 @@ IF 	NOT KS_LeftTop_Far_Contact1 OR
 	NOT KS_handEmergency2_Contact2 OR
 	NOT KS_softEmergency2_Contact THEN
 	Hardware_EmergencyStop:=FALSE;
+ELSE
+	Hardware_EmergencyStop:=TRUE;
 END_IF
 ]]></ST>
       </Implementation>
@@ -4040,6 +4042,7 @@ END_FOR]]></ST>
       <LineId Id="24" Count="5" />
       <LineId Id="5" Count="0" />
       <LineId Id="31" Count="0" />
+      <LineId Id="36" Count="1" />
       <LineId Id="4" Count="0" />
       <LineId Id="1" Count="0" />
     </LineIds>
