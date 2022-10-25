@@ -252,13 +252,19 @@ A_GetTemperatureSensorsData();
 A_CryogenicCompensationMonitoring();
 
 (*设置position bias*)
-IF loadParametersDone THEN 
+IF loadParametersDone AND DriveStatus=1 THEN 
 	A_SetLinearEncoderPositionBias();
 END_IF
 (*检查硬急停状态，包括安全限位、柜门急停、手持急停*)
 A_CheckHardwareEmergencyStopStatus();
 (*获取驱动器状态信息*)
-A_GetDriverStatus();]]></ST>
+A_GetDriverStatus();
+(*IDControlReady*)
+IF DriveStatus<>0 AND SafePLCRunOK THEN
+	IDControlReady:=TRUE;
+ELSE
+	IDControlReady:=FALSE;
+END_IF]]></ST>
     </Implementation>
     <Action Name="A_CheckHardwareEmergencyStopStatus" Id="{c59a955b-0a8f-43a7-a0e7-3ab11b3d5ab6}">
       <Implementation>
@@ -551,11 +557,24 @@ CASE m_GetDriveStatusState OF
 			OR FB_SoEReadDiagNumber_RightBottom.bError THEN
 			m_GetDriveStatusState:=-100;
 		END_IF
+		(*Drive Status*)
+		//D012, Axis state machine: Control and power section ready
+		IF DriveDiagNumber_LeftTop=16#D012 AND DriveDiagNumber_RightTop=16#D012
+			AND DriveDiagNumber_LeftBottom=16#D012 AND DriveDiagNumber_RightBottom=16#D012 THEN
+			DriveStatus:=1;
+		//D013, Axis state machine: Axis in operation
+		ELSIF DriveDiagNumber_LeftTop=16#D013 AND DriveDiagNumber_RightTop=16#D013
+			AND DriveDiagNumber_LeftBottom=16#D013 AND DriveDiagNumber_RightBottom=16#D013 THEN
+			DriveStatus:=2;
+		ELSE
+			DriveStatus:=0;
+		END_IF
 	88:
 		bDriveDiagMessageAndNumber:=FALSE;
 		A_GetDriverStatusMC();
 		GetDriveStatusStateDone:=TRUE;
 		GetDriveStatusStateError:=FALSE;
+		m_GetDriveStatusState:=0;
 	-100:
 		bDriveDiagMessageAndNumber:=FALSE;
 		A_GetDriverStatusMC();
@@ -2760,15 +2779,15 @@ IF ABS(PosDiff_RightBottomLin_actual)>PosDiff_RightBottomLin THEN
 	LED_Error:=TRUE;
 END_IF
 //
-IF ABS(PosDiff_LeftTopLin_actual-PosDiff_RightTopLin_actual)>0.1 THEN
+IF ABS(PosDiff_LeftTopLin_actual-PosDiff_RightTopLin_actual)>0.05 THEN
 	ErrorID:=205;
-	ErrorDescription:='ABS(PosDiff_LeftTopLin_actual-PosDiff_RightTopLin_actual)>0.1';
+	ErrorDescription:='ABS(PosDiff_LeftTopLin_actual-PosDiff_RightTopLin_actual)>0.05';
 	Error:=TRUE;
 	FB_PlcEmergencyStop();
 	LED_Error:=TRUE;
-ELSIF ABS(PosDiff_LeftBottomLin_actual-PosDiff_RightBottomLin_actual)>0.1 THEN
+ELSIF ABS(PosDiff_LeftBottomLin_actual-PosDiff_RightBottomLin_actual)>0.05 THEN
 	ErrorID:=206;
-	ErrorDescription:='ABS(PosDiff_LeftBottomLin_actual-PosDiff_RightBottomLin_actual)>0.1';
+	ErrorDescription:='ABS(PosDiff_LeftBottomLin_actual-PosDiff_RightBottomLin_actual)>0.05';
 	Error:=TRUE;
 	FB_PlcEmergencyStop();
 	LED_Error:=TRUE;
@@ -4033,6 +4052,10 @@ END_FOR]]></ST>
       <LineId Id="1505" Count="0" />
       <LineId Id="1504" Count="0" />
       <LineId Id="1506" Count="1" />
+      <LineId Id="1695" Count="0" />
+      <LineId Id="1692" Count="1" />
+      <LineId Id="1696" Count="1" />
+      <LineId Id="1694" Count="0" />
     </LineIds>
     <LineIds Name="MAIN.A_CheckHardwareEmergencyStopStatus">
       <LineId Id="33" Count="2" />
@@ -4091,7 +4114,19 @@ END_FOR]]></ST>
       <LineId Id="192" Count="2" />
       <LineId Id="191" Count="0" />
       <LineId Id="102" Count="0" />
-      <LineId Id="104" Count="86" />
+      <LineId Id="104" Count="47" />
+      <LineId Id="199" Count="0" />
+      <LineId Id="204" Count="0" />
+      <LineId Id="195" Count="1" />
+      <LineId Id="198" Count="0" />
+      <LineId Id="205" Count="0" />
+      <LineId Id="202" Count="1" />
+      <LineId Id="200" Count="1" />
+      <LineId Id="206" Count="0" />
+      <LineId Id="197" Count="0" />
+      <LineId Id="152" Count="4" />
+      <LineId Id="207" Count="0" />
+      <LineId Id="157" Count="33" />
       <LineId Id="39" Count="0" />
     </LineIds>
     <LineIds Name="MAIN.A_GetTemperatureSensorsData">

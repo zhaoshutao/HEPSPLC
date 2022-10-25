@@ -3,6 +3,8 @@
   <GVL Name="Global_Variables" Id="{bcaa4f18-97b1-4818-bac8-1835e8da9e31}">
     <Declaration><![CDATA[//{attribute 'Tc2GvlVarNames'}
 VAR_GLOBAL
+(*IDControl Ready*)
+	IDControlReady:BOOL;
 (*Error Massage*)
 	Error:BOOL;
 	ErrorID:DINT;
@@ -14,6 +16,8 @@ VAR_GLOBAL
 	PositionBiasDone:BOOL;
 (*回程差*)
 	HysteresisError:LREAL;
+(*Drive Status*)
+	DriveStatus:DINT;//1:Drive Ready;2:Axis is in operation;0:Others
 (*光栅漂移误差阈值*)
 	LEDriftErrorThreshold:LREAL:=0.001;
 (*Lag Distance threshold*)
