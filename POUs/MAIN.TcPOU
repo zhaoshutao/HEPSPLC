@@ -202,7 +202,7 @@ IF NOT simulation THEN
 A_SafePlcStartInit();
 END_IF
 (************SetAxisPosition*********************)
-IF  NOT USELinearEncoeder AND setAxisPositionEnable AND btn_setAxisPosition THEN
+IF  NOT USELinearEncoder AND setAxisPositionEnable AND btn_setAxisPosition THEN
 	//IF NOT SerAxisPositionDone THEN
 		FB_Set_AxisPosition.GapValueSet:=GapSetValue;
 		A_SetAxisPosition();
@@ -224,12 +224,6 @@ IF SafePLCRunOK OR Simulation THEN
 		UserMode();
 	END_IF
 END_IF
-(************SetAxisPosition*********************)
-//IF NOT USELinearEncoeder THEN
-//	IF NOT SerAxisPositionDone THEN
-//		A_SetAxisPosition();
-//	END_IF
-//END_IF
 (*******Led Show******)
 fb_led_Show();
 (*******Check Power status£¬¸³Öµ¸øÈ«¾Ö±äÁ¿st_Power*******)
@@ -252,7 +246,7 @@ A_GetTemperatureSensorsData();
 A_CryogenicCompensationMonitoring();
 
 (*设置position bias*)
-IF loadParametersDone AND DriveStatus=1 THEN 
+IF loadParametersDone AND (DriveStatus=1 OR simulation) THEN 
 	A_SetLinearEncoderPositionBias();
 END_IF
 (*检查硬急停状态，包括安全限位、柜门急停、手持急停*)
@@ -4042,7 +4036,8 @@ END_FOR]]></ST>
       <LineId Id="268" Count="0" />
       <LineId Id="85" Count="11" />
       <LineId Id="448" Count="1" />
-      <LineId Id="97" Count="21" />
+      <LineId Id="97" Count="1" />
+      <LineId Id="105" Count="13" />
       <LineId Id="540" Count="0" />
       <LineId Id="743" Count="0" />
       <LineId Id="1174" Count="4" />

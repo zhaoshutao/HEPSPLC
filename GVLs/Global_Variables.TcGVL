@@ -104,7 +104,7 @@ VAR_GLOBAL
 (*simulation OR NOT*)
 	simulation:BOOL;
 (*USELinearEncoeder*)
-	USELinearEncoeder:BOOL:=TRUE;
+	USELinearEncoder:BOOL:=TRUE;
 (*restartTwinCAT*)
 	m_restartTC:BOOL;
 (*Plc_EmergencyStop *)
