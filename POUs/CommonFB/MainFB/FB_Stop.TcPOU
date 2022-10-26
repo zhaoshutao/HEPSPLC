@@ -77,9 +77,9 @@ END_VAR]]></Declaration>
       <ST><![CDATA[IF PowerState=1 THEN
 	IF Mode=1 AND CoupleState=1 THEN
 		A_GapStop();
-	ELSIF Mode=2 AND CoupleState=1 AND TopStop THEN
+	ELSIF Mode=2 AND CoupleState=0 AND TopStop THEN
 		A_TopStop();
-	ELSIF Mode=2 AND CoupleState=1 AND BottomStop THEN
+	ELSIF Mode=2 AND CoupleState=0 AND BottomStop THEN
 		A_BottomStop();
 	ELSIF Mode=3 AND CoupleState=0 AND TaperStop THEN
 		A_TaperStop();
@@ -174,24 +174,27 @@ fb_ton2(PT:=t#100ms);
 A_StopMC();
 CASE BottomState OF
 	0:
-		IF Bottom_MC_Stop.Error THEN
+		IF Bottom_MC_Stop.Error OR RightBottomLin_MC_Stop.Error THEN
 			ErrorID:=1;
 			BottomState:=-100;
 			Bottom_MC_Stop.Execute:=FALSE;
+			RightBottomLin_MC_Stop.Execute:=FALSE;
 			A_StopMC();
 		ELSE
 			BottomState:=1;
 		END_IF
 	1:
 		Bottom_MC_Stop.Execute:=TRUE;
+		RightBottomLin_MC_Stop.Execute:=TRUE;
 		fb_ton2.IN:=TRUE;
 		BottomState:=2;
 	2:
-		IF  NOT Bottom_MC_Stop.Done THEN
+		IF  NOT Bottom_MC_Stop.Done OR NOT Bottom_MC_Stop.Done THEN
 				BottomState:=2;
 		ELSE
 			BottomState:=88;
 			Bottom_MC_Stop.Execute:=FALSE;
+			RightBottomLin_MC_Stop.Execute:=FALSE;
 			A_StopMC();
 		END_IF
 
@@ -212,6 +215,7 @@ CASE BottomState OF
 		BottomDone:=FALSE;
 		Error:=TRUE;
 		Bottom_MC_Stop.Execute:=FALSE;
+		RightBottomLin_MC_Stop.Execute:=FALSE;
 		A_StopMC();
 		fb_ton2.IN:=FALSE;
 
@@ -1641,7 +1645,7 @@ fb_ton1(PT:=t#100ms);
 A_StopMC();
 CASE TopState OF
 	0:
-		IF Top_MC_Stop.Error THEN
+		IF Top_MC_Stop.Error OR RightTopLin_MC_Stop.Error THEN
 			ErrorID:=1;
 			TopState:=-100;
 			Top_MC_Stop.Execute:=FALSE;
@@ -1651,14 +1655,16 @@ CASE TopState OF
 		END_IF
 	1:
 		Top_MC_Stop.Execute:=TRUE;
+		RightTopLin_MC_Stop.Execute:=TRUE;
 		fb_ton1.IN:=TRUE;
 		TopState:=2;
 	2:
-		IF  NOT Top_MC_Stop.Done THEN
+		IF  NOT Top_MC_Stop.Done OR NOT RightTopLin_MC_Stop.Done THEN
 				TopState:=2;
 		ELSE
 			TopState:=88;
 			Top_MC_Stop.Execute:=FALSE;
+			RightTopLin_MC_Stop.Execute:=FALSE;
 			A_StopMC();
 		END_IF
 
@@ -1679,6 +1685,7 @@ CASE TopState OF
 		TopDone:=FALSE;
 		Error:=TRUE;
 		Top_MC_Stop.Execute:=FALSE;
+		RightTopLin_MC_Stop.Execute:=FALSE;
 		A_StopMC();
 		fb_ton1.IN:=FALSE;
 
@@ -1693,7 +1700,15 @@ END_IF]]></ST>
       <LineId Id="0" Count="61" />
     </LineIds>
     <LineIds Name="FB_Stop.A_BottomStop">
-      <LineId Id="0" Count="49" />
+      <LineId Id="0" Count="10" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="11" Count="5" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="17" Count="7" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="25" Count="19" />
+      <LineId Id="54" Count="0" />
+      <LineId Id="45" Count="4" />
     </LineIds>
     <LineIds Name="FB_Stop.A_GapStop">
       <LineId Id="0" Count="53" />
@@ -1714,7 +1729,13 @@ END_IF]]></ST>
       <LineId Id="0" Count="53" />
     </LineIds>
     <LineIds Name="FB_Stop.A_TopStop">
-      <LineId Id="0" Count="49" />
+      <LineId Id="0" Count="16" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="17" Count="7" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="25" Count="19" />
+      <LineId Id="53" Count="0" />
+      <LineId Id="45" Count="4" />
     </LineIds>
   </POU>
 </TcPlcObject>
