@@ -14,7 +14,7 @@ FUNCTION_BLOCK FB_Move
 VAR_INPUT
 	(*È«¾Ö*)
 	Mode:DINT;
-	PowerState:DINT;
+	PowerState:BOOL;
 	CoupleState:DINT;
 	(*BCGapMode*)
 	BCLeftTopPosition:LREAL;
