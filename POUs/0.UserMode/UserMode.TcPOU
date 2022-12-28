@@ -66,6 +66,7 @@ VAR
 	HysteresisMoving:BOOL;
 	NoneHysteresisMoving:BOOL;
 	(*Spectroscopy scanning Mode*)
+	IsSSMotionMode:BOOL;
 	RegularMotionMode:BOOL;
 	SSMotionMode:BOOL;
 	SS_StepSize:LREAL:=0.001;
@@ -145,11 +146,11 @@ IF NOT loadParametersDone THEN
 	RETURN;
 END_IF
 (*btn_Power On/Off*)
-IF btn_Power AND st_Power=0 THEN
+IF btn_Power AND NOT st_Power THEN
 	btn_PowerOn:=TRUE;
 	btn_Power:=FALSE;
 END_IF
-IF btn_Power AND st_Power=1 THEN
+IF btn_Power AND st_Power THEN
 	btn_PowerOff:=TRUE;
 	btn_Power:=FALSE;
 END_IF
@@ -175,6 +176,13 @@ IF RegularMotionMode AND NOT SSMotionMode THEN
 END_IF
 
 (*Spectroscopy scanning Mode*)
+IF IsSSMotionMode THEN
+	SSMotionMode:=TRUE;
+	RegularMotionMode:=FALSE;
+ELSE
+	SSMotionMode:=FALSE;
+	RegularMotionMode:=TRUE;
+END_IF
 IF	SSMotionMode AND NOT RegularMotionMode THEN
 	A_SpectroscopyScanningMotion();
 END_IF
@@ -1140,6 +1148,10 @@ END_IF
       <LineId Id="549" Count="0" />
       <LineId Id="545" Count="0" />
       <LineId Id="445" Count="0" />
+      <LineId Id="1149" Count="1" />
+      <LineId Id="1152" Count="2" />
+      <LineId Id="1156" Count="0" />
+      <LineId Id="1155" Count="0" />
       <LineId Id="550" Count="0" />
       <LineId Id="528" Count="0" />
       <LineId Id="551" Count="0" />

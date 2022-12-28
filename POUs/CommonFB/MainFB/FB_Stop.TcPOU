@@ -5,7 +5,7 @@
 VAR_INPUT
 (*È«¾Ö*)
 	Mode:DINT;
-	PowerState:DINT;
+	PowerState:BOOL;
 	CoupleState:DINT;
 	(*GapMode*)
 	GapStop:BOOL;

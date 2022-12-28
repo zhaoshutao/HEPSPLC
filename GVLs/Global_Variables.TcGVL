@@ -237,7 +237,7 @@ VAR_GLOBAL
 	UserTaperPositionActual:LREAL;
 	UserTaperVelocityActual:LREAL;
 (***********************Power status and couple statatus***********************)
-	st_Power:DINT;
+	st_Power:BOOL;
 	st_Couple:DINT;
 (************************FB***********************)
 	FB_Power:FB_Power;
