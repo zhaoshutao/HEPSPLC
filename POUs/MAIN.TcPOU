@@ -169,6 +169,7 @@ VAR
 	m_GetDriveStatusState:INT;
 	GetDriveStatusStateDone:BOOL;
 	GetDriveStatusStateError:BOOL;
+	GetDriveStatusTON: TON;
 	//	
 	fb_SoEReadDiagMessage_LeftTop: FB_SoEReadDiagMessage;
 	fb_SoEReadDiagMessage_RightTop: FB_SoEReadDiagMessage;
@@ -283,6 +284,7 @@ IF NOT simulation THEN
 END_IF
 (*IDControlReady*)
 IF ((DriveStatus<>0 AND SafePLCRunOK) OR simulation) AND NOT Error THEN
+//IF (SafePLCRunOK OR simulation) AND NOT Error THEN
 	IDControlReady:=TRUE;
 ELSE
 	IDControlReady:=FALSE;
@@ -570,28 +572,19 @@ END_IF
 	m_GetDriveStatusState:=0;
 	bReloadDriveDiagMessageAndNumber:=FALSE;
 END_IF
+GetDriveStatusTON(PT:=T#1S);
 A_GetDriverStatusMC();
 CASE m_GetDriveStatusState OF
 	0:
-		(*
-		IF 	fb_SoEReadDiagMessage_LeftTop.bError
-			OR fb_SoEReadDiagMessage_RightTop.bError
-			OR fb_SoEReadDiagMessage_LeftBottom.bError
-			OR fb_SoEReadDiagMessage_RightBottom.bError
-			OR FB_SoEReadDiagNumber_LeftTop.bError
-			OR FB_SoEReadDiagNumber_RightTop.bError
-			OR FB_SoEReadDiagNumber_LeftBottom.bError
-			OR FB_SoEReadDiagNumber_RightBottom.bError THEN
-			m_GetDriveStatusState:=-100;
-		ELSE
-			m_GetDriveStatusState:=1;
-		END_IF
-		*)
+		GetDriveStatusTON.IN:=TRUE;
 		m_GetDriveStatusState:=1;
 	1:
-		bDriveDiagMessageAndNumber:=TRUE;
-		m_GetDriveStatusState:=2;
+		IF GetDriveStatusTON.Q THEN
+			bDriveDiagMessageAndNumber:=TRUE;
+			m_GetDriveStatusState:=2;
+		END_IF
 	2:
+		GetDriveStatusTON.IN:=FALSE;
 		DriveDiagMessage_LeftTop:=fb_SoEReadDiagMessage_LeftTop.sDiagMessage.strData;
 		DriveDiagMessage_RightTop:=fb_SoEReadDiagMessage_RightTop.sDiagMessage.strData;
 		DriveDiagMessage_LeftBottom:=fb_SoEReadDiagMessage_LeftBottom.sDiagMessage.strData;
@@ -4170,7 +4163,9 @@ END_CASE]]></ST>
       <LineId Id="2285" Count="0" />
       <LineId Id="2287" Count="45" />
       <LineId Id="2334" Count="2" />
-      <LineId Id="2338" Count="20" />
+      <LineId Id="2338" Count="17" />
+      <LineId Id="2581" Count="0" />
+      <LineId Id="2356" Count="2" />
       <LineId Id="1694" Count="0" />
       <LineId Id="2368" Count="1" />
       <LineId Id="2371" Count="0" />
@@ -4243,12 +4238,17 @@ END_CASE]]></ST>
     <LineIds Name="MAIN.A_GetDriverStatus">
       <LineId Id="192" Count="2" />
       <LineId Id="191" Count="0" />
+      <LineId Id="215" Count="0" />
       <LineId Id="102" Count="0" />
       <LineId Id="104" Count="1" />
-      <LineId Id="208" Count="0" />
-      <LineId Id="106" Count="11" />
       <LineId Id="209" Count="1" />
-      <LineId Id="118" Count="33" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="216" Count="0" />
+      <LineId Id="119" Count="1" />
+      <LineId Id="217" Count="0" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="218" Count="0" />
+      <LineId Id="122" Count="29" />
       <LineId Id="199" Count="0" />
       <LineId Id="204" Count="0" />
       <LineId Id="195" Count="1" />
