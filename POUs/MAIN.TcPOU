@@ -202,7 +202,7 @@ VAR
 	Exe_kill_step: UINT;
 	R_TRIG_Exekill: R_TRIG;
 	Exe_Kill_Done:BOOL;
-
+	LoadOpcIocTON:TON;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[(*加载Ricipe参数*)
@@ -2854,17 +2854,22 @@ NT_StartProcess_Kill(
     <Action Name="A_LoadOpcIocShellExe" Id="{e69e9ea4-205f-45b3-85e7-e1c1b3150dfb}" FolderPath="TC\">
       <Implementation>
         <ST><![CDATA[R_TRIG_Exeload(CLK:=bExe_load_Prog, Q=> );
+LoadOpcIocTON(PT:=T#20S);
 CASE Exe_load_step OF
 	0:
+		LoadOpcIocTON.IN:=TRUE;
 		IF R_TRIG_Exeload.Q THEN
 			NT_StartProcess_Load.START:=FALSE;
 			NT_StartProcess_Load.PATHSTR:='C:\HZB\OpcIocShell\IDControlIOC\startTwinCATOPCServer.bat';
 			Exe_load_step:=10;
 		END_IF;
 	10:
-		NT_StartProcess_Load.START:=TRUE;
-		Exe_load_step:=20;
+		IF LoadOpcIocTON.Q THEN
+			NT_StartProcess_Load.START:=TRUE;
+			Exe_load_step:=20;
+		END_IF
 	20:
+		LoadOpcIocTON.IN:=FALSE;
 		IF NT_StartProcess_Load.ERR THEN
 			Exe_load_step:=0;
 		ELSE
@@ -4335,9 +4340,17 @@ END_CASE]]></ST>
     </LineIds>
     <LineIds Name="MAIN.A_LoadOpcIocShellExe">
       <LineId Id="2" Count="0" />
-      <LineId Id="4" Count="4" />
-      <LineId Id="11" Count="4" />
-      <LineId Id="17" Count="3" />
+      <LineId Id="51" Count="0" />
+      <LineId Id="4" Count="1" />
+      <LineId Id="52" Count="0" />
+      <LineId Id="6" Count="2" />
+      <LineId Id="11" Count="2" />
+      <LineId Id="53" Count="1" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="59" Count="0" />
+      <LineId Id="18" Count="2" />
       <LineId Id="29" Count="1" />
       <LineId Id="34" Count="2" />
       <LineId Id="49" Count="0" />
