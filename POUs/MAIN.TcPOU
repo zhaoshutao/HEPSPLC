@@ -291,7 +291,7 @@ ELSE
 END_IF
 
 (*IOC Start*)
-IF IDControlReady THEN
+IF SafePLCRunOK OR simulation THEN
 	bExe_load_Prog:=TRUE;
 	A_LoadOpcIocShellExe();
 END_IF]]></ST>
