@@ -2854,7 +2854,7 @@ NT_StartProcess_Kill(
     <Action Name="A_LoadOpcIocShellExe" Id="{e69e9ea4-205f-45b3-85e7-e1c1b3150dfb}" FolderPath="TC\">
       <Implementation>
         <ST><![CDATA[R_TRIG_Exeload(CLK:=bExe_load_Prog, Q=> );
-LoadOpcIocTON(PT:=T#20S);
+LoadOpcIocTON(PT:=T#10S);
 CASE Exe_load_step OF
 	0:
 		LoadOpcIocTON.IN:=TRUE;
