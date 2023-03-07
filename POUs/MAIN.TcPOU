@@ -153,8 +153,8 @@ VAR
 	
 		//
 	temperatureStatus:INT;//0：有传感器度数错误；1:常温；2:低温；3:常温和低温中间态
-	CryogenicTemperatureThreshold:LREAL:=80;//80K以下归划分为低温
-	RoomTemperatureThreshold:LREAL:=293;//293K以上划分为常温
+	CryogenicTemperatureThreshold:LREAL:=82;//82K以下归划分为低温
+	RoomTemperatureThreshold:LREAL:=293;//293K以上划分为常温.20摄氏度
 	//CPMU cryogenix ON/FF
 	CryogenicCompensationOn:BOOL;
 	CryogenicCompensationConditionsReady:BOOL;
@@ -556,14 +556,18 @@ ELSE
 	END_IF
 END_IF
 //若在低温补偿模式，但是温度没到低温区间，则Emergency，不允许启动
-(*
+(**)
 IF CryogenicCompensationOn AND temperatureStatus<>2 THEN
 			Error:=TRUE;
 			ErrorID:=1205;
 			ErrorDescription:='CryogenicCompensationOn AND temperatureStatus<>2';
 			FB_PlcEmergencyStop();
 END_IF
-*)]]></ST>
+
+//温度和模式切换连锁保护
+//情况1：非低温，采用了低温模式。应当允许此间隙控制，应当执行此间隙最大运动
+
+]]></ST>
       </Implementation>
     </Action>
     <Action Name="A_GetDriverStatus" Id="{e05cf975-7b3e-4430-bb2e-a308f4391f1b}" FolderPath="Driver\">
@@ -4238,7 +4242,9 @@ END_CASE]]></ST>
       <LineId Id="43" Count="0" />
       <LineId Id="38" Count="4" />
       <LineId Id="1" Count="0" />
-      <LineId Id="44" Count="0" />
+      <LineId Id="44" Count="1" />
+      <LineId Id="47" Count="1" />
+      <LineId Id="46" Count="0" />
     </LineIds>
     <LineIds Name="MAIN.A_GetDriverStatus">
       <LineId Id="192" Count="2" />
