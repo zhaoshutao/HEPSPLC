@@ -530,25 +530,25 @@ IF NOT HasTemperatureSensorOrNot OR NOT CryogenicCompensationOn THEN //OR temper
 ELSE
 	CryogenicCompensationConditionsReady:=TRUE;//条件具备，可以低温补偿
 	//检查补偿值，单轴补偿范围均在0-1内
-	IF CryogenicCompensation_LeftTop>1 OR CryogenicCompensation_LeftTop<=0 THEN
+	IF CryogenicCompensation_LeftTop>1.5 OR CryogenicCompensation_LeftTop<=0 THEN
 			Error:=TRUE;
 			ErrorID:=1201;
 			ErrorDescription:='CryogenicCompensation_LeftTop>1 OR CryogenicCompensation_LeftTop<=0';
 			FB_PlcEmergencyStop();
 	END_IF
-	IF CryogenicCompensation_RightTop>1 OR CryogenicCompensation_RightTop<=0 THEN
+	IF CryogenicCompensation_RightTop>1.5 OR CryogenicCompensation_RightTop<=0 THEN
 			Error:=TRUE;
 			ErrorID:=1202;
 			ErrorDescription:='CryogenicCompensation_RightTop>1 OR CryogenicCompensation_RightTop<=0';
 			FB_PlcEmergencyStop();
 	END_IF
-	IF CryogenicCompensation_LeftBottom>1 OR CryogenicCompensation_LeftBottom<=0 THEN
+	IF CryogenicCompensation_LeftBottom>1.5 OR CryogenicCompensation_LeftBottom<=0 THEN
 			Error:=TRUE;
 			ErrorID:=1203;
 			ErrorDescription:='CryogenicCompensation_LeftBottom>1 OR CryogenicCompensation_LeftBottom<=0';
 			FB_PlcEmergencyStop();
 	END_IF
-	IF CryogenicCompensation_RightBottom>1 OR CryogenicCompensation_RightBottom<=0 THEN
+	IF CryogenicCompensation_RightBottom>1.5 OR CryogenicCompensation_RightBottom<=0 THEN
 			Error:=TRUE;
 			ErrorID:=1204;
 			ErrorDescription:='CryogenicCompensation_RightBottom>1 OR CryogenicCompensation_RightBottom<=0';
