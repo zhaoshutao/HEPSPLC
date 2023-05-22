@@ -133,8 +133,8 @@ VAR
 	Threshold_UserRightVelo_PLC: LREAL;
 	testa: BOOL;
 	testb: BOOL;
-	Threshold_GapChangeFlag: LREAL;
-	Threshold_TaperChangeFlag: LREAL;
+	Threshold_GapChangeFlag: LREAL:=0.001;
+	Threshold_TaperChangeFlag: LREAL:=0.005;
 	TaperAndGapSafetyfactor: LREAL:=1;
 END_VAR
 ]]></Declaration>
@@ -377,7 +377,7 @@ IF USE_SingleAxis_Compensation THEN
 	//左轴目标位置解算
 	IF NOT TaperOrNot THEN
 		UserTaperPositionNew:=0;
-		UserTaperPositionDisplay:=0;
+		//UserTaperPositionDisplay:=0;
 	END_IF
 	UserRightGapPositionNew:=UserGapPositionNew+UserTaperPositionNew;
 	//左轴目标位置解算
@@ -453,8 +453,8 @@ IF USE_SingleAxis_Compensation THEN
 	END_FOR
 	IF TaperOrNot THEN
 		UserTaperPositionDisplay:=DINT_TO_LREAL(LREAL_TO_DINT((UserRightGapPositionDisplay-UserGapPositionDisplay)*100000))/100000;
+		UserTaperVelocityDisplay:=DINT_TO_LREAL(LREAL_TO_DINT((Velo_RightTopLin+Velo_RightBottomLin)/2*100000))/100000;
 	END_IF
-END_IF
 (*速度可以不用解算，直接用即可*)
 LeftTopLinVelocityDisplay:=Velo_LeftTopLin;
 RightTopLinVelocityDisplay:=Velo_RightTopLin;
@@ -788,13 +788,21 @@ IF InitPowerDone AND InitCompensationDatasDone THEN
 					FB_Move.CoupleState:=st_Couple;			
 					FB_Move.PowerState:=st_Power;							
 					FB_Move.BCLeftTopPosition:=LeftTopLinPositionNew;
-					FB_Move.BCLeftTopVelocity:=UserGapVelocityNew/2;
 					FB_Move.BCRightTopPosition:=RightTopLinPositionNew;
-					FB_Move.BCRightTopVelocity:=UserGapVelocityNew/2;
 					FB_Move.BCLeftBottomPosition:=LeftBottomLinPositionNew;
-					FB_Move.BCLeftBottomVelocity:=UserGapVelocityNew/2;
 					FB_Move.BCRightBottomPosition:=RightBottomLinPositionNew;
-					FB_Move.BCRightBottomVelocity:=UserGapVelocityNew/2;		
+					IF NOT TaperOrNot THEN
+						FB_Move.BCLeftTopVelocity:=UserGapVelocityNew/2;
+						FB_Move.BCRightTopVelocity:=UserGapVelocityNew/2;
+						FB_Move.BCLeftBottomVelocity:=UserGapVelocityNew/2;
+						FB_Move.BCRightBottomVelocity:=UserGapVelocityNew/2;
+					ELSE
+						FB_Move.BCLeftTopVelocity:=UserTaperVelocityNew;
+						FB_Move.BCRightTopVelocity:=UserTaperVelocityNew;
+						FB_Move.BCLeftBottomVelocity:=UserTaperVelocityNew;
+						FB_Move.BCRightBottomVelocity:=UserTaperVelocityNew;
+					END_IF
+		
 					IF btn_UserGapMove THEN
 						FB_Move.BCGapMove:=TRUE;
 						m_state:=1;
@@ -847,10 +855,17 @@ IF InitPowerDone AND InitCompensationDatasDone THEN
 						FB_Move.BCRightBottomPosition:=RightBottomLinPositionNew;
 					END_IF					
 					//
-					FB_Move.BCLeftTopVelocity:=UserGapVelocityNew/2;
-					FB_Move.BCRightTopVelocity:=UserGapVelocityNew/2;
-					FB_Move.BCLeftBottomVelocity:=UserGapVelocityNew/2;
-					FB_Move.BCRightBottomVelocity:=UserGapVelocityNew/2;
+					IF NOT TaperOrNot THEN
+						FB_Move.BCLeftTopVelocity:=UserGapVelocityNew/2;
+						FB_Move.BCRightTopVelocity:=UserGapVelocityNew/2;
+						FB_Move.BCLeftBottomVelocity:=UserGapVelocityNew/2;
+						FB_Move.BCRightBottomVelocity:=UserGapVelocityNew/2;
+					ELSE
+						FB_Move.BCLeftTopVelocity:=UserTaperVelocityNew;
+						FB_Move.BCRightTopVelocity:=UserTaperVelocityNew;
+						FB_Move.BCLeftBottomVelocity:=UserTaperVelocityNew;
+						FB_Move.BCRightBottomVelocity:=UserTaperVelocityNew;
+					END_IF
 						
 					IF btn_UserGapMove THEN							
 						n_state:=1;
@@ -888,10 +903,17 @@ IF InitPowerDone AND InitCompensationDatasDone THEN
 					FB_Move.BCLeftBottomPosition:=LeftBottomLinPositionNew;
 					FB_Move.BCRightBottomPosition:=RightBottomLinPositionNew;
 					//
-					FB_Move.BCLeftTopVelocity:=UserGapVelocityNew/2;
-					FB_Move.BCRightTopVelocity:=UserGapVelocityNew/2;
-					FB_Move.BCLeftBottomVelocity:=UserGapVelocityNew/2;
-					FB_Move.BCRightBottomVelocity:=UserGapVelocityNew/2;
+					IF NOT TaperOrNot THEN
+						FB_Move.BCLeftTopVelocity:=UserGapVelocityNew/2;
+						FB_Move.BCRightTopVelocity:=UserGapVelocityNew/2;
+						FB_Move.BCLeftBottomVelocity:=UserGapVelocityNew/2;
+						FB_Move.BCRightBottomVelocity:=UserGapVelocityNew/2;
+					ELSE
+						FB_Move.BCLeftTopVelocity:=UserTaperVelocityNew;
+						FB_Move.BCRightTopVelocity:=UserTaperVelocityNew;
+						FB_Move.BCLeftBottomVelocity:=UserTaperVelocityNew;
+						FB_Move.BCRightBottomVelocity:=UserTaperVelocityNew;
+					END_IF
 					FB_Move();							
 					n_state:=3;
 				3:
@@ -1354,11 +1376,26 @@ END_IF
       <LineId Id="294" Count="1" />
       <LineId Id="298" Count="23" />
       <LineId Id="296" Count="1" />
-      <LineId Id="33" Count="24" />
+      <LineId Id="33" Count="11" />
+      <LineId Id="46" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="50" Count="0" />
+      <LineId Id="345" Count="0" />
+      <LineId Id="348" Count="2" />
+      <LineId Id="346" Count="0" />
+      <LineId Id="351" Count="0" />
+      <LineId Id="353" Count="2" />
+      <LineId Id="352" Count="0" />
+      <LineId Id="347" Count="0" />
+      <LineId Id="51" Count="6" />
       <LineId Id="216" Count="0" />
-      <LineId Id="58" Count="56" />
+      <LineId Id="58" Count="44" />
+      <LineId Id="356" Count="9" />
+      <LineId Id="106" Count="8" />
       <LineId Id="218" Count="0" />
-      <LineId Id="115" Count="83" />
+      <LineId Id="115" Count="27" />
+      <LineId Id="366" Count="9" />
+      <LineId Id="146" Count="52" />
       <LineId Id="1" Count="0" />
       <LineId Id="204" Count="0" />
       <LineId Id="200" Count="3" />
