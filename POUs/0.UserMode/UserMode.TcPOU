@@ -464,6 +464,7 @@ RightBottomLinVelocityDisplay:=Velo_RightBottomLin;
 UserGapVelocityDisplay:=DINT_TO_LREAL(LREAL_TO_DINT(((LeftTopLinVelocityDisplay+RightTopLinVelocityDisplay+
 	LeftBottomLinVelocityDisplay+RightBottomLinVelocityDisplay)/2)*100000))/100000;
 
+END_IF
 ]]></ST>
       </Implementation>
     </Action>
@@ -1283,6 +1284,7 @@ END_IF
       <LineId Id="318" Count="0" />
       <LineId Id="327" Count="0" />
       <LineId Id="323" Count="1" />
+      <LineId Id="328" Count="0" />
       <LineId Id="129" Count="1" />
     </LineIds>
     <LineIds Name="UserMode.A_MonitoringAllAxis">
