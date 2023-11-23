@@ -151,6 +151,7 @@ VAR
 	//Global_ChainProtection_ErrorDescription: STRING;
 	Global_ChainProtection_ManualOperation:BOOL:=TRUE;
 	Global_ChainProtection_FTRIG:F_TRIG;
+	Global_ChainProtection_FTRIG_Manul:F_TRIG;
 	Global_ChainProtection_TON:TON;
 	Global_ChainProtection_Triggered:BOOL;
 	Global_ChainProtection_In:BOOL;
@@ -177,6 +178,7 @@ VAR
 	//Cryogenic_ChainProtection_ErrorDescription: STRING;
 	Cryogenic_ChainProtection_ManualOperation:BOOL:=TRUE;
 	Cryogenic_ChainProtection_FTRIG:F_TRIG;
+	Cryogenic_ChainProtection_FTRIG_Manul:F_TRIG;
 	Cryogenic_ChainProtection_TON:TON;
 	Cryogenic_ChainProtection_Triggered:BOOL;
 	Cryogenic_ChainProtection_In:BOOL;
@@ -185,7 +187,9 @@ VAR
 	Cryogenic_ChainProtection_TON_Stop2Move:TON;
 	Cryogenic_ChainProtection_TON_Stop2Move_InTaperMode:TON;
 	Cryogenic_ChainProtection_TON_Power2Move:TON;
-	test11:INT:=2;
+	test11:INT:=1;
+	IsTest11OrNot:BOOL;
+	tesetBegin: BOOL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -425,14 +429,17 @@ END_IF
 IF NOT Cryogenic_ChainProtection_On THEN
 	RETURN;
 END_IF
-//判断插入件状态，是否就位
-IF NOT IDControlReady THEN
-	Cryogenic_ChainProtection_Done:=FALSE;
-	Error:= TRUE;
-	ErrorID:=1501;
-	ErrorDescription:='ID NOT READY!';
+IF NOT MAIN.CryogenicCompensationOn THEN
 	RETURN;
 END_IF
+//判断插入件状态，是否就位
+//IF NOT IDControlReady THEN
+//	Cryogenic_ChainProtection_Done:=FALSE;
+//	Error:= TRUE;
+//	ErrorID:=1501;
+//	ErrorDescription:='ID NOT READY!';
+//	RETURN;
+//END_IF
 
 //
 //全局连锁保护程序开始
@@ -442,11 +449,15 @@ END_IF
 //2.判断是否在Moving状态,若有就Stop
 //3.将磁间隙打开到至最大阈值
 //4.到位后给出反馈，且安全PLC触发
-IF MAIN.temperatureStatus=3 THEN //=2低温,超出低温阈值就触发保护
+//IF MAIN.temperatureStatus=3 THEN //=2低温,超出低温阈值就触发保护
+//	Cryogenic_ChainProtection_Triggered:=TRUE;
+//END_IF
+Cryogenic_ChainProtection_FTRIG(CLK:=MAIN.InCryogenicOrNot);
+IF Cryogenic_ChainProtection_FTRIG.Q THEN
 	Cryogenic_ChainProtection_Triggered:=TRUE;
 END_IF
-Cryogenic_ChainProtection_FTRIG(CLK:=Cryogenic_ChainProtection_ManualOperation);
-IF Cryogenic_ChainProtection_FTRIG.Q THEN
+Cryogenic_ChainProtection_FTRIG_Manul(CLK:=Cryogenic_ChainProtection_ManualOperation);
+IF Cryogenic_ChainProtection_FTRIG_Manul.Q THEN
 	Cryogenic_ChainProtection_Triggered:=TRUE;
 END_IF
 IF Cryogenic_ChainProtection_Triggered THEN
@@ -546,13 +557,13 @@ IF NOT Global_ChainProtection_On THEN
 	RETURN;
 END_IF
 //判断插入件状态，是否就位
-IF NOT IDControlReady THEN
-	Global_ChainProtection_Done:=FALSE;
-	Error:= TRUE;
-	ErrorID:= 1401;
-	ErrorDescription:='ID NOT READY!';
-	RETURN;
-END_IF
+//IF NOT IDControlReady THEN
+//	Global_ChainProtection_Done:=FALSE;
+//	Error:= TRUE;
+//	ErrorID:= 1401;
+//	ErrorDescription:='ID NOT READY!';
+//	RETURN;
+//END_IF
 //判断束线是否给出就位信号，暂时由参数表给出TRUE，最终将由IOC接受PV
 IF 	NOT Global_ChainProtection_BeamLineReady THEN
 	Global_ChainProtection_Done:=FALSE;
@@ -577,8 +588,12 @@ END_IF
 //2.判断是否在Moving状态,若有就Stop
 //3.将磁间隙打开到至最大阈值
 //4.到位后给出反馈，且安全PLC触发
-Global_ChainProtection_FTRIG(CLK:=Global_ChainProtection_In OR Global_ChainProtection_ManualOperation);
+Global_ChainProtection_FTRIG(CLK:=Global_ChainProtection_In);
 IF Global_ChainProtection_FTRIG.Q THEN
+	Global_ChainProtection_Triggered:=TRUE;
+END_IF
+Global_ChainProtection_FTRIG_Manul(CLK:=Global_ChainProtection_ManualOperation);
+IF Global_ChainProtection_FTRIG_Manul.Q THEN
 	Global_ChainProtection_Triggered:=TRUE;
 END_IF
 IF Global_ChainProtection_Triggered THEN
@@ -1531,11 +1546,16 @@ END_IF
       <LineId Id="104" Count="0" />
     </LineIds>
     <LineIds Name="UserMode.A_CryogenicChainProtection">
-      <LineId Id="107" Count="11" />
+      <LineId Id="107" Count="3" />
+      <LineId Id="259" Count="2" />
+      <LineId Id="111" Count="7" />
       <LineId Id="241" Count="0" />
       <LineId Id="135" Count="7" />
       <LineId Id="233" Count="2" />
-      <LineId Id="143" Count="4" />
+      <LineId Id="143" Count="3" />
+      <LineId Id="274" Count="2" />
+      <LineId Id="273" Count="0" />
+      <LineId Id="147" Count="0" />
       <LineId Id="251" Count="7" />
       <LineId Id="250" Count="0" />
       <LineId Id="148" Count="9" />
@@ -1559,7 +1579,10 @@ END_IF
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="UserMode.A_GlobalChainProtection">
-      <LineId Id="99" Count="58" />
+      <LineId Id="99" Count="47" />
+      <LineId Id="229" Count="2" />
+      <LineId Id="228" Count="0" />
+      <LineId Id="147" Count="10" />
       <LineId Id="197" Count="2" />
       <LineId Id="201" Count="0" />
       <LineId Id="200" Count="0" />
