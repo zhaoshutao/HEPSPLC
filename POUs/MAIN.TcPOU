@@ -155,6 +155,7 @@ VAR
 	temperatureStatus:INT;//0：有传感器度数错误；1:常温；2:低温；3:常温和低温中间态
 	CryogenicTemperatureThreshold:LREAL:=82;//82K以下归划分为低温
 	RoomTemperatureThreshold:LREAL:=293;//293K以上划分为常温.20摄氏度
+	InCryogenicOrNot:BOOL;
 	//CPMU cryogenix ON/FF
 	CryogenicCompensationOn:BOOL;
 	CryogenicCompensationConditionsReady:BOOL;
@@ -556,14 +557,14 @@ ELSE
 	END_IF
 END_IF
 //若在低温补偿模式，但是温度没到低温区间，则Emergency，不允许启动
-(**)
+(*
 IF CryogenicCompensationOn AND temperatureStatus<>2 THEN
 			Error:=TRUE;
 			ErrorID:=1205;
 			ErrorDescription:='CryogenicCompensationOn AND temperatureStatus<>2';
 			FB_PlcEmergencyStop();
 END_IF
-
+*)
 //温度和模式切换连锁保护
 //情况1：非低温，采用了低温模式。应当允许此间隙控制，应当执行此间隙最大运动
 
@@ -2707,6 +2708,7 @@ IF TemperatureSensors_1=0 OR TemperatureSensors_2=0 OR TemperatureSensors_3=0
 ELSIF TemperatureSensors_1>=RoomTemperatureThreshold AND TemperatureSensors_2>=RoomTemperatureThreshold AND TemperatureSensors_3>=RoomTemperatureThreshold
 	AND TemperatureSensors_4>=RoomTemperatureThreshold AND TemperatureSensors_5>=RoomTemperatureThreshold AND TemperatureSensors_6>=RoomTemperatureThreshold THEN	
 	temperatureStatus:=1;//常温
+	InCryogenicOrNot:=FALSE;
 ELSIF TemperatureSensors_1<=CryogenicTemperatureThreshold AND TemperatureSensors_1>77
 	AND TemperatureSensors_2<=CryogenicTemperatureThreshold  AND TemperatureSensors_2>77
 	AND TemperatureSensors_3<=CryogenicTemperatureThreshold  AND TemperatureSensors_3>77
@@ -2714,8 +2716,10 @@ ELSIF TemperatureSensors_1<=CryogenicTemperatureThreshold AND TemperatureSensors
 	AND TemperatureSensors_5<=CryogenicTemperatureThreshold  AND TemperatureSensors_5>77
 	AND TemperatureSensors_6<=CryogenicTemperatureThreshold   AND TemperatureSensors_6>77 THEN	
 	temperatureStatus:=2;//低温
+	InCryogenicOrNot:=TRUE;
 ELSE
 	temperatureStatus:=3;//常温和低温中间
+	InCryogenicOrNot:=FALSE;
 END_IF
 							
 					
@@ -4300,7 +4304,13 @@ END_CASE]]></ST>
       <LineId Id="97" Count="0" />
       <LineId Id="83" Count="0" />
       <LineId Id="89" Count="1" />
-      <LineId Id="98" Count="17" />
+      <LineId Id="98" Count="7" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="106" Count="6" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="113" Count="1" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="115" Count="0" />
       <LineId Id="91" Count="5" />
     </LineIds>
     <LineIds Name="MAIN.A_InitAxisParameters">
