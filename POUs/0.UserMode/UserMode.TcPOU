@@ -136,6 +136,7 @@ VAR
 	Threshold_GapChangeFlag: LREAL:=0.001;
 	Threshold_TaperChangeFlag: LREAL:=0.005;
 	TaperAndGapSafetyfactor: LREAL:=1;
+	TaperAndGapSafetyScale:LREAL:=0.41;//IAU=0.41,IVU=0.32,CPMU=0.33,IAMW=0.42
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -734,7 +735,7 @@ IF ABS(UserGapPositionNew-UserGapPositionDisplay)>Threshold_GapChangeFlag AND bt
 	END_IF
 END_IF
 (*Taper和gap连锁限制性保护。比如11mm时候如果taper，入口端gap变小，会有压真空盒的问题。设置保护*)
-IF UserGapPositionNew-TaperAndGapSafetyfactor*0.41*UserTaperPositionNew<=min_UserGapPositionNew AND btn_UserGapMove THEN
+IF UserGapPositionNew-TaperAndGapSafetyfactor*TaperAndGapSafetyScale*UserTaperPositionNew<=min_UserGapPositionNew AND btn_UserGapMove THEN
 		btn_UserGapStop:=TRUE;
 		btn_UserGapMove:=FALSE;
 		Error:=TRUE;
