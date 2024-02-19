@@ -411,8 +411,8 @@ CASE BottomState OF
 			BottomState:=-100;
 		ELSIF  (LeftBottomLin.Status.Moving AND  RightBottomLin.Status.NotMoving)
 				OR (RightBottomLin.Status.Moving AND  LeftBottomLin.Status.NotMoving) THEN
-			ErrorID:=4;
-			BottomState:=-100;
+			//ErrorID:=4;
+			//BottomState:=-100;
 		ELSIF NOT Bottom_MC_MoveAbsolute.Done THEN		(*ÔË¶¯ÖÐ£¬¼ì²éDoneÐÅºÅ£¬Ã»ÓÐÔòÑ­»·£¬³¬Ê±±¨´í*)
 			BottomState:=2;
 		ELSIF Bottom_MC_MoveAbsolute.Done THEN		(*ÔË¶¯Íê³É£¬×ªÏÂÒ»²½*)
@@ -2495,8 +2495,8 @@ CASE TopState OF
 			TopState:=-100;
 		ELSIF  (LeftTopLin.Status.Moving AND  RightTopLin.Status.NotMoving)
 				OR (RightTopLin.Status.Moving AND  LeftTopLin.Status.NotMoving) THEN			(*Ò»Öá¶¯£¬ÁíÒ»Öá²»¶¯£¬½ô¼±×´Ì¬*)
-			ErrorID:=4;
-			TopState:=-100;
+			//ErrorID:=4;
+			//TopState:=-100;
 		ELSIF NOT Top_MC_MoveAbsolute.Done OR NOT RightTopLin_MC_MoveAbsolute.Done THEN		(*ÔË¶¯ÖÐ£¬¼ì²éDoneÐÅºÅ£¬Ã»ÓÐÔòÑ­»·£¬³¬Ê±±¨´í*)
 			TopState:=2;
 		ELSIF Top_MC_MoveAbsolute.Done AND RightTopLin_MC_MoveAbsolute.Done THEN		(*ÔË¶¯Íê³É£¬×ªÏÂÒ»²½*)
