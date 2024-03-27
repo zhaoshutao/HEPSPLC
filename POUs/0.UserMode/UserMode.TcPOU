@@ -541,8 +541,8 @@ IF Cryogenic_ChainProtection_Triggered THEN
 	END_CASE
 END_IF
 
-//监控是否同时是低温模式，且温度传感器检测到的是常温
-IF MAIN.temperatureStatus=1 THEN//在常温
+//监控是否同时是低温模式，且温度传感器检测到的是低温+10℃（避开低温联锁保护，联锁保护要求在低温阈值时拉开磁间隙）
+IF MAIN.temperatureStatus<>0 AND MAIN.temperature_average > MAIN.CryogenicTemperatureThreshold +10 THEN//在低温+10℃
 	IF MAIN.HasTemperatureSensorOrNot AND MAIN.CryogenicCompensationOn THEN
 			Error:=TRUE;
 			ErrorID:=1505;
