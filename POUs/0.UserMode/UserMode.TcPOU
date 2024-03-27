@@ -539,6 +539,16 @@ IF Cryogenic_ChainProtection_Triggered THEN
 			ErrorID:=1504;
 			ErrorDescription:='NOT MOVING TO MAXGAP';
 	END_CASE
+END_IF
+
+//监控是否同时是低温模式，且温度传感器检测到的是常温
+IF MAIN.temperatureStatus=1 THEN//在常温
+	IF MAIN.HasTemperatureSensorOrNot AND MAIN.CryogenicCompensationOn THEN
+			Error:=TRUE;
+			ErrorID:=1505;
+			Plc_EmergencyStop:=FALSE;
+			ErrorDescription:='CryogenicCompensationOn AND Room temperatureStatus';
+	END_IF
 END_IF]]></ST>
       </Implementation>
     </Action>
@@ -1577,6 +1587,10 @@ END_IF
       <LineId Id="247" Count="0" />
       <LineId Id="190" Count="5" />
       <LineId Id="1" Count="0" />
+      <LineId Id="286" Count="5" />
+      <LineId Id="294" Count="0" />
+      <LineId Id="292" Count="1" />
+      <LineId Id="285" Count="0" />
     </LineIds>
     <LineIds Name="UserMode.A_GlobalChainProtection">
       <LineId Id="99" Count="47" />
