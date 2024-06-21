@@ -5,6 +5,10 @@
 VAR_GLOBAL
 (*IDControl Ready*)
 	IDControlReady:BOOL;
+(*key Command*)
+	btn_Power:BOOL;
+	btn_PowerOn: BOOL;
+	btn_PowerOff: BOOL;
 (*Error Massage*)
 	Error:BOOL;
 	ErrorID:DINT;
@@ -115,16 +119,16 @@ VAR_GLOBAL
 	Led_Run  AT %Q*:BOOL;
 	Led_Error  AT %Q*:BOOL;
 (*LimitSwitch*)
-	LS_LeftTop_Top  :BOOL;
-	LS_LeftTop_Bottom  :BOOL;
-	LS_RightTop_Top  :BOOL;
-	LS_RightTop_Bottom  :BOOL;
-	LS_LeftBottom_Top  :BOOL;
-	LS_LeftBottom_Bottom  :BOOL;
-	LS_RightBottom_Top :BOOL;
-	LS_RightBottom_Bottom  :BOOL;
-	Unreach_LS_Top:BOOL;
-	Unreach_LS_Bottom:BOOL;
+	LS_LeftTop_Far  :BOOL;
+	LS_LeftTop_Near  :BOOL;
+	LS_RightTop_Far  :BOOL;
+	LS_RightTop_Near  :BOOL;
+	LS_LeftBottom_Far  :BOOL;
+	LS_LeftBottom_Near  :BOOL;
+	LS_RightBottom_Far :BOOL;
+	LS_RightBottom_Near  :BOOL;
+	Unreach_LS_Far:BOOL;
+	Unreach_LS_Near:BOOL;
 (*kill switch*)
 	KS_LeftTop_Far_Contact1:BOOL;
 	KS_LeftTop_Far_Contact2:BOOL;

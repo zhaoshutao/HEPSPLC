@@ -3,10 +3,6 @@
   <POU Name="SingleCarrierMode" Id="{932b8545-d89d-46a8-8a71-7d229764fd43}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM SingleCarrierMode
 VAR
-	(*key Command*)
-	btn_Power:BOOL;
-	btn_PowerOn: BOOL;
-	btn_PowerOff: BOOL;
 	TopPositionNew:LREAL:=100;
 	TopVelocityNew:LREAL:=1;
 	btn_TopMove:BOOL;
@@ -184,7 +180,7 @@ END_IF
 (*********************************************************************ÏÞÎ»Åö´¥×´Ì¬»Ö¸´************************************************************)
 
 (*Èç¹û¼ì²âµ½ÏØÏÞÎ»¿ª¹ØÏÂ½µÑØ£¬»Ö¸´Move×´Ì¬*)
-FTrig_ReachLS(CLK:=Unreach_LS_Top AND Unreach_LS_Bottom);
+FTrig_ReachLS(CLK:=Unreach_LS_Far AND Unreach_LS_Near);
 IF FTrig_ReachLS.Q THEN		(*FTrig_ReachLS.QÌ«¿ì£¬Ö»ÄÜÊ¹btn_TopStopÎªTRUE*)
 	btn_TopStop:=TRUE;
 	btn_BottomStop:=TRUE;

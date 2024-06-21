@@ -4,8 +4,6 @@
     <Declaration><![CDATA[PROGRAM TaperMode
 VAR
 	(*key Command*)
-	btn_PowerOn: BOOL;
-	btn_PowerOff: BOOL;
 	TaperLargePositionNew:LREAL;
 	TaperLargePositionActual: LREAL;
 	TaperPositionNew:LREAL;
@@ -29,7 +27,6 @@ VAR
 	(*¼ì²âµ½ÏÞÎ»£¬»Ö¸´Move×´Ì¬*)
 	FTrig_ReachLS: F_TRIG;
 	FTrig_btn_GapMove: F_TRIG;
-	btn_Power: BOOL;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[TaperPositionActual:=((Pos_RightTopLin+Pos_RighTBottomLin)-(Pos_LeftTopLin+Pos_LeftBottomLin))/2;	(*Êµ¼ÊTaper¶È£¬Taper¶¨ÒåÎªµ¥²à*)
@@ -135,15 +132,15 @@ IF btn_PowerOff THEN
 END_IF
 (*********************************************************************ÏÞÎ»Åö´¥×´Ì¬»Ö¸´************************************************************)
 (*Èç¹û¼ì²âµ½ÏØÏÞÎ»¿ª¹ØÏÂ½µÑØ£¬»Ö¸´Move×´Ì¬*)
-FTrig_ReachLS(CLK:=Unreach_LS_Top AND Unreach_LS_Bottom);
+FTrig_ReachLS(CLK:=Unreach_LS_Far AND Unreach_LS_Near);
 IF FTrig_ReachLS.Q THEN
 	btn_TaperStop:=TRUE;
 END_IF
 (*Èç¹û¼ì²âµ½TopÏÞÎ»¿ª¹ØFALSE£¬ÇÒÄ¿±êÎ»ÖÃ´óÓÚµ±Ç°Î»ÖÃÊ±£¬»òÕßÏà·´Ê±£¬»Ö¸´Move×´Ì¬*)
-IF NOT Unreach_LS_Top AND TaperLargePositionNew-TaperLargePositionActual>0.0005 AND btn_TaperMove THEN
+IF NOT Unreach_LS_Far AND TaperLargePositionNew-TaperLargePositionActual>0.0005 AND btn_TaperMove THEN
 	btn_TaperStop:=TRUE;
 END_IF
-IF NOT Unreach_LS_Bottom AND TaperLargePositionNew-TaperLargePositionActual<0.0005 AND btn_TaperMove THEN
+IF NOT Unreach_LS_Near AND TaperLargePositionNew-TaperLargePositionActual<0.0005 AND btn_TaperMove THEN
 	btn_TaperStop:=TRUE;
 END_IF]]></ST>
     </Implementation>

@@ -88,7 +88,7 @@ END_IF]]></ST>
                         <v n="BoxType">"MC_Power"</v>
                         <o n="Instance" t="Operand">
                           <v n="Operand">"LeftTopLin_MC_Power"</v>
-                          <v n="Type">""</v>
+                          <v n="Type">"MC_Power"</v>
                           <v n="Comment">""</v>
                           <v n="SymbolComment">""</v>
                           <v n="Address">""</v>
@@ -107,7 +107,7 @@ END_IF]]></ST>
                             <n />
                             <o>
                               <v n="Operand">""</v>
-                              <v n="Type">""</v>
+                              <n n="Type" />
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -116,14 +116,14 @@ END_IF]]></ST>
                                 <v n="Fixed">false</v>
                                 <v n="Extensible">false</v>
                               </o>
-                              <v n="LValue">false</v>
+                              <v n="LValue">true</v>
                               <v n="Boolean">false</v>
                               <v n="IsInstance">false</v>
                               <v n="Id">4L</v>
                             </o>
                             <o>
                               <v n="Operand">""</v>
-                              <v n="Type">""</v>
+                              <n n="Type" />
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -132,14 +132,14 @@ END_IF]]></ST>
                                 <v n="Fixed">false</v>
                                 <v n="Extensible">false</v>
                               </o>
-                              <v n="LValue">false</v>
+                              <v n="LValue">true</v>
                               <v n="Boolean">false</v>
                               <v n="IsInstance">false</v>
                               <v n="Id">5L</v>
                             </o>
                             <o>
                               <v n="Operand">""</v>
-                              <v n="Type">""</v>
+                              <n n="Type" />
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -148,14 +148,14 @@ END_IF]]></ST>
                                 <v n="Fixed">false</v>
                                 <v n="Extensible">false</v>
                               </o>
-                              <v n="LValue">false</v>
+                              <v n="LValue">true</v>
                               <v n="Boolean">false</v>
                               <v n="IsInstance">false</v>
                               <v n="Id">6L</v>
                             </o>
                             <o>
                               <v n="Operand">""</v>
-                              <v n="Type">""</v>
+                              <n n="Type" />
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -164,7 +164,7 @@ END_IF]]></ST>
                                 <v n="Fixed">false</v>
                                 <v n="Extensible">false</v>
                               </o>
-                              <v n="LValue">false</v>
+                              <v n="LValue">true</v>
                               <v n="Boolean">false</v>
                               <v n="IsInstance">false</v>
                               <v n="Id">7L</v>
@@ -181,7 +181,7 @@ END_IF]]></ST>
                           <o>
                             <o n="Operand" t="Operand">
                               <v n="Operand">""</v>
-                              <v n="Type">""</v>
+                              <n n="Type" />
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -199,8 +199,8 @@ END_IF]]></ST>
                           </o>
                           <o>
                             <o n="Operand" t="Operand">
-                              <v n="Operand">"Unreach_LS_Top AND NOT Taper_BeyondRangeNegtive"</v>
-                              <v n="Type">""</v>
+                              <v n="Operand">"Unreach_LS_Far AND NOT Taper_BeyondRangeNegtive"</v>
+                              <v n="Type">"BOOL"</v>
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -218,8 +218,8 @@ END_IF]]></ST>
                           </o>
                           <o>
                             <o n="Operand" t="Operand">
-                              <v n="Operand">"Unreach_LS_Bottom AND NOT Taper_BeyondRangePositive"</v>
-                              <v n="Type">""</v>
+                              <v n="Operand">"Unreach_LS_Near AND NOT Taper_BeyondRangePositive"</v>
+                              <v n="Type">"BOOL"</v>
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -238,7 +238,7 @@ END_IF]]></ST>
                           <o>
                             <o n="Operand" t="Operand">
                               <v n="Operand">""</v>
-                              <v n="Type">""</v>
+                              <n n="Type" />
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -257,7 +257,7 @@ END_IF]]></ST>
                           <o>
                             <o n="Operand" t="Operand">
                               <v n="Operand">""</v>
-                              <v n="Type">""</v>
+                              <n n="Type" />
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -276,7 +276,7 @@ END_IF]]></ST>
                           <o>
                             <o n="Operand" t="Operand">
                               <v n="Operand">"LeftTopLin"</v>
-                              <v n="Type">""</v>
+                              <v n="Type">"axis_ref"</v>
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -353,7 +353,7 @@ END_IF]]></ST>
                         <v n="BoxType">"MC_Power"</v>
                         <o n="Instance" t="Operand">
                           <v n="Operand">"RightTopLin_MC_Power"</v>
-                          <v n="Type">""</v>
+                          <v n="Type">"MC_Power"</v>
                           <v n="Comment">""</v>
                           <v n="SymbolComment">""</v>
                           <v n="Address">""</v>
@@ -372,7 +372,7 @@ END_IF]]></ST>
                             <n />
                             <o>
                               <v n="Operand">""</v>
-                              <v n="Type">""</v>
+                              <n n="Type" />
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -381,14 +381,14 @@ END_IF]]></ST>
                                 <v n="Fixed">false</v>
                                 <v n="Extensible">false</v>
                               </o>
-                              <v n="LValue">false</v>
+                              <v n="LValue">true</v>
                               <v n="Boolean">false</v>
                               <v n="IsInstance">false</v>
                               <v n="Id">23L</v>
                             </o>
                             <o>
                               <v n="Operand">""</v>
-                              <v n="Type">""</v>
+                              <n n="Type" />
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -397,14 +397,14 @@ END_IF]]></ST>
                                 <v n="Fixed">false</v>
                                 <v n="Extensible">false</v>
                               </o>
-                              <v n="LValue">false</v>
+                              <v n="LValue">true</v>
                               <v n="Boolean">false</v>
                               <v n="IsInstance">false</v>
                               <v n="Id">24L</v>
                             </o>
                             <o>
                               <v n="Operand">""</v>
-                              <v n="Type">""</v>
+                              <n n="Type" />
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -413,14 +413,14 @@ END_IF]]></ST>
                                 <v n="Fixed">false</v>
                                 <v n="Extensible">false</v>
                               </o>
-                              <v n="LValue">false</v>
+                              <v n="LValue">true</v>
                               <v n="Boolean">false</v>
                               <v n="IsInstance">false</v>
                               <v n="Id">25L</v>
                             </o>
                             <o>
                               <v n="Operand">""</v>
-                              <v n="Type">""</v>
+                              <n n="Type" />
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -429,7 +429,7 @@ END_IF]]></ST>
                                 <v n="Fixed">false</v>
                                 <v n="Extensible">false</v>
                               </o>
-                              <v n="LValue">false</v>
+                              <v n="LValue">true</v>
                               <v n="Boolean">false</v>
                               <v n="IsInstance">false</v>
                               <v n="Id">26L</v>
@@ -446,7 +446,7 @@ END_IF]]></ST>
                           <o>
                             <o n="Operand" t="Operand">
                               <v n="Operand">""</v>
-                              <v n="Type">""</v>
+                              <n n="Type" />
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -464,8 +464,8 @@ END_IF]]></ST>
                           </o>
                           <o>
                             <o n="Operand" t="Operand">
-                              <v n="Operand">"Unreach_LS_Top AND NOT Taper_BeyondRangePositive"</v>
-                              <v n="Type">""</v>
+                              <v n="Operand">"Unreach_LS_Far AND NOT Taper_BeyondRangePositive"</v>
+                              <v n="Type">"BOOL"</v>
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -483,8 +483,8 @@ END_IF]]></ST>
                           </o>
                           <o>
                             <o n="Operand" t="Operand">
-                              <v n="Operand">"Unreach_LS_Bottom AND NOT Taper_BeyondRangeNegtive"</v>
-                              <v n="Type">""</v>
+                              <v n="Operand">"Unreach_LS_Near AND NOT Taper_BeyondRangeNegtive"</v>
+                              <v n="Type">"BOOL"</v>
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -503,7 +503,7 @@ END_IF]]></ST>
                           <o>
                             <o n="Operand" t="Operand">
                               <v n="Operand">""</v>
-                              <v n="Type">""</v>
+                              <n n="Type" />
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -522,7 +522,7 @@ END_IF]]></ST>
                           <o>
                             <o n="Operand" t="Operand">
                               <v n="Operand">""</v>
-                              <v n="Type">""</v>
+                              <n n="Type" />
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -541,7 +541,7 @@ END_IF]]></ST>
                           <o>
                             <o n="Operand" t="Operand">
                               <v n="Operand">"RightTopLin"</v>
-                              <v n="Type">""</v>
+                              <v n="Type">"axis_ref"</v>
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -618,7 +618,7 @@ END_IF]]></ST>
                         <v n="BoxType">"MC_Power"</v>
                         <o n="Instance" t="Operand">
                           <v n="Operand">"LeftBottomLin_MC_Power"</v>
-                          <v n="Type">""</v>
+                          <v n="Type">"MC_Power"</v>
                           <v n="Comment">""</v>
                           <v n="SymbolComment">""</v>
                           <v n="Address">""</v>
@@ -637,7 +637,7 @@ END_IF]]></ST>
                             <n />
                             <o>
                               <v n="Operand">""</v>
-                              <v n="Type">""</v>
+                              <n n="Type" />
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -646,14 +646,14 @@ END_IF]]></ST>
                                 <v n="Fixed">false</v>
                                 <v n="Extensible">false</v>
                               </o>
-                              <v n="LValue">false</v>
+                              <v n="LValue">true</v>
                               <v n="Boolean">false</v>
                               <v n="IsInstance">false</v>
                               <v n="Id">42L</v>
                             </o>
                             <o>
                               <v n="Operand">""</v>
-                              <v n="Type">""</v>
+                              <n n="Type" />
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -662,14 +662,14 @@ END_IF]]></ST>
                                 <v n="Fixed">false</v>
                                 <v n="Extensible">false</v>
                               </o>
-                              <v n="LValue">false</v>
+                              <v n="LValue">true</v>
                               <v n="Boolean">false</v>
                               <v n="IsInstance">false</v>
                               <v n="Id">43L</v>
                             </o>
                             <o>
                               <v n="Operand">""</v>
-                              <v n="Type">""</v>
+                              <n n="Type" />
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -678,14 +678,14 @@ END_IF]]></ST>
                                 <v n="Fixed">false</v>
                                 <v n="Extensible">false</v>
                               </o>
-                              <v n="LValue">false</v>
+                              <v n="LValue">true</v>
                               <v n="Boolean">false</v>
                               <v n="IsInstance">false</v>
                               <v n="Id">44L</v>
                             </o>
                             <o>
                               <v n="Operand">""</v>
-                              <v n="Type">""</v>
+                              <n n="Type" />
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -694,7 +694,7 @@ END_IF]]></ST>
                                 <v n="Fixed">false</v>
                                 <v n="Extensible">false</v>
                               </o>
-                              <v n="LValue">false</v>
+                              <v n="LValue">true</v>
                               <v n="Boolean">false</v>
                               <v n="IsInstance">false</v>
                               <v n="Id">45L</v>
@@ -711,7 +711,7 @@ END_IF]]></ST>
                           <o>
                             <o n="Operand" t="Operand">
                               <v n="Operand">""</v>
-                              <v n="Type">""</v>
+                              <n n="Type" />
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -729,8 +729,8 @@ END_IF]]></ST>
                           </o>
                           <o>
                             <o n="Operand" t="Operand">
-                              <v n="Operand">"Unreach_LS_Top AND NOT Taper_BeyondRangeNegtive"</v>
-                              <v n="Type">""</v>
+                              <v n="Operand">"Unreach_LS_Far AND NOT Taper_BeyondRangeNegtive"</v>
+                              <v n="Type">"BOOL"</v>
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -748,8 +748,8 @@ END_IF]]></ST>
                           </o>
                           <o>
                             <o n="Operand" t="Operand">
-                              <v n="Operand">"Unreach_LS_Bottom AND NOT Taper_BeyondRangePositive"</v>
-                              <v n="Type">""</v>
+                              <v n="Operand">"Unreach_LS_Near AND NOT Taper_BeyondRangePositive"</v>
+                              <v n="Type">"BOOL"</v>
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -768,7 +768,7 @@ END_IF]]></ST>
                           <o>
                             <o n="Operand" t="Operand">
                               <v n="Operand">""</v>
-                              <v n="Type">""</v>
+                              <n n="Type" />
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -787,7 +787,7 @@ END_IF]]></ST>
                           <o>
                             <o n="Operand" t="Operand">
                               <v n="Operand">""</v>
-                              <v n="Type">""</v>
+                              <n n="Type" />
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -806,7 +806,7 @@ END_IF]]></ST>
                           <o>
                             <o n="Operand" t="Operand">
                               <v n="Operand">"LeftBottomLin"</v>
-                              <v n="Type">""</v>
+                              <v n="Type">"axis_ref"</v>
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -883,7 +883,7 @@ END_IF]]></ST>
                         <v n="BoxType">"MC_Power"</v>
                         <o n="Instance" t="Operand">
                           <v n="Operand">"RightBottomLin_MC_Power"</v>
-                          <v n="Type">""</v>
+                          <v n="Type">"MC_Power"</v>
                           <v n="Comment">""</v>
                           <v n="SymbolComment">""</v>
                           <v n="Address">""</v>
@@ -902,7 +902,7 @@ END_IF]]></ST>
                             <n />
                             <o>
                               <v n="Operand">""</v>
-                              <v n="Type">""</v>
+                              <n n="Type" />
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -911,14 +911,14 @@ END_IF]]></ST>
                                 <v n="Fixed">false</v>
                                 <v n="Extensible">false</v>
                               </o>
-                              <v n="LValue">false</v>
+                              <v n="LValue">true</v>
                               <v n="Boolean">false</v>
                               <v n="IsInstance">false</v>
                               <v n="Id">61L</v>
                             </o>
                             <o>
                               <v n="Operand">""</v>
-                              <v n="Type">""</v>
+                              <n n="Type" />
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -927,14 +927,14 @@ END_IF]]></ST>
                                 <v n="Fixed">false</v>
                                 <v n="Extensible">false</v>
                               </o>
-                              <v n="LValue">false</v>
+                              <v n="LValue">true</v>
                               <v n="Boolean">false</v>
                               <v n="IsInstance">false</v>
                               <v n="Id">62L</v>
                             </o>
                             <o>
                               <v n="Operand">""</v>
-                              <v n="Type">""</v>
+                              <n n="Type" />
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -943,14 +943,14 @@ END_IF]]></ST>
                                 <v n="Fixed">false</v>
                                 <v n="Extensible">false</v>
                               </o>
-                              <v n="LValue">false</v>
+                              <v n="LValue">true</v>
                               <v n="Boolean">false</v>
                               <v n="IsInstance">false</v>
                               <v n="Id">63L</v>
                             </o>
                             <o>
                               <v n="Operand">""</v>
-                              <v n="Type">""</v>
+                              <n n="Type" />
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -959,7 +959,7 @@ END_IF]]></ST>
                                 <v n="Fixed">false</v>
                                 <v n="Extensible">false</v>
                               </o>
-                              <v n="LValue">false</v>
+                              <v n="LValue">true</v>
                               <v n="Boolean">false</v>
                               <v n="IsInstance">false</v>
                               <v n="Id">64L</v>
@@ -976,7 +976,7 @@ END_IF]]></ST>
                           <o>
                             <o n="Operand" t="Operand">
                               <v n="Operand">""</v>
-                              <v n="Type">""</v>
+                              <n n="Type" />
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -994,8 +994,8 @@ END_IF]]></ST>
                           </o>
                           <o>
                             <o n="Operand" t="Operand">
-                              <v n="Operand">"Unreach_LS_Top AND NOT Taper_BeyondRangePositive"</v>
-                              <v n="Type">""</v>
+                              <v n="Operand">"Unreach_LS_Far AND NOT Taper_BeyondRangePositive"</v>
+                              <v n="Type">"BOOL"</v>
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -1013,8 +1013,8 @@ END_IF]]></ST>
                           </o>
                           <o>
                             <o n="Operand" t="Operand">
-                              <v n="Operand">"Unreach_LS_Bottom AND NOT Taper_BeyondRangeNegtive"</v>
-                              <v n="Type">""</v>
+                              <v n="Operand">"Unreach_LS_Near AND NOT Taper_BeyondRangeNegtive"</v>
+                              <v n="Type">"BOOL"</v>
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -1033,7 +1033,7 @@ END_IF]]></ST>
                           <o>
                             <o n="Operand" t="Operand">
                               <v n="Operand">""</v>
-                              <v n="Type">""</v>
+                              <n n="Type" />
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -1052,7 +1052,7 @@ END_IF]]></ST>
                           <o>
                             <o n="Operand" t="Operand">
                               <v n="Operand">""</v>
-                              <v n="Type">""</v>
+                              <n n="Type" />
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
@@ -1071,7 +1071,7 @@ END_IF]]></ST>
                           <o>
                             <o n="Operand" t="Operand">
                               <v n="Operand">"RightBottomLin"</v>
-                              <v n="Type">""</v>
+                              <v n="Type">"axis_ref"</v>
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
                               <v n="Address">""</v>
