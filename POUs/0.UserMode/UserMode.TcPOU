@@ -3,10 +3,6 @@
   <POU Name="UserMode" Id="{dbb58c86-3204-4c0e-a297-03b24a68bd10}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM UserMode
 VAR
-(*key Command*)
-	btn_Power:BOOL;
-	btn_PowerOn: BOOL;
-	btn_PowerOff: BOOL;
 (*GapMode*)
 	UserGapPositionNew:LREAL:=20;//target
 	UserGapVelocityNew:LREAL:=1;//target
@@ -1288,7 +1284,7 @@ IF btn_UserGapStop THEN
 END_IF
 
 (*触发限位开关后，相当于点击了Stop按钮*)
-FTrig_ReachLS(CLK:=Unreach_LS_Top AND Unreach_LS_Bottom);
+FTrig_ReachLS(CLK:=Unreach_LS_Far AND Unreach_LS_Near);
 IF FTrig_ReachLS.Q THEN
 	btn_UserGapStop:=TRUE;
 END_IF]]></ST>
@@ -1456,7 +1452,7 @@ IF SS_Stop THEN
 END_IF
 
 (*触发限位开关后，相当于点击了Stop按钮*)
-FTrig_ReachLS(CLK:=Unreach_LS_Top AND Unreach_LS_Bottom);
+FTrig_ReachLS(CLK:=Unreach_LS_Far AND Unreach_LS_Near);
 IF FTrig_ReachLS.Q THEN
 	SS_Stop:=TRUE;
 END_IF

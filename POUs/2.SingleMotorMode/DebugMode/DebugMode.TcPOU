@@ -11,8 +11,6 @@ VAR
 	PowerState: INT;(*PowerOnState*)
 	ton_t: TON;
 (*Key Command*)
-	btn_PowerOn: BOOL;
-	btn_PowerOff: BOOL;
 	LeftTopLinPositionNew:LREAL;
 	LeftTopLinVelocityNew:LREAL:=1;
 	btn_LeftTopLinMove:BOOL;
@@ -63,13 +61,16 @@ VAR
 	(*¼ì²âµ½ÏÞÎ»£¬»Ö¸´Move×´Ì¬*)
 	FTrig_ReachLS: F_TRIG;
 	FTrig_btn_GapMove: F_TRIG;
-	btn_Power: BOOL;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[(*********************************************************************Monitor All Carrirt Position***********************************************)
 A_MonitoringAllAxis();
 (*********************************************************************A_PosDiffDetection***********************************************)
 A_PosDiffDetection();
+//
+IF st_Power=1 THEN
+	InitDone:=TRUE;
+END_IF
 (*********************************************************************btn_PowerOn************************************************************)
 IF btn_Power AND st_Power=0 THEN
 	btn_PowerOn:=TRUE;
@@ -360,7 +361,7 @@ ELSE
 END_IF
 (*********************************************************************ÏÞÎ»Åö´¥×´Ì¬»Ö¸´************************************************************)
 (*Èç¹û¼ì²âµ½ÏØÏÞÎ»¿ª¹ØÏÂ½µÑØ£¬»Ö¸´Move×´Ì¬*)
-FTrig_ReachLS(CLK:=Unreach_LS_Top AND Unreach_LS_Bottom);
+FTrig_ReachLS(CLK:=Unreach_LS_Far AND Unreach_LS_Near);
 IF FTrig_ReachLS.Q THEN
 	btn_LeftTopLinStop:=TRUE;
 	btn_RightTopLinStop:=TRUE;
@@ -378,16 +379,16 @@ IF btn_LeftBottomLinStop THEN
 END_IF
 
 (*Èç¹û¼ì²âµ½TopÏÞÎ»¿ª¹ØFALSE£¬ÇÒÄ¿±êÎ»ÖÃ´óÓÚµ±Ç°Î»ÖÃÊ±£¬»òÕßÏà·´Ê±£¬»Ö¸´Move×´Ì¬*)
-IF NOT Unreach_LS_Top AND LeftTopLinPositionNew-Pos_LeftTopLin>0.0005 AND btn_LeftTopLinMove THEN
+IF NOT Unreach_LS_Far AND LeftTopLinPositionNew-Pos_LeftTopLin>0.0005 AND btn_LeftTopLinMove THEN
 	btn_LeftTopLinStop:=TRUE;
 END_IF
-IF NOT Unreach_LS_Bottom AND RightTopLinPositionNew-Pos_RightTopLin<0.0005 AND btn_RightTopLinMove THEN
+IF NOT Unreach_LS_Near AND RightTopLinPositionNew-Pos_RightTopLin<0.0005 AND btn_RightTopLinMove THEN
 	btn_RightTopLinStop:=TRUE;
 END_IF
-IF NOT Unreach_LS_Top AND LeftBottomLinPositionNew-Pos_LeftBottomLin>0.0005 AND btn_LeftBottomLinMove THEN
+IF NOT Unreach_LS_Far AND LeftBottomLinPositionNew-Pos_LeftBottomLin>0.0005 AND btn_LeftBottomLinMove THEN
 	btn_LeftBottomLinStop:=TRUE;
 END_IF
-IF NOT Unreach_LS_Bottom AND RightBottomLinPositionNew-Pos_RightBottomLin<0.0005 AND btn_RightBottomLinMove THEN
+IF NOT Unreach_LS_Near AND RightBottomLinPositionNew-Pos_RightBottomLin<0.0005 AND btn_RightBottomLinMove THEN
 	btn_RightBottomLinStop:=TRUE;
 END_IF]]></ST>
     </Implementation>
@@ -617,6 +618,9 @@ END_CASE]]></ST>
     </Action>
     <LineIds Name="DebugMode">
       <LineId Id="65" Count="3" />
+      <LineId Id="519" Count="0" />
+      <LineId Id="517" Count="1" />
+      <LineId Id="516" Count="0" />
       <LineId Id="445" Count="7" />
       <LineId Id="444" Count="0" />
       <LineId Id="69" Count="310" />

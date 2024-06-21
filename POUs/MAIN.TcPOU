@@ -208,6 +208,9 @@ END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[(*加载Ricipe参数*)
 A_InitRecipeParameters();
+IF NOT loadParametersDone THEN
+	RETURN;
+END_IF
 (*Restart TwinCAT*)
 IF Global_Variables.m_restartTC THEN
 (*首先关闭opcIocShell.exe*)	
@@ -409,23 +412,23 @@ ELSE
 (**)
 IF simulation THEN
 	(**)
-	LS_LeftTop_Top:=TRUE;
-	LS_LeftTop_Bottom:=TRUE;
-	LS_RightTop_Top:=TRUE;
-	LS_RightTop_Bottom:=TRUE;
-	LS_LeftBottom_Top:=TRUE;
-	LS_LeftBottom_Bottom:=TRUE;
-	LS_RightBottom_Top:=TRUE;
-	LS_RightBottom_Bottom:=TRUE;
+	LS_LeftTop_Far:=TRUE;
+	LS_LeftTop_Near:=TRUE;
+	LS_RightTop_Far:=TRUE;
+	LS_RightTop_Near:=TRUE;
+	LS_LeftBottom_Far:=TRUE;
+	LS_LeftBottom_Near:=TRUE;
+	LS_RightBottom_Far:=TRUE;
+	LS_RightBottom_Near:=TRUE;
 ELSE
-	LS_LeftTop_Top :=el1808_D1[1];
-	LS_LeftTop_Bottom:=el1808_D1[3];
-	LS_RightTop_Top:=el1808_D1[2];
-	LS_RightTop_Bottom:=el1808_D1[4];
-	LS_LeftBottom_Top:=el1808_D1[7];
-	LS_LeftBottom_Bottom:=el1808_D1[5];
-	LS_RightBottom_Top:=el1808_D1[8];
-	LS_RightBottom_Bottom:=el1808_D1[6];
+	LS_LeftTop_Far :=el1808_D1[1];
+	LS_LeftTop_Near:=el1808_D1[3];
+	LS_RightTop_Far:=el1808_D1[2];
+	LS_RightTop_Near:=el1808_D1[4];
+	LS_LeftBottom_Far:=el1808_D1[7];
+	LS_LeftBottom_Near:=el1808_D1[5];
+	LS_RightBottom_Far:=el1808_D1[8];
+	LS_RightBottom_Near:=el1808_D1[6];
 END_IF
 (*
 	LS_LeftTop_Top:=TRUE;
@@ -438,8 +441,8 @@ END_IF
 	LS_RightBottom_Bottom:=TRUE;
 *)
 (******2.TopÏÞÎ»»òÕßBottomÏÞÎ»ÓÐÒ»¸ö´¥·¢£¬È«¾Ö±äÁ¿¡£¸øMC_POWERÓÃÓÚ·½Ïò¿ØÖÆ£¬ÓÐÒ»¸öÏÞÎ»Îª´¥·¢ÎªFALSE£¬ÔòUnreach_LSÎªFALSE******)
-Unreach_LS_Top:=LS_LeftTop_Top AND LS_RightTop_Top AND LS_LeftBottom_Top AND LS_RightBottom_Top;
-Unreach_LS_Bottom:=LS_LeftTop_Bottom AND LS_RightTop_Bottom AND LS_LeftBottom_Bottom AND LS_RightBottom_Bottom;
+Unreach_LS_Far:=LS_LeftTop_Far AND LS_RightTop_Far AND LS_LeftBottom_Far AND LS_RightBottom_Far;
+Unreach_LS_Near:=LS_LeftTop_Near AND LS_RightTop_Near AND LS_LeftBottom_Near AND LS_RightBottom_Near;
 (**************************ÏòTopÔË¶¯Ê±£¬´¥ÅöBottomÏÞÎ»¿ª¹Ø£¬»òÕßÏà·´£¬ESTOP**************************************)
 (*
 IF LeftTopLin.Status.Moving AND Velo_LeftTopLin>0 THEN
@@ -4166,7 +4169,9 @@ END_CASE]]></ST>
       </Implementation>
     </Action>
     <LineIds Name="MAIN">
-      <LineId Id="2277" Count="3" />
+      <LineId Id="2277" Count="1" />
+      <LineId Id="2785" Count="2" />
+      <LineId Id="2279" Count="1" />
       <LineId Id="2374" Count="0" />
       <LineId Id="2379" Count="0" />
       <LineId Id="2282" Count="1" />
