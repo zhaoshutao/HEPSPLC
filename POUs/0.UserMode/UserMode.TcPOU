@@ -135,34 +135,52 @@ VAR
 	TaperAndGapSafetyfactor: LREAL:=1;
 	TaperAndGapSafetyScale:LREAL:=0.41;//IAU=0.41,IVU=0.32,CPMU=0.33,IAMW=0.42
 	//
-	//Global Chain protection
-	Global_ChainProtection_BeamLineReady:BOOL;
-	Global_ChainProtection_StorageRingReady:BOOL;
-	Global_ChainProtection_On: BOOL;
-	Global_ChainProtection_MaxGapValue: LREAL;
-	Global_ChainProtection_MoveVelocity: LREAL;
-	Global_ChainProtection_Done: BOOL;
+	//Global Chain protection-MPS
+	Global_ChainProtection_MPS_StorageRingReady:BOOL;
+	Global_ChainProtection_MPS_On: BOOL;
+	Global_ChainProtection_MPS_MaxGapValue: LREAL;
+	Global_ChainProtection_MPS_MoveVelocity: LREAL;
+	Global_ChainProtection_MPS_Done: BOOL;
 	//Global_ChainProtection_Error: BOOL;
 	//Global_ChainProtection_ErrorID: INT;
 	//Global_ChainProtection_ErrorDescription: STRING;
-	Global_ChainProtection_ManualOperation:BOOL:=TRUE;
-	Global_ChainProtection_FTRIG:F_TRIG;
-	Global_ChainProtection_FTRIG_Manul:F_TRIG;
-	Global_ChainProtection_TON:TON;
-	Global_ChainProtection_Triggered:BOOL;
-	Global_ChainProtection_In:BOOL;
-	Global_ChainProtection_In1 AT%I* :BOOL;//下降沿表示触发
-	Global_ChainProtection_In2 AT%I* :BOOL;
-	Global_ChainProtection_In3 AT%I* :BOOL;
-	Global_ChainProtection_In4 AT%I* :BOOL;
-	Global_ChainProtection_State:DINT;
-	Global_ChainProtection_Out1 AT%Q* :BOOL;//上升沿标识到达最大间隙，连锁保护成功
-	Global_ChainProtection_Out2 AT%Q* :BOOL;
-	Global_ChainProtection_Out3 AT%Q* :BOOL;
-	Global_ChainProtection_Out4 AT%Q* :BOOL;
-	Global_ChainProtection_TON_Stop2Move:TON;
-	Global_ChainProtection_TON_Stop2Move_InTaperMode:TON;
-	Global_ChainProtection_TON_Power2Move:TON;
+	Global_ChainProtection_MPS_ManualOperation:BOOL:=TRUE;
+	Global_ChainProtection_MPS_FTRIG:F_TRIG;
+	Global_ChainProtection_MPS_FTRIG_Manul:F_TRIG;
+	Global_ChainProtection_MPS_TON:TON;
+	Global_ChainProtection_MPS_Triggered:BOOL;
+	Global_ChainProtection_MPS_In:BOOL;
+	Global_ChainProtection_MPS_In1 AT%I* :BOOL;//下降沿表示触发
+	Global_ChainProtection_MPS_In2 AT%I* :BOOL;
+	Global_ChainProtection_MPS_State:DINT;
+	Global_ChainProtection_MPS_Out1 AT%Q* :BOOL;//上升沿标识到达最大间隙，连锁保护成功
+	Global_ChainProtection_MPS_Out2 AT%Q* :BOOL;
+	Global_ChainProtection_MPS_TON_Stop2Move:TON;
+	Global_ChainProtection_MPS_TON_Stop2Move_InTaperMode:TON;
+	Global_ChainProtection_MPS_TON_Power2Move:TON;
+	//Global Chain protection-EPS
+	Global_ChainProtection_EPS_BeamLineReady:BOOL;
+	Global_ChainProtection_EPS_On: BOOL;
+	Global_ChainProtection_EPS_MaxGapValue: LREAL;
+	Global_ChainProtection_EPS_MoveVelocity: LREAL;
+	Global_ChainProtection_EPS_Done: BOOL;
+	//Global_ChainProtection_Error: BOOL;
+	//Global_ChainProtection_ErrorID: INT;
+	//Global_ChainProtection_ErrorDescription: STRING;
+	Global_ChainProtection_EPS_ManualOperation:BOOL:=TRUE;
+	Global_ChainProtection_EPS_FTRIG:F_TRIG;
+	Global_ChainProtection_EPS_FTRIG_Manul:F_TRIG;
+	Global_ChainProtection_EPS_TON:TON;
+	Global_ChainProtection_EPS_Triggered:BOOL;
+	Global_ChainProtection_EPS_In:BOOL;
+	Global_ChainProtection_EPS_In1 AT%I* :BOOL;//下降沿表示触发
+	Global_ChainProtection_EPS_In2 AT%I* :BOOL;
+	Global_ChainProtection_EPS_State:DINT;
+	Global_ChainProtection_EPS_Out1 AT%Q* :BOOL;//上升沿标识到达最大间隙，连锁保护成功
+	Global_ChainProtection_EPS_Out2 AT%Q* :BOOL;
+	Global_ChainProtection_EPS_TON_Stop2Move:TON;
+	Global_ChainProtection_EPS_TON_Stop2Move_InTaperMode:TON;
+	Global_ChainProtection_EPS_TON_Power2Move:TON;
 	//
 	//Cryogenic Chain protection
 	Cryogenic_ChainProtection_On: BOOL;
@@ -242,7 +260,8 @@ A_CheckInputPosVelo();
 (*检查光栅读数是否在范围内*)
 A_CheckLinearEncoder();
 (*GlobalChainProtection*)
-A_GlobalChainProtection();
+A_GlobalChainProtection_MPS();
+A_GlobalChainProtection_EPS();
 (*CryogenicChainProtection*)
 A_CryogenicChainProtection();]]></ST>
     </Implementation>
@@ -548,39 +567,144 @@ IF MAIN.temperatureStatus<>0 AND MAIN.temperature_average > MAIN.CryogenicTemper
 END_IF]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_GlobalChainProtection" Id="{214f7982-b3a1-46e2-bee6-e29b232f3cd2}">
+    <Action Name="A_GlobalChainProtection_EPS" Id="{06b22d18-fd3c-40de-ae42-96c81b461f09}">
       <Implementation>
         <ST><![CDATA[//硬线输入定义
-Global_ChainProtection_In:=Global_ChainProtection_In1 AND Global_ChainProtection_In2
-					AND	Global_ChainProtection_In3 AND Global_ChainProtection_In4;
+Global_ChainProtection_EPS_In:=Global_ChainProtection_EPS_In1 AND Global_ChainProtection_EPS_In2;
 //硬线输出定义
-Global_ChainProtection_Out1:=Global_ChainProtection_Done;
-Global_ChainProtection_Out2:=Global_ChainProtection_Done;
-Global_ChainProtection_Out3:=Global_ChainProtection_Done;
-Global_ChainProtection_Out4:=Global_ChainProtection_Done;
+Global_ChainProtection_EPS_Out1:=Global_ChainProtection_EPS_Done;
+Global_ChainProtection_EPS_Out2:=Global_ChainProtection_EPS_Done;
 //总开关
-IF NOT Global_ChainProtection_On THEN
+IF NOT Global_ChainProtection_EPS_On THEN
 	RETURN;
 END_IF
 //判断插入件状态，是否就位
 //IF NOT IDControlReady THEN
-//	Global_ChainProtection_Done:=FALSE;
+//	Global_ChainProtection_EPS_Done:=FALSE;
+//	Error:= TRUE;
+//	ErrorID:= 1501;
+//	ErrorDescription:='ID NOT READY!';
+//	RETURN;
+//END_IF
+//判断储存环是否给出就位信号，暂时由参数表给出TRUE，最终将由IOC接受PV
+IF 	NOT Global_ChainProtection_EPS_BeamLineReady THEN
+	Global_ChainProtection_EPS_Done:=FALSE;
+	Error:= TRUE;
+	ErrorID:= 1503;
+	ErrorDescription:='Global_ChainProtection_EPS_BeamLineReady NOT Ready';
+	RETURN;
+END_IF
+//
+//全局连锁保护程序开始
+//
+//0.检测到下降沿，触发
+//1.判断电机是否在开启状态,没有就打开电源
+//2.判断是否在Moving状态,若有就Stop
+//3.将磁间隙打开到至最大阈值
+//4.到位后给出反馈，且安全PLC触发
+Global_ChainProtection_EPS_FTRIG(CLK:=Global_ChainProtection_EPS_In);
+IF Global_ChainProtection_EPS_FTRIG.Q THEN
+	Global_ChainProtection_EPS_Triggered:=TRUE;
+END_IF
+Global_ChainProtection_EPS_FTRIG_Manul(CLK:=Global_ChainProtection_EPS_ManualOperation);
+IF Global_ChainProtection_EPS_FTRIG_Manul.Q THEN
+	Global_ChainProtection_EPS_Triggered:=TRUE;
+END_IF
+IF Global_ChainProtection_EPS_Triggered THEN
+	CASE Global_ChainProtection_EPS_State OF
+		0://1.判断电机是否在开启状态,没有就打开电源
+			IF st_Power=1 THEN
+				Global_ChainProtection_EPS_State:=1;
+			ELSE
+				btn_PowerOn:=TRUE;
+				IF btn_PowerOn THEN
+					A_PowerOn();
+				END_IF
+			END_IF
+		1://1.判断是否在谱学扫描模式，如果是，则切换回正常运动模式
+			IF IsSSMotionMode THEN
+				SS_Stop:=TRUE;
+				IsSSMotionMode:=FALSE;
+			END_IF
+			Global_ChainProtection_EPS_State:=2;
+		2://判断是否在taper，如果在taper,则判断是否在运动，如果是，则停止运动,0.5sh后，转入下一步
+			IF TaperOrNot THEN
+				IF MAIN.moveStatusLeftTop OR MAIN.moveStatusRightTop OR MAIN.moveStatusLeftBottom OR MAIN.moveStatusRightBottom THEN
+					btn_UserGapStop:=TRUE;
+				ELSE
+					Global_ChainProtection_EPS_TON_Stop2Move_InTaperMode(PT:=T#0.5S);
+					Global_ChainProtection_EPS_TON_Stop2Move_InTaperMode.IN:=TRUE;
+					IF Global_ChainProtection_EPS_TON_Stop2Move_InTaperMode.Q THEN
+						TaperOrNot:=FALSE;//关闭taper模式
+						Global_ChainProtection_EPS_State:=3;
+					END_IF
+				END_IF
+			ELSE
+				Global_ChainProtection_EPS_State:=3;
+			END_IF
+		3://3.判断是否在Moving状态,若有就Stop.Taper模式已处理完，此处开始走正常GAP开合逻辑
+			IF MAIN.moveStatusLeftTop OR MAIN.moveStatusRightTop OR MAIN.moveStatusLeftBottom OR MAIN.moveStatusRightBottom THEN
+				btn_UserGapStop:=TRUE;
+			ELSE
+				Global_ChainProtection_EPS_TON_Stop2Move(PT:=T#0.5S);
+				Global_ChainProtection_EPS_TON_Stop2Move.IN:=TRUE;
+				IF Global_ChainProtection_EPS_TON_Stop2Move.Q THEN
+					Global_ChainProtection_EPS_State:=4;
+				END_IF
+			END_IF
+		4://4.将磁间隙打开到至最大阈值
+			Global_ChainProtection_EPS_TON(PT:=INT_TO_TIME(LREAL_TO_INT(Global_ChainProtection_EPS_MaxGapValue/Global_ChainProtection_EPS_MoveVelocity+30))*1000);
+			Global_ChainProtection_EPS_TON.IN:=TRUE;
+			Global_ChainProtection_EPS_TON_Power2Move(PT:=T#0.1S);
+			Global_ChainProtection_EPS_TON_Power2Move.IN:=TRUE;
+			UserGapPositionNew:=Global_ChainProtection_EPS_MaxGapValue;
+			UserGapVelocityNew:=Global_ChainProtection_EPS_MoveVelocity;
+			btn_UserGapMove:=TRUE;
+			IF Global_ChainProtection_EPS_TON_Power2Move.Q THEN
+				IF FB_MOVE.BCGapDone THEN
+					Global_ChainProtection_EPS_State:=88;
+				END_IF
+			END_IF
+			IF Global_ChainProtection_EPS_TON.Q THEN//如果150s后，还没有运动到指定gap，则报错
+				Global_ChainProtection_EPS_State:=-100;
+			END_IF
+		88://4.到位后给出反馈，且安全PLC触发
+			Global_ChainProtection_EPS_Done:=TRUE;
+			Plc_EmergencyStop:=FALSE;	
+			Error:=TRUE;
+			ErrorID:=1504;
+			ErrorDescription:='Global_ChainProtection_EPS Triggered ';	
+		-100:
+			Global_ChainProtection_EPS_Done:=FALSE;
+			Error:=TRUE;
+			ErrorID:=1505;
+			ErrorDescription:='NOT MOVING TO MAXGAP';
+	END_CASE
+END_IF]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_GlobalChainProtection_MPS" Id="{214f7982-b3a1-46e2-bee6-e29b232f3cd2}">
+      <Implementation>
+        <ST><![CDATA[//硬线输入定义
+Global_ChainProtection_MPS_In:=Global_ChainProtection_MPS_In1 AND Global_ChainProtection_MPS_In2;
+//硬线输出定义
+Global_ChainProtection_MPS_Out1:=Global_ChainProtection_MPS_Done;
+Global_ChainProtection_MPS_Out2:=Global_ChainProtection_MPS_Done;
+//总开关
+IF NOT Global_ChainProtection_MPS_On THEN
+	RETURN;
+END_IF
+//判断插入件状态，是否就位
+//IF NOT IDControlReady THEN
+//	Global_ChainProtection_MPS_Done:=FALSE;
 //	Error:= TRUE;
 //	ErrorID:= 1401;
 //	ErrorDescription:='ID NOT READY!';
 //	RETURN;
 //END_IF
-//判断束线是否给出就位信号，暂时由参数表给出TRUE，最终将由IOC接受PV
-IF 	NOT Global_ChainProtection_BeamLineReady THEN
-	Global_ChainProtection_Done:=FALSE;
-	Error:= TRUE;
-	ErrorID:= 1402;
-	ErrorDescription:='BeamLineChainProtection NOT Ready';
-	RETURN;
-END_IF	
 //判断储存环是否给出就位信号，暂时由参数表给出TRUE，最终将由IOC接受PV
-IF 	NOT Global_ChainProtection_StorageRingReady THEN
-	Global_ChainProtection_Done:=FALSE;
+IF 	NOT Global_ChainProtection_MPS_StorageRingReady THEN
+	Global_ChainProtection_MPS_Done:=FALSE;
 	Error:= TRUE;
 	ErrorID:= 1403;
 	ErrorDescription:='StorageRingChainProtection NOT Ready';
@@ -594,19 +718,19 @@ END_IF
 //2.判断是否在Moving状态,若有就Stop
 //3.将磁间隙打开到至最大阈值
 //4.到位后给出反馈，且安全PLC触发
-Global_ChainProtection_FTRIG(CLK:=Global_ChainProtection_In);
-IF Global_ChainProtection_FTRIG.Q THEN
-	Global_ChainProtection_Triggered:=TRUE;
+Global_ChainProtection_MPS_FTRIG(CLK:=Global_ChainProtection_MPS_In);
+IF Global_ChainProtection_MPS_FTRIG.Q THEN
+	Global_ChainProtection_MPS_Triggered:=TRUE;
 END_IF
-Global_ChainProtection_FTRIG_Manul(CLK:=Global_ChainProtection_ManualOperation);
-IF Global_ChainProtection_FTRIG_Manul.Q THEN
-	Global_ChainProtection_Triggered:=TRUE;
+Global_ChainProtection_MPS_FTRIG_Manul(CLK:=Global_ChainProtection_MPS_ManualOperation);
+IF Global_ChainProtection_MPS_FTRIG_Manul.Q THEN
+	Global_ChainProtection_MPS_Triggered:=TRUE;
 END_IF
-IF Global_ChainProtection_Triggered THEN
-	CASE Global_ChainProtection_State OF
+IF Global_ChainProtection_MPS_Triggered THEN
+	CASE Global_ChainProtection_MPS_State OF
 		0://1.判断电机是否在开启状态,没有就打开电源
 			IF st_Power=1 THEN
-				Global_ChainProtection_State:=1;
+				Global_ChainProtection_MPS_State:=1;
 			ELSE
 				btn_PowerOn:=TRUE;
 				IF btn_PowerOn THEN
@@ -618,56 +742,56 @@ IF Global_ChainProtection_Triggered THEN
 				SS_Stop:=TRUE;
 				IsSSMotionMode:=FALSE;
 			END_IF
-			Global_ChainProtection_State:=2;
+			Global_ChainProtection_MPS_State:=2;
 		2://判断是否在taper，如果在taper,则判断是否在运动，如果是，则停止运动,0.5sh后，转入下一步
 			IF TaperOrNot THEN
 				IF MAIN.moveStatusLeftTop OR MAIN.moveStatusRightTop OR MAIN.moveStatusLeftBottom OR MAIN.moveStatusRightBottom THEN
 					btn_UserGapStop:=TRUE;
 				ELSE
-					Global_ChainProtection_TON_Stop2Move_InTaperMode(PT:=T#0.5S);
-					Global_ChainProtection_TON_Stop2Move_InTaperMode.IN:=TRUE;
-					IF Global_ChainProtection_TON_Stop2Move_InTaperMode.Q THEN
+					Global_ChainProtection_MPS_TON_Stop2Move_InTaperMode(PT:=T#0.5S);
+					Global_ChainProtection_MPS_TON_Stop2Move_InTaperMode.IN:=TRUE;
+					IF Global_ChainProtection_MPS_TON_Stop2Move_InTaperMode.Q THEN
 						TaperOrNot:=FALSE;//关闭taper模式
-						Global_ChainProtection_State:=3;
+						Global_ChainProtection_MPS_State:=3;
 					END_IF
 				END_IF
 			ELSE
-				Global_ChainProtection_State:=3;
+				Global_ChainProtection_MPS_State:=3;
 			END_IF
 		3://3.判断是否在Moving状态,若有就Stop.Taper模式已处理完，此处开始走正常GAP开合逻辑
 			IF MAIN.moveStatusLeftTop OR MAIN.moveStatusRightTop OR MAIN.moveStatusLeftBottom OR MAIN.moveStatusRightBottom THEN
 				btn_UserGapStop:=TRUE;
 			ELSE
-				Global_ChainProtection_TON_Stop2Move(PT:=T#0.5S);
-				Global_ChainProtection_TON_Stop2Move.IN:=TRUE;
-				IF Global_ChainProtection_TON_Stop2Move.Q THEN
-					Global_ChainProtection_State:=4;
+				Global_ChainProtection_MPS_TON_Stop2Move(PT:=T#0.5S);
+				Global_ChainProtection_MPS_TON_Stop2Move.IN:=TRUE;
+				IF Global_ChainProtection_MPS_TON_Stop2Move.Q THEN
+					Global_ChainProtection_MPS_State:=4;
 				END_IF
 			END_IF
 		4://4.将磁间隙打开到至最大阈值
-			Global_ChainProtection_TON(PT:=INT_TO_TIME(LREAL_TO_INT(Global_ChainProtection_MaxGapValue/Global_ChainProtection_MoveVelocity+30))*1000);
-			Global_ChainProtection_TON.IN:=TRUE;
-			Global_ChainProtection_TON_Power2Move(PT:=T#0.1S);
-			Global_ChainProtection_TON_Power2Move.IN:=TRUE;
-			UserGapPositionNew:=Global_ChainProtection_MaxGapValue;
-			UserGapVelocityNew:=Global_ChainProtection_MoveVelocity;
+			Global_ChainProtection_MPS_TON(PT:=INT_TO_TIME(LREAL_TO_INT(Global_ChainProtection_MPS_MaxGapValue/Global_ChainProtection_MPS_MoveVelocity+30))*1000);
+			Global_ChainProtection_MPS_TON.IN:=TRUE;
+			Global_ChainProtection_MPS_TON_Power2Move(PT:=T#0.1S);
+			Global_ChainProtection_MPS_TON_Power2Move.IN:=TRUE;
+			UserGapPositionNew:=Global_ChainProtection_MPS_MaxGapValue;
+			UserGapVelocityNew:=Global_ChainProtection_MPS_MoveVelocity;
 			btn_UserGapMove:=TRUE;
-			IF Global_ChainProtection_TON_Power2Move.Q THEN
+			IF Global_ChainProtection_MPS_TON_Power2Move.Q THEN
 				IF FB_MOVE.BCGapDone THEN
-					Global_ChainProtection_State:=88;
+					Global_ChainProtection_MPS_State:=88;
 				END_IF
 			END_IF
-			IF Global_ChainProtection_TON.Q THEN//如果150s后，还没有运动到指定gap，则报错
-				Global_ChainProtection_State:=-100;
+			IF Global_ChainProtection_MPS_TON.Q THEN//如果150s后，还没有运动到指定gap，则报错
+				Global_ChainProtection_MPS_State:=-100;
 			END_IF
 		88://4.到位后给出反馈，且安全PLC触发
-			Global_ChainProtection_Done:=TRUE;
+			Global_ChainProtection_MPS_Done:=TRUE;
 			Plc_EmergencyStop:=FALSE;	
 			Error:=TRUE;
 			ErrorID:=1404;
-			ErrorDescription:='Global_ChainProtection Triggered ';	
+			ErrorDescription:='Global_ChainProtection_MPS Triggered ';	
 		-100:
-			Global_ChainProtection_Done:=FALSE;
+			Global_ChainProtection_MPS_Done:=FALSE;
 			Error:=TRUE;
 			ErrorID:=1405;
 			ErrorDescription:='NOT MOVING TO MAXGAP';
@@ -761,7 +885,7 @@ IF USE_SingleAxis_Compensation THEN
 				UserRightGapPositionDisplay:=(UserRightGapPositionDisplay_FromRightTop+UserRightGapPositionDisplay_FromRightBottom)/2;
 			END_IF
 	END_FOR
-	IF TaperOrNot OR Global_ChainProtection_Triggered THEN//安全联锁触发时，需要UserTaperPositionDisplay作为A_MonitoringAllAxis的保护
+	IF TaperOrNot OR (Global_ChainProtection_MPS_Triggered OR Global_ChainProtection_EPS_Triggered)  THEN//安全联锁触发时，需要UserTaperPositionDisplay作为A_MonitoringAllAxis的保护
 		UserTaperPositionDisplay:=DINT_TO_LREAL(LREAL_TO_DINT((UserRightGapPositionDisplay-UserGapPositionDisplay)*100000))/100000;
 		UserTaperVelocityDisplay:=DINT_TO_LREAL(LREAL_TO_DINT((Velo_RightTopLin+Velo_RightBottomLin)/2*100000))/100000;
 	END_IF
@@ -1033,7 +1157,7 @@ IF btn_UserGapMove AND NOT SSMotionMode AND RegularMotionMode THEN
 	END_IF
 END_IF
 (*若GAP将有变化，首先检测TAPER是否超出阈值，若超出，则报错，提示必须先将TAPER回归到0，才可以改变GAP*)
-IF NOT Global_ChainProtection_Triggered THEN//在触发联锁保护后，taper保护关闭
+IF NOT (Global_ChainProtection_MPS_Triggered OR Global_ChainProtection_EPS_Triggered) THEN//在触发联锁保护后，taper保护关闭
 	IF ABS(UserGapPositionNew-UserGapPositionDisplay)>Threshold_GapChangeFlag AND btn_UserGapMove THEN
 		IF UserTaperPositionDisplay>Threshold_TaperChangeFlag THEN
 			btn_UserGapStop:=TRUE;
@@ -1046,7 +1170,7 @@ IF NOT Global_ChainProtection_Triggered THEN//在触发联锁保护后，taper�
 	END_IF
 END_IF
 (*Taper和gap连锁限制性保护。比如11mm时候如果taper，入口端gap变小，会有压真空盒的问题。设置保护*)
-IF NOT Global_ChainProtection_Triggered THEN//在触发联锁保护后，taper保护关闭
+IF NOT (Global_ChainProtection_MPS_Triggered OR Global_ChainProtection_EPS_Triggered)  THEN//在触发联锁保护后，taper保护关闭
 	IF UserGapPositionNew-TaperAndGapSafetyfactor*TaperAndGapSafetyScale*UserTaperPositionNew<=min_UserGapPositionNew AND btn_UserGapMove THEN
 			btn_UserGapStop:=TRUE;
 			btn_UserGapMove:=FALSE;
@@ -1368,13 +1492,13 @@ IF InitPowerDone AND InitCompensationDatasDone AND SS_Move AND SS_InitStartPosit
 				FB_Move.CoupleState:=st_Couple;			
 				FB_Move.PowerState:=st_Power;							
 				FB_Move.BCLeftTopPosition:=LeftTopLinPositionNew;
-				FB_Move.BCLeftTopVelocity:=UserGapVelocityNew/2;
+				FB_Move.BCLeftTopVelocity:=SS_StepVelocity/2;
 				FB_Move.BCRightTopPosition:=RightTopLinPositionNew;
-				FB_Move.BCRightTopVelocity:=UserGapVelocityNew/2;
+				FB_Move.BCRightTopVelocity:=SS_StepVelocity/2;
 				FB_Move.BCLeftBottomPosition:=LeftBottomLinPositionNew;
-				FB_Move.BCLeftBottomVelocity:=UserGapVelocityNew/2;
+				FB_Move.BCLeftBottomVelocity:=SS_StepVelocity/2;
 				FB_Move.BCRightBottomPosition:=RightBottomLinPositionNew;
-				FB_Move.BCRightBottomVelocity:=UserGapVelocityNew/2;		
+				FB_Move.BCRightBottomVelocity:=SS_StepVelocity/2;		
 				FB_Move.BCGapMove:=TRUE;
 				FB_Move();
 				SS_MoveState:=1;
@@ -1460,45 +1584,9 @@ END_IF
       </Implementation>
     </Action>
     <LineIds Name="UserMode">
-      <LineId Id="767" Count="1" />
-      <LineId Id="770" Count="0" />
-      <LineId Id="883" Count="1" />
-      <LineId Id="882" Count="0" />
-      <LineId Id="40" Count="8" />
-      <LineId Id="52" Count="1" />
-      <LineId Id="51" Count="0" />
-      <LineId Id="56" Count="1" />
-      <LineId Id="54" Count="0" />
-      <LineId Id="546" Count="0" />
-      <LineId Id="59" Count="0" />
-      <LineId Id="538" Count="0" />
-      <LineId Id="542" Count="0" />
-      <LineId Id="72" Count="0" />
-      <LineId Id="71" Count="0" />
-      <LineId Id="543" Count="0" />
-      <LineId Id="82" Count="0" />
-      <LineId Id="81" Count="0" />
-      <LineId Id="544" Count="0" />
-      <LineId Id="406" Count="0" />
-      <LineId Id="548" Count="0" />
-      <LineId Id="530" Count="0" />
-      <LineId Id="549" Count="0" />
-      <LineId Id="545" Count="0" />
-      <LineId Id="445" Count="0" />
-      <LineId Id="1149" Count="1" />
-      <LineId Id="1152" Count="2" />
-      <LineId Id="1156" Count="0" />
-      <LineId Id="1155" Count="0" />
-      <LineId Id="550" Count="0" />
-      <LineId Id="528" Count="0" />
-      <LineId Id="551" Count="0" />
-      <LineId Id="655" Count="0" />
-      <LineId Id="570" Count="0" />
-      <LineId Id="656" Count="0" />
-      <LineId Id="1012" Count="0" />
-      <LineId Id="1011" Count="0" />
-      <LineId Id="1326" Count="1" />
-      <LineId Id="1329" Count="0" />
+      <LineId Id="1545" Count="53" />
+      <LineId Id="1600" Count="0" />
+      <LineId Id="1599" Count="0" />
       <LineId Id="1328" Count="0" />
     </LineIds>
     <LineIds Name="UserMode.A_CheckCoupleStatus">
@@ -1588,28 +1676,15 @@ END_IF
       <LineId Id="292" Count="1" />
       <LineId Id="285" Count="0" />
     </LineIds>
-    <LineIds Name="UserMode.A_GlobalChainProtection">
-      <LineId Id="99" Count="47" />
-      <LineId Id="229" Count="2" />
-      <LineId Id="228" Count="0" />
-      <LineId Id="147" Count="10" />
-      <LineId Id="197" Count="2" />
-      <LineId Id="201" Count="0" />
-      <LineId Id="200" Count="0" />
-      <LineId Id="202" Count="0" />
-      <LineId Id="204" Count="1" />
-      <LineId Id="212" Count="5" />
-      <LineId Id="223" Count="0" />
-      <LineId Id="218" Count="1" />
-      <LineId Id="211" Count="0" />
-      <LineId Id="208" Count="0" />
-      <LineId Id="221" Count="0" />
-      <LineId Id="207" Count="0" />
-      <LineId Id="158" Count="1" />
-      <LineId Id="163" Count="26" />
-      <LineId Id="226" Count="1" />
-      <LineId Id="225" Count="0" />
-      <LineId Id="190" Count="5" />
+    <LineIds Name="UserMode.A_GlobalChainProtection_EPS">
+      <LineId Id="354" Count="110" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="UserMode.A_GlobalChainProtection_MPS">
+      <LineId Id="232" Count="1" />
+      <LineId Id="235" Count="2" />
+      <LineId Id="240" Count="11" />
+      <LineId Id="260" Count="93" />
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="UserMode.A_InitCompensationData">
