@@ -204,6 +204,7 @@ VAR
 	test11:INT:=1;
 	IsTest11OrNot:BOOL;
 	tesetBegin: BOOL;
+	Threshold_motorsTargetPosCalculate: LREAL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -503,7 +504,7 @@ IF Cryogenic_ChainProtection_Triggered THEN
 			Cryogenic_ChainProtection_State:=2;
 		2://判断是否在taper，如果在taper,则判断是否在运动，如果是，则停止运动,0.5sh后，转入下一步
 			IF TaperOrNot THEN
-				IF MAIN.moveStatusLeftTop OR MAIN.moveStatusRightTop OR MAIN.moveStatusLeftBottom OR MAIN.moveStatusRightBottom THEN
+				IF moveStatusLeftTop OR moveStatusRightTop OR moveStatusLeftBottom OR moveStatusRightBottom THEN
 					btn_UserGapStop:=TRUE;
 				ELSE
 					Cryogenic_ChainProtection_TON_Stop2Move_InTaperMode(PT:=T#0.5S);
@@ -517,7 +518,7 @@ IF Cryogenic_ChainProtection_Triggered THEN
 				Cryogenic_ChainProtection_State:=3;
 			END_IF
 		3://3.判断是否在Moving状态,若有就Stop.Taper模式已处理完，此处开始走正常GAP开合逻辑
-			IF MAIN.moveStatusLeftTop OR MAIN.moveStatusRightTop OR MAIN.moveStatusLeftBottom OR MAIN.moveStatusRightBottom THEN
+			IF moveStatusLeftTop OR moveStatusRightTop OR moveStatusLeftBottom OR moveStatusRightBottom THEN
 				btn_UserGapStop:=TRUE;
 			ELSE
 				Cryogenic_ChainProtection_TON_Stop2Move(PT:=T#0.5S);
@@ -629,7 +630,7 @@ IF Global_ChainProtection_EPS_Triggered THEN
 			Global_ChainProtection_EPS_State:=2;
 		2://判断是否在taper，如果在taper,则判断是否在运动，如果是，则停止运动,0.5sh后，转入下一步
 			IF TaperOrNot THEN
-				IF MAIN.moveStatusLeftTop OR MAIN.moveStatusRightTop OR MAIN.moveStatusLeftBottom OR MAIN.moveStatusRightBottom THEN
+				IF moveStatusLeftTop OR moveStatusRightTop OR moveStatusLeftBottom OR moveStatusRightBottom THEN
 					btn_UserGapStop:=TRUE;
 				ELSE
 					Global_ChainProtection_EPS_TON_Stop2Move_InTaperMode(PT:=T#0.5S);
@@ -643,7 +644,7 @@ IF Global_ChainProtection_EPS_Triggered THEN
 				Global_ChainProtection_EPS_State:=3;
 			END_IF
 		3://3.判断是否在Moving状态,若有就Stop.Taper模式已处理完，此处开始走正常GAP开合逻辑
-			IF MAIN.moveStatusLeftTop OR MAIN.moveStatusRightTop OR MAIN.moveStatusLeftBottom OR MAIN.moveStatusRightBottom THEN
+			IF moveStatusLeftTop OR moveStatusRightTop OR moveStatusLeftBottom OR moveStatusRightBottom THEN
 				btn_UserGapStop:=TRUE;
 			ELSE
 				Global_ChainProtection_EPS_TON_Stop2Move(PT:=T#0.5S);
@@ -745,7 +746,7 @@ IF Global_ChainProtection_MPS_Triggered THEN
 			Global_ChainProtection_MPS_State:=2;
 		2://判断是否在taper，如果在taper,则判断是否在运动，如果是，则停止运动,0.5sh后，转入下一步
 			IF TaperOrNot THEN
-				IF MAIN.moveStatusLeftTop OR MAIN.moveStatusRightTop OR MAIN.moveStatusLeftBottom OR MAIN.moveStatusRightBottom THEN
+				IF moveStatusLeftTop OR moveStatusRightTop OR moveStatusLeftBottom OR moveStatusRightBottom THEN
 					btn_UserGapStop:=TRUE;
 				ELSE
 					Global_ChainProtection_MPS_TON_Stop2Move_InTaperMode(PT:=T#0.5S);
@@ -759,7 +760,7 @@ IF Global_ChainProtection_MPS_Triggered THEN
 				Global_ChainProtection_MPS_State:=3;
 			END_IF
 		3://3.判断是否在Moving状态,若有就Stop.Taper模式已处理完，此处开始走正常GAP开合逻辑
-			IF MAIN.moveStatusLeftTop OR MAIN.moveStatusRightTop OR MAIN.moveStatusLeftBottom OR MAIN.moveStatusRightBottom THEN
+			IF moveStatusLeftTop OR moveStatusRightTop OR moveStatusLeftBottom OR moveStatusRightBottom THEN
 				btn_UserGapStop:=TRUE;
 			ELSE
 				Global_ChainProtection_MPS_TON_Stop2Move(PT:=T#0.5S);
@@ -889,15 +890,40 @@ IF USE_SingleAxis_Compensation THEN
 		UserTaperPositionDisplay:=DINT_TO_LREAL(LREAL_TO_DINT((UserRightGapPositionDisplay-UserGapPositionDisplay)*100000))/100000;
 		UserTaperVelocityDisplay:=DINT_TO_LREAL(LREAL_TO_DINT((Velo_RightTopLin+Velo_RightBottomLin)/2*100000))/100000;
 	END_IF
-(*速度可以不用解算，直接用即可*)
-LeftTopLinVelocityDisplay:=Velo_LeftTopLin;
-RightTopLinVelocityDisplay:=Velo_RightTopLin;
-LeftBottomLinVelocityDisplay:=Velo_LeftBottomLin;
-RightBottomLinVelocityDisplay:=Velo_RightBottomLin;
-//Gap velocity
-UserGapVelocityDisplay:=DINT_TO_LREAL(LREAL_TO_DINT(((LeftTopLinVelocityDisplay+RightTopLinVelocityDisplay+
-	LeftBottomLinVelocityDisplay+RightBottomLinVelocityDisplay)/2)*100000))/100000;
-
+	(*速度可以不用解算，直接用即可*)
+	LeftTopLinVelocityDisplay:=Velo_LeftTopLin;
+	RightTopLinVelocityDisplay:=Velo_RightTopLin;
+	LeftBottomLinVelocityDisplay:=Velo_LeftBottomLin;
+	RightBottomLinVelocityDisplay:=Velo_RightBottomLin;
+	//Gap velocity
+	UserGapVelocityDisplay:=DINT_TO_LREAL(LREAL_TO_DINT(((LeftTopLinVelocityDisplay+RightTopLinVelocityDisplay+
+		LeftBottomLinVelocityDisplay+RightBottomLinVelocityDisplay)/2)*100000))/100000;
+	
+	(*解算单轴位置后，核验并做保护*)
+	IF ABS(LeftTopLinPositionNew-UserGapPositionNew/2)>Threshold_motorsTargetPosCalculate THEN
+		ErrorID:=1601;
+		Error:=TRUE;
+		ErrorDescription:='LeftTop Threshold_motorsTargetPosCalculate';
+		FB_PlcEmergencyStop();
+	END_IF
+	IF ABS(RightTopLinPositionNew-UserGapPositionNew/2)>Threshold_motorsTargetPosCalculate THEN
+		ErrorID:=1602;
+		Error:=TRUE;
+		ErrorDescription:='RightTop Threshold_motorsTargetPosCalculate';
+		FB_PlcEmergencyStop();
+	END_IF
+	IF ABS(LeftBottomLinPositionNew-UserGapPositionNew/2)>Threshold_motorsTargetPosCalculate THEN
+		ErrorID:=1603;
+		Error:=TRUE;
+		ErrorDescription:='LeftBottom Threshold_motorsTargetPosCalculate';
+		FB_PlcEmergencyStop();
+	END_IF
+	IF ABS(RightBottomLinPositionNew-UserGapPositionNew/2)>Threshold_motorsTargetPosCalculate THEN
+		ErrorID:=1604;
+		Error:=TRUE;
+		ErrorDescription:='RightBottom Threshold_motorsTargetPosCalculate';
+		FB_PlcEmergencyStop();
+	END_IF
 END_IF
 ]]></ST>
       </Implementation>
@@ -1102,7 +1128,7 @@ END_CASE]]></ST>
     <Action Name="A_RegularMotion" Id="{79d2706f-89ad-4612-adf2-c80c9fc85b18}">
       <Implementation>
         <ST><![CDATA[(*输入保护*)
-IF btn_UserGapMove AND NOT SSMotionMode AND RegularMotionMode THEN
+IF btn_UserGapMove  AND NOT SSMotionMode AND RegularMotionMode THEN
 	IF NOT inRange_UserGapPositionNew THEN
 		btn_UserGapStop:=TRUE;
 		btn_UserGapMove:=FALSE;
@@ -1154,6 +1180,37 @@ IF btn_UserGapMove AND NOT SSMotionMode AND RegularMotionMode THEN
 		Error:=FALSE;
 		ErrorId:=0;
 		ErrorDescription:='';
+	END_IF
+END_IF
+(*运动过程中保护*)
+IF moveStatusAnyAxis THEN
+	IF NOT inRange_UserGapPositionNew THEN
+		btn_UserGapStop:=TRUE;
+		Error:=TRUE;
+		ErrorId:=805;
+		ErrorDescription:='target Gap position out of range in moving process!';
+		FB_PlcEmergencyStop();
+	END_IF
+	IF NOT inRange_UserGapVelocityNew THEN
+		btn_UserGapStop:=TRUE;
+		Error:=TRUE;
+		ErrorId:=806;
+		ErrorDescription:='target Gap velocity out of range in moving process!';
+		FB_PlcEmergencyStop();
+	END_IF
+	IF NOT inRange_UserTaperPositionNew THEN
+		btn_UserGapStop:=TRUE;
+		Error:=TRUE;
+		ErrorId:=807;
+		ErrorDescription:='target Taper Position out of range in moving process!';
+		FB_PlcEmergencyStop();
+	END_IF
+	IF NOT inRange_UserTaperVelocityNew THEN
+		btn_UserGapStop:=TRUE;
+		Error:=TRUE;
+		ErrorId:=808;
+		ErrorDescription:='target Taper velocity out of range in moving process!';
+		FB_PlcEmergencyStop();
 	END_IF
 END_IF
 (*若GAP将有变化，首先检测TAPER是否超出阈值，若超出，则报错，提示必须先将TAPER回归到0，才可以改变GAP*)
@@ -1737,8 +1794,16 @@ END_IF
       <LineId Id="318" Count="0" />
       <LineId Id="327" Count="0" />
       <LineId Id="323" Count="1" />
-      <LineId Id="328" Count="0" />
-      <LineId Id="129" Count="1" />
+      <LineId Id="328" Count="2" />
+      <LineId Id="332" Count="2" />
+      <LineId Id="331" Count="0" />
+      <LineId Id="129" Count="0" />
+      <LineId Id="336" Count="4" />
+      <LineId Id="335" Count="0" />
+      <LineId Id="342" Count="10" />
+      <LineId Id="341" Count="0" />
+      <LineId Id="353" Count="0" />
+      <LineId Id="130" Count="0" />
     </LineIds>
     <LineIds Name="UserMode.A_MonitoringAllAxis">
       <LineId Id="0" Count="34" />
@@ -1819,6 +1884,18 @@ END_IF
       <LineId Id="279" Count="0" />
       <LineId Id="229" Count="0" />
       <LineId Id="240" Count="0" />
+      <LineId Id="380" Count="1" />
+      <LineId Id="384" Count="1" />
+      <LineId Id="387" Count="2" />
+      <LineId Id="391" Count="0" />
+      <LineId Id="382" Count="0" />
+      <LineId Id="394" Count="5" />
+      <LineId Id="393" Count="0" />
+      <LineId Id="401" Count="5" />
+      <LineId Id="400" Count="0" />
+      <LineId Id="408" Count="5" />
+      <LineId Id="407" Count="0" />
+      <LineId Id="383" Count="0" />
       <LineId Id="322" Count="0" />
       <LineId Id="376" Count="0" />
       <LineId Id="323" Count="1" />
