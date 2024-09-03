@@ -84,6 +84,14 @@ VAR_GLOBAL
 	Threshold_LeftVelo_SingleCarrier: LREAL:=2;
 	Threshold_RightVelo_SingleCarrier: LREAL:=2;
 (*Compensation Value*)
+	(*Moving or notmoving*)
+	moveStatusLeftTop: BOOL;
+	moveStatusRightTop: BOOL;
+	moveStatusLeftBottom: BOOL;
+	moveStatusRightBottom: BOOL;
+	moveStatusAllAxis: BOOL;
+	moveStatusAnyAxis: BOOL;
+
 	M_Compensation:ARRAY[1..18] OF Struct_M_Compensation
 :=[
 (Encoder:=0,	LeftTop:=0,	RightTop:=0,		LeftBottom:=0,	RightBottom:=0,	InRange:=FALSE),

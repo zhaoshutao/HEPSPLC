@@ -57,11 +57,7 @@ VAR
 	moveDoneLeftBottom: BOOL;
 	moveDoneRightBottom: BOOL;
 	moveDoneAllAxis: BOOL;
-	moveStatusLeftTop: BOOL;
-	moveStatusRightTop: BOOL;
-	moveStatusLeftBottom: BOOL;
-	moveStatusRightBottom: BOOL;
-	moveStatusAllAxis: BOOL;
+
 
 (*Torque*)
 	Torque_LT AT%I*:INT;
@@ -2749,6 +2745,7 @@ END_IF
 	moveStatusLeftBottom:=LeftBottomLin.Status.Moving;
 	moveStatusRightBottom:=RightBottomLin.Status.Moving;
 	moveStatusAllAxis:=moveStatusLeftTop AND moveStatusRightTop AND moveStatusLeftBottom AND moveStatusRightBottom;
+	moveStatusAnyAxis:=moveStatusLeftTop OR moveStatusRightTop OR moveStatusLeftBottom OR moveStatusRightBottom;
 
 	Velo_LeftTopLin:=DINT_TO_LREAL(LREAL_TO_DINT(LeftTopLin.NcToPlc.ActVelo*100000))/100000;
 	Velo_RightTopLin:=DINT_TO_LREAL(LREAL_TO_DINT(RightTopLin.NcToPlc.ActVelo*100000))/100000;
@@ -4323,7 +4320,9 @@ END_CASE]]></ST>
       <LineId Id="35" Count="0" />
       <LineId Id="4" Count="1" />
       <LineId Id="36" Count="0" />
-      <LineId Id="6" Count="27" />
+      <LineId Id="6" Count="7" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="14" Count="19" />
     </LineIds>
     <LineIds Name="MAIN.A_InitRecipeParameters">
       <LineId Id="78" Count="5" />
