@@ -500,6 +500,7 @@ IF btn_UserGapMove  AND NOT SSMotionMode AND RegularMotionMode THEN
 		ErrorDescription:='';
 	END_IF
 END_IF
+
 //
 //运动过程中，监控目标位置速度
 //
@@ -1731,7 +1732,9 @@ END_IF
       <LineId Id="121" Count="0" />
       <LineId Id="32" Count="0" />
       <LineId Id="117" Count="1" />
-      <LineId Id="33" Count="54" />
+      <LineId Id="33" Count="53" />
+      <LineId Id="247" Count="0" />
+      <LineId Id="87" Count="0" />
       <LineId Id="119" Count="1" />
       <LineId Id="88" Count="28" />
       <LineId Id="31" Count="0" />

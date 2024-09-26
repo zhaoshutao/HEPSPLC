@@ -97,6 +97,10 @@ VAR
 	MC_SetLEPosBias_RightTop:MC_WriteParameter;
 	MC_SetLEPosBias_LeftBottom:MC_WriteParameter;
 	MC_SetLEPosBias_RightBottom:MC_WriteParameter;
+	PositionBias_LeftTopLin: LREAL:=10.1;
+	PositionBias_RightTopLin: LREAL:=10.2;
+	PositionBias_LeftBottomLin: LREAL:=10.3;
+	PositionBias_RightBottomLin: LREAL:=10.4;
 	PositionBias_LeftTop: LREAL:=10.1;
 	PositionBias_RightTop: LREAL:=10.2;
 	PositionBias_LeftBottom: LREAL:=10.3;
@@ -200,6 +204,23 @@ VAR
 	R_TRIG_Exekill: R_TRIG;
 	Exe_Kill_Done:BOOL;
 	LoadOpcIocTON:TON;
+	
+	LeftTop_2:AXIS_REF;
+	RightTop_2:AXIS_REF;
+	LeftBottom_2:AXIS_REF;
+	RightBottom_2:AXIS_REF;
+	Pos_LeftTop_2:LREAL;
+	Velo_LeftTop_2:LREAL;
+	Pos_RightTop_2:LREAL;
+	Velo_RightTop_2:LREAL;
+	Pos_LeftBottom_2:LREAL;
+	Velo_LeftBottom_2:LREAL;
+	Pos_RightBottom_2:LREAL;
+	Velo_RightBottom_2:LREAL;
+	PosDifference_LeftTop2to1:LREAL;
+	PosDifference_RightTop2to1:LREAL;
+	PosDifference_LeftBottom2to1:LREAL;
+	PosDifference_RightBottom2to1:LREAL;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[(*加载Ricipe参数*)
@@ -2761,8 +2782,26 @@ END_IF
 	RightTopLin.ReadStatus();
 	LeftBottomLin.ReadStatus();
 	RightBottomLin.ReadStatus();
-
-
+	
+	//feedback2 LE value when no LE
+	IF NOT USELinearEncoder THEN
+		Pos_LeftTop_2:=DINT_TO_LREAL(LREAL_TO_DINT((LeftTop_2.NcToPlc.ActPos+PositionBias_LeftTop)*100000))/100000;
+		Pos_RightTop_2:=DINT_TO_LREAL(LREAL_TO_DINT((RightTop_2.NcToPlc.ActPos+PositionBias_RightTop)*100000))/100000;
+		Pos_LeftBottom_2:=DINT_TO_LREAL(LREAL_TO_DINT((LeftBottom_2.NcToPlc.ActPos+PositionBias_LeftBottom)*100000))/100000;
+		Pos_RightBottom_2:=DINT_TO_LREAL(LREAL_TO_DINT((RightBottom_2.NcToPlc.ActPos+PositionBias_RightBottom)*100000))/100000;
+		Velo_LeftTop_2:=DINT_TO_LREAL(LREAL_TO_DINT(LeftTop_2.NcToPlc.ActVelo*100000))/100000;
+		Velo_RightTop_2:=DINT_TO_LREAL(LREAL_TO_DINT(RightTop_2.NcToPlc.ActVelo*100000))/100000;
+		Velo_LeftBottom_2:=DINT_TO_LREAL(LREAL_TO_DINT(LeftBottom_2.NcToPlc.ActVelo*100000))/100000;
+		Velo_RightBottom_2:=DINT_TO_LREAL(LREAL_TO_DINT(RightBottom_2.NcToPlc.ActVelo*100000))/100000;
+		LeftTop_2.ReadStatus();
+		RightTop_2.ReadStatus();
+		LeftBottom_2.ReadStatus();
+		RightBottom_2.ReadStatus();
+		PosDifference_LeftTop2to1:=Pos_LeftTop_2-Pos_LeftTopLin;
+		PosDifference_RightTop2to1:=Pos_RightTop_2-Pos_RightTopLin;
+		PosDifference_LeftBottom2to1:=Pos_LeftBottom_2-Pos_LeftBottomLin;
+		PosDifference_RightBottom2to1:=Pos_RightBottom_2-Pos_RightBottomLin;
+	END_IF
 
 
 ]]></ST>
@@ -3250,14 +3289,27 @@ END_CASE
     </Action>
     <Action Name="A_SetLinearEncoderPositionBias" Id="{6f3d3f8e-255d-4e09-853f-5fdf91122229}" FolderPath="LinearEncoder\">
       <Implementation>
-        <ST><![CDATA[//光栅positionBias补偿低温收缩量
+        <ST><![CDATA[//No LE
+IF NOT USELinearEncoder THEN
+	PositionBias_LeftTopLin:=0;
+	PositionBias_RightTopLin:=0;
+	PositionBias_LeftBottomLin:=0;
+	PositionBias_RightBottomLin:=0;
+ELSE
+	PositionBias_LeftTopLin:=PositionBias_LeftTop;
+	PositionBias_RightTopLin:=PositionBias_RightTop;
+	PositionBias_LeftBottomLin:=PositionBias_LeftBottom;
+	PositionBias_RightBottomLin:=PositionBias_RightBottom;
+END_IF
+	//光栅positionBias补偿低温收缩量
 IF CryogenicCompensationConditionsReady AND NOT CryogenicCompensationDone THEN
-	PositionBias_LeftTop:=PositionBias_LeftTop+CryogenicCompensation_LeftTop;
-	PositionBias_RightTop:=PositionBias_RightTop+CryogenicCompensation_RightTop;
-	PositionBias_LeftBottom:=PositionBias_LeftBottom+CryogenicCompensation_LeftBottom;
-	PositionBias_RightBottom:=PositionBias_RightBottom+CryogenicCompensation_RightBottom;
+	PositionBias_LeftTopLin:=PositionBias_LeftTop+CryogenicCompensation_LeftTop;
+	PositionBias_RightTopLin:=PositionBias_RightTop+CryogenicCompensation_RightTop;
+	PositionBias_LeftBottomLin:=PositionBias_LeftBottom+CryogenicCompensation_LeftBottom;
+	PositionBias_RightBottomLin:=PositionBias_RightBottom+CryogenicCompensation_RightBottom;
 	CryogenicCompensationDone:=TRUE;
 END_IF
+//END_IF
 //设置bias开始
 A_SetLinearEncoderPositionBiasMC();
 PositionBiasTON(PT:=T#0.1S);
@@ -3468,7 +3520,7 @@ END_CASE]]></ST>
                           </o>
                           <o>
                             <o n="Operand" t="Operand">
-                              <v n="Operand">"PositionBias_LeftTop"</v>
+                              <v n="Operand">"PositionBias_LeftTopLin"</v>
                               <v n="Type">"LREAL"</v>
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
@@ -3673,7 +3725,7 @@ END_CASE]]></ST>
                           </o>
                           <o>
                             <o n="Operand" t="Operand">
-                              <v n="Operand">"PositionBias_RightTop"</v>
+                              <v n="Operand">"PositionBias_RightTopLin"</v>
                               <v n="Type">"LREAL"</v>
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
@@ -3878,7 +3930,7 @@ END_CASE]]></ST>
                           </o>
                           <o>
                             <o n="Operand" t="Operand">
-                              <v n="Operand">"PositionBias_LeftBottom"</v>
+                              <v n="Operand">"PositionBias_LeftBottomLin"</v>
                               <v n="Type">"LREAL"</v>
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
@@ -4083,7 +4135,7 @@ END_CASE]]></ST>
                           </o>
                           <o>
                             <o n="Operand" t="Operand">
-                              <v n="Operand">"PositionBias_RightBottom"</v>
+                              <v n="Operand">"PositionBias_RightBottomLin"</v>
                               <v n="Type">"LREAL"</v>
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
@@ -4322,7 +4374,21 @@ END_CASE]]></ST>
       <LineId Id="36" Count="0" />
       <LineId Id="6" Count="7" />
       <LineId Id="37" Count="0" />
-      <LineId Id="14" Count="19" />
+      <LineId Id="14" Count="14" />
+      <LineId Id="39" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="40" Count="1" />
+      <LineId Id="43" Count="1" />
+      <LineId Id="50" Count="2" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="38" Count="0" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="29" Count="1" />
+      <LineId Id="58" Count="2" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="55" Count="0" />
+      <LineId Id="31" Count="2" />
     </LineIds>
     <LineIds Name="MAIN.A_InitRecipeParameters">
       <LineId Id="78" Count="5" />
@@ -4417,8 +4483,14 @@ END_CASE]]></ST>
       <LineId Id="32" Count="1" />
     </LineIds>
     <LineIds Name="MAIN.A_SetLinearEncoderPositionBias">
+      <LineId Id="271" Count="2" />
+      <LineId Id="275" Count="2" />
+      <LineId Id="274" Count="0" />
+      <LineId Id="285" Count="2" />
+      <LineId Id="283" Count="1" />
       <LineId Id="263" Count="6" />
       <LineId Id="262" Count="0" />
+      <LineId Id="282" Count="0" />
       <LineId Id="270" Count="0" />
       <LineId Id="245" Count="0" />
       <LineId Id="109" Count="0" />
