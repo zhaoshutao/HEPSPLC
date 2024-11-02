@@ -3295,21 +3295,21 @@ IF NOT USELinearEncoder THEN
 	PositionBias_RightTopLin:=0;
 	PositionBias_LeftBottomLin:=0;
 	PositionBias_RightBottomLin:=0;
-ELSE
-	PositionBias_LeftTopLin:=PositionBias_LeftTop;
-	PositionBias_RightTopLin:=PositionBias_RightTop;
-	PositionBias_LeftBottomLin:=PositionBias_LeftBottom;
-	PositionBias_RightBottomLin:=PositionBias_RightBottom;
 END_IF
-	//光栅positionBias补偿低温收缩量
-IF CryogenicCompensationConditionsReady AND NOT CryogenicCompensationDone THEN
+//没有传感器OR不是CPMU不低温补偿OR低温不到位，均不补偿
+IF HasTemperatureSensorOrNot AND CryogenicCompensationOn THEN
 	PositionBias_LeftTopLin:=PositionBias_LeftTop+CryogenicCompensation_LeftTop;
 	PositionBias_RightTopLin:=PositionBias_RightTop+CryogenicCompensation_RightTop;
 	PositionBias_LeftBottomLin:=PositionBias_LeftBottom+CryogenicCompensation_LeftBottom;
 	PositionBias_RightBottomLin:=PositionBias_RightBottom+CryogenicCompensation_RightBottom;
 	CryogenicCompensationDone:=TRUE;
+ELSE
+	PositionBias_LeftTopLin:=0;
+	PositionBias_RightTopLin:=0;
+	PositionBias_LeftBottomLin:=0;
+	PositionBias_RightBottomLin:=0;
 END_IF
-//END_IF
+
 //设置bias开始
 A_SetLinearEncoderPositionBiasMC();
 PositionBiasTON(PT:=T#0.1S);
@@ -4485,11 +4485,14 @@ END_CASE]]></ST>
     <LineIds Name="MAIN.A_SetLinearEncoderPositionBias">
       <LineId Id="271" Count="2" />
       <LineId Id="275" Count="2" />
-      <LineId Id="274" Count="0" />
-      <LineId Id="285" Count="2" />
-      <LineId Id="283" Count="1" />
-      <LineId Id="263" Count="6" />
-      <LineId Id="262" Count="0" />
+      <LineId Id="289" Count="1" />
+      <LineId Id="299" Count="0" />
+      <LineId Id="302" Count="3" />
+      <LineId Id="300" Count="0" />
+      <LineId Id="306" Count="0" />
+      <LineId Id="308" Count="2" />
+      <LineId Id="307" Count="0" />
+      <LineId Id="301" Count="0" />
       <LineId Id="282" Count="0" />
       <LineId Id="270" Count="0" />
       <LineId Id="245" Count="0" />
