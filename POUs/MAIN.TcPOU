@@ -51,7 +51,7 @@ VAR
 	j: INT;
 
 (****RS232***)
-	fbEL6001	: FB_SerialCom;
+	//fbEL6001	: FB_SerialCom;
 	moveDoneLeftTop: BOOL;
 	moveDoneRightTop: BOOL;
 	moveDoneLeftBottom: BOOL;
@@ -285,7 +285,7 @@ st_Power:=FB_Power.PowerState;
 FB_CheckCoupleStatus(Check:=TRUE);
 st_Couple:=FB_CheckCoupleStatus.CoupleState;
 (*********RS232*********************)
-BackgroundEL();
+//BackgroundEL();
 (*fbEL6001(TxBuffer:=TxBufferEL, RxBuffer:=RxBufferEL);*)
 
 (*获取温度传感器数据*)

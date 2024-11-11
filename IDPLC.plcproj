@@ -111,12 +111,6 @@
     <Compile Include="POUs\MainPRG\FB_CheckCoupleStatus.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\RS232\BackgroundEL.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="POUs\RS232\FB_SerialCom.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="RecipeManager.TcRMO">
       <SubType>Code</SubType>
     </Compile>
@@ -136,7 +130,6 @@
     <Folder Include="POUs\CommonFB\MainFB" />
     <Folder Include="POUs\MainPRG" />
     <Folder Include="POUs\0.UserMode" />
-    <Folder Include="POUs\RS232" />
     <Folder Include="VISUs" />
   </ItemGroup>
   <ItemGroup>
@@ -168,10 +161,6 @@
     <PlaceholderReference Include="Tc2_NcDrive">
       <DefaultResolution>Tc2_NcDrive, * (Beckhoff Automation GmbH)</DefaultResolution>
       <Namespace>Tc2_NcDrive</Namespace>
-    </PlaceholderReference>
-    <PlaceholderReference Include="Tc2_SerialCom">
-      <DefaultResolution>Tc2_SerialCom, * (Beckhoff Automation GmbH)</DefaultResolution>
-      <Namespace>Tc2_SerialCom</Namespace>
     </PlaceholderReference>
     <PlaceholderReference Include="Tc2_Standard">
       <DefaultResolution>Tc2_Standard, * (Beckhoff Automation GmbH)</DefaultResolution>
