@@ -412,8 +412,8 @@ Struct_M_lakeshore_168:ARRAY[1..52] OF Struct_M_lakeshore:=(Temperature:=-255.02
 *)
 
 (******RS232************)
-	RxBufferEL			: ComBuffer;	(* Receive data buffer; used with all receive function blocks *)
-	TxBufferEL			: ComBuffer;	(* Transmit data buffer; used with all receive function blocks *)
+	//			: ComBuffer;	(* Receive data buffer; used with all receive function blocks *)
+	//TxBufferEL			: ComBuffer;	(* Transmit data buffer; used with all receive function blocks *)
 
 END_VAR
 
