@@ -3304,10 +3304,10 @@ IF HasTemperatureSensorOrNot AND CryogenicCompensationOn THEN
 	PositionBias_RightBottomLin:=PositionBias_RightBottom+CryogenicCompensation_RightBottom;
 	CryogenicCompensationDone:=TRUE;
 ELSE
-	PositionBias_LeftTopLin:=0;
-	PositionBias_RightTopLin:=0;
-	PositionBias_LeftBottomLin:=0;
-	PositionBias_RightBottomLin:=0;
+	PositionBias_LeftTopLin:=PositionBias_LeftTop;
+	PositionBias_RightTopLin:=PositionBias_RightTop;
+	PositionBias_LeftBottomLin:=PositionBias_LeftBottom;
+	PositionBias_RightBottomLin:=PositionBias_RightBottom;
 END_IF
 
 //设置bias开始
