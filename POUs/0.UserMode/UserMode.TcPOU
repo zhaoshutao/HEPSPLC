@@ -150,10 +150,10 @@ VAR
 	Global_ChainProtection_MPS_TON:TON;
 	Global_ChainProtection_MPS_Triggered:BOOL;
 	Global_ChainProtection_MPS_In:BOOL;
-	Global_ChainProtection_MPS_In1 AT%I* :BOOL;//下降沿表示触发
+	Global_ChainProtection_MPS_In1 AT%I* :BOOL;//下降沿表示触发,EL1008
 	Global_ChainProtection_MPS_In2 AT%I* :BOOL;
 	Global_ChainProtection_MPS_State:DINT;
-	Global_ChainProtection_MPS_Out1 AT%Q* :BOOL;//上升沿标识到达最大间隙，连锁保护成功
+	Global_ChainProtection_MPS_Out1 AT%Q* :BOOL;//上升沿标识到达最大间隙，连锁保护成功,EL2624
 	Global_ChainProtection_MPS_Out2 AT%Q* :BOOL;
 	Global_ChainProtection_MPS_TON_Stop2Move:TON;
 	Global_ChainProtection_MPS_TON_Stop2Move_InTaperMode:TON;
@@ -173,10 +173,10 @@ VAR
 	Global_ChainProtection_EPS_TON:TON;
 	Global_ChainProtection_EPS_Triggered:BOOL;
 	Global_ChainProtection_EPS_In:BOOL;
-	Global_ChainProtection_EPS_In1 AT%I* :BOOL;//下降沿表示触发
+	Global_ChainProtection_EPS_In1 AT%I* :BOOL;//下降沿表示触发,EL1124
 	Global_ChainProtection_EPS_In2 AT%I* :BOOL;
 	Global_ChainProtection_EPS_State:DINT;
-	Global_ChainProtection_EPS_Out1 AT%Q* :BOOL;//上升沿标识到达最大间隙，连锁保护成功
+	Global_ChainProtection_EPS_Out1 AT%Q* :BOOL;//上升沿标识到达最大间隙，连锁保护成功,EL2124
 	Global_ChainProtection_EPS_Out2 AT%Q* :BOOL;
 	Global_ChainProtection_EPS_TON_Stop2Move:TON;
 	Global_ChainProtection_EPS_TON_Stop2Move_InTaperMode:TON;
