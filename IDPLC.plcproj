@@ -24,6 +24,30 @@
     <Compile Include="DUTs\DUT_SENSOR_DATAS_1.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\DUT_SENSOR_DATAS_h1.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\DUT_SENSOR_DATAS_h2.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\DUT_SENSOR_DATAS_h3.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\DUT_SENSOR_DATAS_h4.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\DUT_SENSOR_DATAS_h5.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\DUT_SENSOR_DATAS_h6.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\DUT_SENSOR_DATAS_h7.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\DUT_SENSOR_DATAS_h8.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\DUT_SENSOR_DATAS_8.TcDUT">
       <SubType>Code</SubType>
     </Compile>
