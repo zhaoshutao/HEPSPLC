@@ -151,6 +151,43 @@ VAR
 	temperature_average:LREAL;
 	A_SetLinearEncoderPositionBias_Enable: BOOL;
 	
+	//
+	//(*Sensor Reading high temperature*)
+	//
+	Sensor_Reading_h1 AT %I*:ARRAY[0..3] OF BYTE;
+	Sensor_Reading_h2 AT %I*:ARRAY[0..3] OF BYTE;
+	Sensor_Reading_h3 AT %I*:ARRAY[0..3] OF BYTE;
+	Sensor_Reading_h4 AT %I*:ARRAY[0..3] OF BYTE;
+	Sensor_Reading_h5 AT %I*:ARRAY[0..3] OF BYTE;
+	Sensor_Reading_h6 AT %I*:ARRAY[0..3] OF BYTE;
+	Sensor_Reading_h7 AT %I*:ARRAY[0..3] OF BYTE;
+	Sensor_Reading_h8 AT %I*:ARRAY[0..3] OF BYTE;
+	Sensor_Reading_DpStateh AT %I*:USINT;
+	Sensor_Reading_ExtDiagFlagh AT %I*:BOOL;
+	TemperatureSensors_h1:LREAL;
+	TemperatureSensors_h2:LREAL;
+	TemperatureSensors_h3:LREAL;
+	TemperatureSensors_h4:LREAL;
+	TemperatureSensors_h5:LREAL;
+	TemperatureSensors_h6:LREAL;
+	TemperatureSensors_h7:LREAL;
+	TemperatureSensors_h8:LREAL;
+	dut_sensor_datas_h1:DUT_SENSOR_DATAS_h1;
+	dut_sensor_datas_h2:DUT_SENSOR_DATAS_h2;
+	dut_sensor_datas_h3:DUT_SENSOR_DATAS_h3;
+	dut_sensor_datas_h4:DUT_SENSOR_DATAS_h4;
+	dut_sensor_datas_h5:DUT_SENSOR_DATAS_h5;
+	dut_sensor_datas_h6:DUT_SENSOR_DATAS_h6;
+	dut_sensor_datas_h7:DUT_SENSOR_DATAS_h7;
+	dut_sensor_datas_h8:DUT_SENSOR_DATAS_h8;
+	//
+	temperature_gradient_h2_To_h1:LREAL;
+	temperature_gradient_h3_To_h2:LREAL;
+	temperature_gradient_h5_To_h4:LREAL;
+	temperature_gradient_h6_To_h5:LREAL;
+	temperature_gradient_maxh:LREAL;
+	//
+	temperature_averageh:LREAL;
 		//
 	temperatureStatus:INT;//0：有传感器度数错误；1:常温；2:低温；3:常温和低温中间态
 	CryogenicTemperatureThreshold:LREAL:=82;//82K以下归划分为低温
@@ -2742,7 +2779,67 @@ ELSE
 	InCryogenicOrNot:=FALSE;
 END_IF
 							
-					
+//
+//high temperature
+//				
+//sensor_h1
+dut_sensor_datas_h1.data_byte[3]:=Sensor_Reading_h1[0];
+dut_sensor_datas_h1.data_byte[2]:=Sensor_Reading_h1[1];
+dut_sensor_datas_h1.data_byte[1]:=Sensor_Reading_h1[2];
+dut_sensor_datas_h1.data_byte[0]:=Sensor_Reading_h1[3];
+TemperatureSensors_h1:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_h1.data_lreal*100))/100;
+//sensor_h2
+dut_sensor_datas_h2.data_byte[3]:=Sensor_Reading_h2[0];
+dut_sensor_datas_h2.data_byte[2]:=Sensor_Reading_h2[1];
+dut_sensor_datas_h2.data_byte[1]:=Sensor_Reading_h2[2];
+dut_sensor_datas_h2.data_byte[0]:=Sensor_Reading_h2[3];
+TemperatureSensors_h2:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_h2.data_lreal*100))/100;
+//sensor_h3
+dut_sensor_datas_h3.data_byte[3]:=Sensor_Reading_h3[0];
+dut_sensor_datas_h3.data_byte[2]:=Sensor_Reading_h3[1];
+dut_sensor_datas_h3.data_byte[1]:=Sensor_Reading_h3[2];
+dut_sensor_datas_h3.data_byte[0]:=Sensor_Reading_h3[3];
+TemperatureSensors_h3:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_h3.data_lreal*100))/100;
+//sensor_h4
+dut_sensor_datas_h4.data_byte[3]:=Sensor_Reading_h4[0];
+dut_sensor_datas_h4.data_byte[2]:=Sensor_Reading_h4[1];
+dut_sensor_datas_h4.data_byte[1]:=Sensor_Reading_h4[2];
+dut_sensor_datas_h4.data_byte[0]:=Sensor_Reading_h4[3];
+TemperatureSensors_h4:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_h4.data_lreal*100))/100;
+//sensor_h5
+dut_sensor_datas_h5.data_byte[3]:=Sensor_Reading_h5[0];
+dut_sensor_datas_h5.data_byte[2]:=Sensor_Reading_h5[1];
+dut_sensor_datas_h5.data_byte[1]:=Sensor_Reading_h5[2];
+dut_sensor_datas_h5.data_byte[0]:=Sensor_Reading_h5[3];
+TemperatureSensors_h5:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_h5.data_lreal*100))/100;
+//sensor_h6
+dut_sensor_datas_h6.data_byte[3]:=Sensor_Reading_h6[0];
+dut_sensor_datas_h6.data_byte[2]:=Sensor_Reading_h6[1];
+dut_sensor_datas_h6.data_byte[1]:=Sensor_Reading_h6[2];
+dut_sensor_datas_h6.data_byte[0]:=Sensor_Reading_h6[3];
+TemperatureSensors_h6:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_h6.data_lreal*100))/100;
+//sensor_h7
+dut_sensor_datas_h7.data_byte[3]:=Sensor_Reading_h7[0];
+dut_sensor_datas_h7.data_byte[2]:=Sensor_Reading_h7[1];
+dut_sensor_datas_h7.data_byte[1]:=Sensor_Reading_h7[2];
+dut_sensor_datas_h7.data_byte[0]:=Sensor_Reading_h7[3];
+TemperatureSensors_h7:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_h7.data_lreal*100))/100;
+//sensor_h8
+dut_sensor_datas_h8.data_byte[3]:=Sensor_Reading_h8[0];
+dut_sensor_datas_h8.data_byte[2]:=Sensor_Reading_h8[1];
+dut_sensor_datas_h8.data_byte[1]:=Sensor_Reading_h8[2];
+dut_sensor_datas_h8.data_byte[0]:=Sensor_Reading_h8[3];
+TemperatureSensors_h8:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_h8.data_lreal*100))/100;
+//计算temperature_gradient
+temperature_gradient_h2_To_h1:=ABS(TemperatureSensors_h2-TemperatureSensors_h1);
+temperature_gradient_h3_To_h2:=ABS(TemperatureSensors_h3-TemperatureSensors_h2);
+temperature_gradient_h5_To_h4:=ABS(TemperatureSensors_h5-TemperatureSensors_h4);
+temperature_gradient_h6_To_h5:=ABS(TemperatureSensors_h6-TemperatureSensors_h5);
+temperature_gradient_maxh:=DINT_TO_LREAL(LREAL_TO_DINT(MAX(temperature_gradient_h2_To_h1,temperature_gradient_h3_To_h2,
+							temperature_gradient_h5_To_h4,temperature_gradient_h6_To_h5)*100))/100;
+//计算大梁上的温度平均值
+temperature_averageh:=DINT_TO_LREAL(LREAL_TO_DINT((TemperatureSensors_h1+TemperatureSensors_h2+TemperatureSensors_h3+TemperatureSensors_h4
+					+TemperatureSensors_h5+TemperatureSensors_h6)/6*100))/100;
 					
 					
 					
@@ -4365,7 +4462,11 @@ END_CASE]]></ST>
       <LineId Id="113" Count="1" />
       <LineId Id="117" Count="0" />
       <LineId Id="115" Count="0" />
-      <LineId Id="91" Count="5" />
+      <LineId Id="91" Count="1" />
+      <LineId Id="119" Count="1" />
+      <LineId Id="123" Count="56" />
+      <LineId Id="122" Count="0" />
+      <LineId Id="93" Count="3" />
     </LineIds>
     <LineIds Name="MAIN.A_InitAxisParameters">
       <LineId Id="0" Count="2" />

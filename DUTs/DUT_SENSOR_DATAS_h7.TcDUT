@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <DUT Name="DUT_SENSOR_DATAS_h7" Id="{bfc6ffe9-cf10-47d7-96e1-0b5606225fcc}">
+    <Declaration><![CDATA[TYPE DUT_SENSOR_DATAS_h7 :
+UNION
+	data_lreal:REAL;
+	data_byte:ARRAY[0..3] OF BYTE;
+END_UNION
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>
