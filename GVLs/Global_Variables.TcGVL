@@ -5,10 +5,17 @@
 VAR_GLOBAL
 (*IDControl Ready*)
 	IDControlReady:BOOL;
+(*RecipeDescription*)
+	RecipeSavedDate:STRING;
+	RecipeDescription:STRING;
 (*key Command*)
 	btn_Power:BOOL;
 	btn_PowerOn: BOOL;
 	btn_PowerOff: BOOL;
+(*Reset*)
+	btn_Reset:BOOL;
+(*ModeStatus*)
+	ModeStatus:INT;
 (*Error Massage*)
 	Error:BOOL;
 	ErrorID:DINT;

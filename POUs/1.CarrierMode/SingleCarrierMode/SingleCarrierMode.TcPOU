@@ -60,6 +60,18 @@ A_MonitoringAllAxis();
 IF btn_TopMove AND NOT bottomBusy THEN
 		TopBusy:=TRUE;
 		btn_BottomMove:=FALSE;
+		IF NOT st_Power THEN
+			ErrorID:=1501;
+			Error:=TRUE;
+			ErrorDescription:='Plz PowerOn Frist';
+			LED_Error:=TRUE;
+			RETURN;
+		ELSE
+			ErrorID:=0;
+			Error:=FALSE;
+			ErrorDescription:='';
+			LED_Error:=FALSE;
+		END_IF
 		CASE tm_state OF
 			0:
 				FB_Move.Mode:=2;						(*单梁模式*)
@@ -90,6 +102,18 @@ END_IF
 IF btn_BottomMove AND NOT TopBusy THEN
 		btn_TopMove:=FALSE;
 		BottomBusy:=TRUE;
+		IF NOT st_Power THEN
+			ErrorID:=1501;
+			Error:=TRUE;
+			ErrorDescription:='Plz PowerOn Frist';
+			LED_Error:=TRUE;
+			RETURN;
+		ELSE
+			ErrorID:=0;
+			Error:=FALSE;
+			ErrorDescription:='';
+			LED_Error:=FALSE;
+		END_IF
 		CASE bm_state OF
 			0:
 				FB_Move.Mode:=2;						
@@ -118,7 +142,7 @@ IF btn_BottomMove AND NOT TopBusy THEN
 END_IF
 (*******************************************************************btn_TopStop********************************************************************)
 
-IF btn_TopStop THEN
+IF btn_TopStop OR btn_reset THEN
 	LED_Run:=FALSE;
 	TopMoveIndicator:=0;
 	FB_Move.TopReset:=TRUE;
@@ -145,10 +169,11 @@ IF btn_TopStop THEN
 				btn_TopStop:=FALSE;	
 				FB_Move.TopReset:=FALSE;	
 				ts_state:=0;
+				btn_reset:=FALSE;
 		END_CASE
 END_IF
 (*******************************************************************btn_BottomStop********************************************************************)
-IF btn_BottomStop  THEN
+IF btn_BottomStop OR btn_reset THEN
 	LED_Run:=FALSE;
 	BottomMoveIndicator:=0;
 	FB_Move.BottomReset:=TRUE;
@@ -175,6 +200,7 @@ IF btn_BottomStop  THEN
 				btn_BottomStop:=FALSE;					
 				FB_Move.BottomReset:=FALSE;				
 				bs_state:=0;
+				btn_reset:=FALSE;
 		END_CASE
 END_IF
 (*********************************************************************ÏÞÎ»Åö´¥×´Ì¬»Ö¸´************************************************************)
@@ -360,14 +386,25 @@ END_CASE]]></ST>
       <LineId Id="350" Count="0" />
       <LineId Id="52" Count="1" />
       <LineId Id="56" Count="0" />
-      <LineId Id="58" Count="11" />
+      <LineId Id="58" Count="2" />
+      <LineId Id="457" Count="4" />
+      <LineId Id="463" Count="5" />
+      <LineId Id="456" Count="0" />
+      <LineId Id="61" Count="8" />
       <LineId Id="77" Count="15" />
       <LineId Id="94" Count="1" />
-      <LineId Id="97" Count="11" />
+      <LineId Id="97" Count="2" />
+      <LineId Id="471" Count="10" />
+      <LineId Id="470" Count="0" />
+      <LineId Id="100" Count="8" />
       <LineId Id="116" Count="16" />
       <LineId Id="134" Count="1" />
       <LineId Id="388" Count="0" />
-      <LineId Id="136" Count="57" />
+      <LineId Id="136" Count="25" />
+      <LineId Id="423" Count="0" />
+      <LineId Id="162" Count="29" />
+      <LineId Id="424" Count="0" />
+      <LineId Id="192" Count="1" />
       <LineId Id="198" Count="0" />
       <LineId Id="389" Count="0" />
       <LineId Id="199" Count="8" />

@@ -301,16 +301,19 @@ END_IF
 IF SafePLCRunOK OR Simulation THEN
 	IF pbSingleCarrierMode AND NOT pbTaperMode AND NOT pbGapMode AND NOT pbDebugMode AND NOT pbBCGapMode AND NOT pbUserMode THEN
 		SingleCarrierMode();
+		ModeStatus:=2;
 	ELSIF pbTaperMode  AND NOT pbSingleCarrierMode AND NOT pbGapMode  AND NOT pbDebugMode AND NOT pbBCGapMode AND NOT pbUserMode THEN
 		TaperMode();
 	ELSIF pbGapMode AND  NOT pbSingleCarrierMode AND NOT pbTaperMode  AND NOT pbDebugMode AND NOT pbBCGapMode AND NOT pbUserMode THEN
 		GapMode();
 	ELSIF pbDebugMode AND NOT pbGapMode AND NOT pbSingleCarrierMode AND NOT pbTaperMode AND NOT pbBCGapMode  AND NOT pbUserMode THEN
 		DebugMode();
+		ModeStatus:=3;
 	ELSIF pbBCGapMode AND NOT pbGapMode AND NOT pbSingleCarrierMode AND NOT pbTaperMode AND NOT pbDebugMode AND NOT pbUserMode THEN
 		BCGapMode();
 	ELSIF pbUserMode AND NOT pbGapMode AND NOT pbSingleCarrierMode AND NOT pbTaperMode AND NOT pbDebugMode AND NOT pbBCGapMode THEN
 		UserMode();
+		ModeStatus:=1;
 	END_IF
 END_IF
 (*******Led Show******)
@@ -349,10 +352,13 @@ ELSE
 END_IF
 
 (*IOC Start*)
-IF SafePLCRunOK OR simulation THEN
+//IF SafePLCRunOK OR simulation THEN
 	bExe_load_Prog:=TRUE;
 	A_LoadOpcIocShellExe();
-END_IF]]></ST>
+//END_IF
+
+(*reset*)
+]]></ST>
     </Implementation>
     <Folder Name="Axis" Id="{1f5db9b2-f074-43bd-a7a5-f28b002c6ac6}" />
     <Folder Name="Check" Id="{79c48f21-8e44-4159-8773-87594d6e7620}" />
@@ -4325,7 +4331,13 @@ END_CASE]]></ST>
       <LineId Id="2284" Count="0" />
       <LineId Id="2378" Count="0" />
       <LineId Id="2285" Count="0" />
-      <LineId Id="2287" Count="45" />
+      <LineId Id="2287" Count="25" />
+      <LineId Id="3049" Count="0" />
+      <LineId Id="2313" Count="5" />
+      <LineId Id="3051" Count="0" />
+      <LineId Id="2319" Count="3" />
+      <LineId Id="3050" Count="0" />
+      <LineId Id="2323" Count="9" />
       <LineId Id="2334" Count="2" />
       <LineId Id="2338" Count="17" />
       <LineId Id="2581" Count="0" />
@@ -4336,6 +4348,9 @@ END_CASE]]></ST>
       <LineId Id="2370" Count="0" />
       <LineId Id="2367" Count="0" />
       <LineId Id="2372" Count="0" />
+      <LineId Id="3046" Count="0" />
+      <LineId Id="3045" Count="0" />
+      <LineId Id="3047" Count="0" />
     </LineIds>
     <LineIds Name="MAIN.A_CheckHardwareEmergencyStopStatus">
       <LineId Id="2" Count="0" />
