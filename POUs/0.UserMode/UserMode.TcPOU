@@ -9,7 +9,7 @@ VAR
 	UserGapPositionDisplay:LREAL;//current
 	UserGapVelocityDisplay:LREAL;//current
 	UserTaperPositionNew:LREAL:=0;//target
-	UserTaperVelocityNew:LREAL:=1;//target
+	UserTaperVelocityNew:LREAL:=0.1;//target
 	UserTaperPositionDisplay:LREAL;//current
 	//UserTaperPositionDisplay_FromRightTop:LREAL;
 	//UserTaperPositionDisplay_FromRightBottom:LREAL;
@@ -92,11 +92,11 @@ VAR
 	inRange_UserGapPositionNew:BOOL;
 	//
 	min_UserGapVelocityNew:LREAL:=0;
-	max_UserGapVelocityNew:LREAL:=3;
+	max_UserGapVelocityNew:LREAL:=2;
 	inRange_UserGapVelocityNew:BOOL;
 	//
 	min_UserTaperPositionNew: LREAL:=0;;
-	max_UserTaperPositionNew: LREAL:=4;
+	max_UserTaperPositionNew: LREAL:=1;
 	inRange_UserTaperPositionNew: BOOL;
 	//
 	min_UserTaperVelocityNew: LREAL:=0;
@@ -612,7 +612,7 @@ IF Cryogenic_ChainProtection_FTRIG_Manul.Q THEN
 END_IF
 IF Cryogenic_ChainProtection_Triggered THEN
 	//判断当前间隙，如果比Cryogenic_ChainProtection_MaxGapValue大，则不动作，只报警，且安全PLC触发
-	IF UserGapPositionDisplay >=Cryogenic_ChainProtection_MaxGapValue THEN
+	IF UserGapPositionDisplay - Cryogenic_ChainProtection_MaxGapValue >=0.001THEN
 		Cryogenic_ChainProtection_Done:=TRUE;
 		Plc_EmergencyStop:=FALSE;
 		Error:= TRUE;
@@ -787,7 +787,17 @@ IF Global_ChainProtection_EPS_Triggered THEN
 					Global_ChainProtection_EPS_State:=4;
 				END_IF
 			END_IF
-		4://4.将磁间隙打开到至最大阈值
+		4://4判断当前磁间隙是否大于联锁最大间隙，如果是，则直接联锁到位	
+			IF UserGapPositionDisplay-Global_ChainProtection_EPS_MaxGapValue>=0.001 THEN
+				Global_ChainProtection_EPS_Done:=TRUE;
+				Plc_EmergencyStop:=FALSE;	
+				Error:=TRUE;
+				ErrorID:=1506;
+				ErrorDescription:='EPS Triggered,but UserGapPositionDisplay-Global_ChainProtection_EPS_MaxGapValue>0.01 ';	
+			ELSE
+				Global_ChainProtection_EPS_State:=5;
+			END_IF
+		5://5.将磁间隙打开到至最大阈值
 			Global_ChainProtection_EPS_TON(PT:=INT_TO_TIME(LREAL_TO_INT(Global_ChainProtection_EPS_MaxGapValue/Global_ChainProtection_EPS_MoveVelocity+30))*1000);
 			Global_ChainProtection_EPS_TON.IN:=TRUE;
 			Global_ChainProtection_EPS_TON_Power2Move(PT:=T#0.1S);
@@ -803,7 +813,7 @@ IF Global_ChainProtection_EPS_Triggered THEN
 			IF Global_ChainProtection_EPS_TON.Q THEN//如果150s后，还没有运动到指定gap，则报错
 				Global_ChainProtection_EPS_State:=-100;
 			END_IF
-		88://4.到位后给出反馈，且安全PLC触发
+		88://6.到位后给出反馈，且安全PLC触发
 			Global_ChainProtection_EPS_Done:=TRUE;
 			Plc_EmergencyStop:=FALSE;	
 			Error:=TRUE;
@@ -903,7 +913,17 @@ IF Global_ChainProtection_MPS_Triggered THEN
 					Global_ChainProtection_MPS_State:=4;
 				END_IF
 			END_IF
-		4://4.将磁间隙打开到至最大阈值
+		4://4判断当前磁间隙是否大于联锁最大间隙，如果是，则直接联锁到位	
+			IF UserGapPositionDisplay-Global_ChainProtection_MPS_MaxGapValue>=0.001 THEN
+				Global_ChainProtection_MPS_Done:=TRUE;
+				Plc_EmergencyStop:=FALSE;	
+				Error:=TRUE;
+				ErrorID:=1406;
+				ErrorDescription:='MPS Triggered,but UserGapPositionDisplay-Global_ChainProtection_EPS_MaxGapValue>0.01 ';	
+			ELSE
+				Global_ChainProtection_EPS_State:=5;
+			END_IF
+		5://5.将磁间隙打开到至最大阈值
 			Global_ChainProtection_MPS_TON(PT:=INT_TO_TIME(LREAL_TO_INT(Global_ChainProtection_MPS_MaxGapValue/Global_ChainProtection_MPS_MoveVelocity+30))*1000);
 			Global_ChainProtection_MPS_TON.IN:=TRUE;
 			Global_ChainProtection_MPS_TON_Power2Move(PT:=T#0.1S);
@@ -919,7 +939,7 @@ IF Global_ChainProtection_MPS_Triggered THEN
 			IF Global_ChainProtection_MPS_TON.Q THEN//如果150s后，还没有运动到指定gap，则报错
 				Global_ChainProtection_MPS_State:=-100;
 			END_IF
-		88://4.到位后给出反馈，且安全PLC触发
+		88://6.到位后给出反馈，且安全PLC触发
 			Global_ChainProtection_MPS_Done:=TRUE;
 			Plc_EmergencyStop:=FALSE;	
 			Error:=TRUE;
@@ -1318,7 +1338,7 @@ IF m_state=0 AND n_state=0 THEN
 END_IF
 
 (*Move*)
-IF InitPowerDone AND InitCompensationDatasDone THEN
+IF InitCompensationDatasDone THEN
 		(*四轴目标位置都大于当前位置，直接走到目标位置即可，不需要先走到考虑回城误差的临时位置*)
 		IF NOT TargetPosLessThanCurrentPos AND NOT HysteresisMoving THEN
 			CASE m_state OF
@@ -1343,6 +1363,20 @@ IF InitPowerDone AND InitCompensationDatasDone THEN
 					END_IF
 		
 					IF btn_UserGapMove THEN
+						IF NOT st_Power THEN
+							ErrorID:=1501;
+							Error:=TRUE;
+							ErrorDescription:='Plz PowerOn Frist';
+							LED_Error:=TRUE;
+							//btn_UserGapMove:=FALSE;
+							RETURN;
+						ELSE
+							ErrorID:=0;
+							Error:=FALSE;
+							ErrorDescription:='';
+							LED_Error:=FALSE;
+							//btn_UserGapMove:=TRUE;
+						END_IF
 						FB_Move.BCGapMove:=TRUE;
 						m_state:=1;
 						FB_Move();
@@ -1481,7 +1515,7 @@ IF InitPowerDone AND InitCompensationDatasDone THEN
 	//
 END_IF
 
-IF btn_UserGapStop THEN
+IF btn_UserGapStop OR btn_reset THEN
 	FB_Move.BCGapReset:=TRUE;							(*¸øÔË¶¯FB¸øÍ£Ö¹ÐÅºÅ£¬Ê¹FB_Move×´Ì¬»Ö¸´*)
 	FB_Move();											(*Æô¶¯FB_Move*)
 	btn_UserGapMove:=FALSE;								(*btn_GapMove:=FALSE*)
@@ -1504,7 +1538,8 @@ IF btn_UserGapStop THEN
 				END_IF
 			88:
 				btn_UserGapStop:=FALSE;						(*»Ö¸´×´Ì¬*)
-				FB_Move.BCGapReset:=FALSE;				(*ÔËÐÐFB*)
+				FB_Move.BCGapReset:=FALSE;
+				btn_reset:=FALSE;
 				s_state:=0;
 		END_CASE
 END_IF
@@ -1585,7 +1620,21 @@ IF RTRG_SS_StartPositionDisplay.Q THEN
 END_IF
 (*SS主程序*)
 IF InitPowerDone AND InitCompensationDatasDone AND SS_Move AND SS_InitStartPositionDone THEN
-	CASE SS_MoveState OF
+	IF NOT st_Power THEN
+		ErrorID:=1501;
+		Error:=TRUE;
+		ErrorDescription:='Plz PowerOn Frist';
+		LED_Error:=TRUE;
+		//btn_UserGapMove:=FALSE;
+		RETURN;
+	ELSE
+		ErrorID:=0;
+		Error:=FALSE;
+		ErrorDescription:='';
+		LED_Error:=FALSE;
+		//btn_UserGapMove:=TRUE;
+	END_IF	
+CASE SS_MoveState OF
 		0:
 				//UserGapPositionNew:=UserGapPositionDisplay+SS_StepSize;
 				UserGapPositionNew:=SS_StartPositionDisplay+SS_StepSize*(SS_currentStep+1);
@@ -1650,7 +1699,7 @@ END_IF
 //END_FOR
 
 (*STOP*)
-IF SS_Stop THEN
+IF SS_Stop OR btn_reset THEN
 	FB_Move.BCGapReset:=TRUE;							(*¸øÔË¶¯FB¸øÍ£Ö¹ÐÅºÅ£¬Ê¹FB_Move×´Ì¬»Ö¸´*)
 	FB_Move();											(*Æô¶¯FB_Move*)
 	SS_Move:=FALSE;								(*btn_GapMove:=FALSE*)
@@ -1674,6 +1723,7 @@ IF SS_Stop THEN
 				SS_Stop:=FALSE;						(*»Ö¸´×´Ì¬*)
 				FB_Move.BCGapReset:=FALSE;				(*ÔËÐÐFB*)
 				SS_StopState:=0;
+				btn_reset:=FALSE;
 		END_CASE
 END_IF
 
@@ -1785,14 +1835,23 @@ END_IF
       <LineId Id="285" Count="0" />
     </LineIds>
     <LineIds Name="UserMode.A_GlobalChainProtection_EPS">
-      <LineId Id="354" Count="110" />
+      <LineId Id="354" Count="82" />
+      <LineId Id="465" Count="1" />
+      <LineId Id="469" Count="3" />
+      <LineId Id="467" Count="0" />
+      <LineId Id="474" Count="1" />
+      <LineId Id="468" Count="0" />
+      <LineId Id="437" Count="27" />
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="UserMode.A_GlobalChainProtection_MPS">
       <LineId Id="232" Count="1" />
       <LineId Id="235" Count="2" />
       <LineId Id="240" Count="11" />
-      <LineId Id="260" Count="93" />
+      <LineId Id="260" Count="65" />
+      <LineId Id="355" Count="9" />
+      <LineId Id="354" Count="0" />
+      <LineId Id="327" Count="26" />
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="UserMode.A_InitCompensationData">
@@ -1930,7 +1989,16 @@ END_IF
       <LineId Id="353" Count="2" />
       <LineId Id="352" Count="0" />
       <LineId Id="347" Count="0" />
-      <LineId Id="51" Count="6" />
+      <LineId Id="51" Count="1" />
+      <LineId Id="418" Count="0" />
+      <LineId Id="422" Count="2" />
+      <LineId Id="421" Count="0" />
+      <LineId Id="428" Count="0" />
+      <LineId Id="437" Count="4" />
+      <LineId Id="419" Count="0" />
+      <LineId Id="442" Count="0" />
+      <LineId Id="420" Count="0" />
+      <LineId Id="53" Count="4" />
       <LineId Id="216" Count="0" />
       <LineId Id="58" Count="44" />
       <LineId Id="356" Count="9" />
@@ -1942,7 +2010,9 @@ END_IF
       <LineId Id="415" Count="0" />
       <LineId Id="414" Count="0" />
       <LineId Id="416" Count="0" />
-      <LineId Id="171" Count="27" />
+      <LineId Id="171" Count="25" />
+      <LineId Id="417" Count="0" />
+      <LineId Id="197" Count="1" />
       <LineId Id="1" Count="0" />
       <LineId Id="204" Count="0" />
       <LineId Id="200" Count="3" />
@@ -1976,7 +2046,10 @@ END_IF
       <LineId Id="305" Count="0" />
       <LineId Id="303" Count="0" />
       <LineId Id="299" Count="0" />
-      <LineId Id="1" Count="1" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="309" Count="12" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="308" Count="0" />
       <LineId Id="5" Count="0" />
       <LineId Id="28" Count="0" />
       <LineId Id="304" Count="0" />
@@ -2015,7 +2088,9 @@ END_IF
       <LineId Id="80" Count="0" />
       <LineId Id="83" Count="0" />
       <LineId Id="88" Count="4" />
-      <LineId Id="94" Count="25" />
+      <LineId Id="94" Count="18" />
+      <LineId Id="307" Count="0" />
+      <LineId Id="113" Count="6" />
       <LineId Id="87" Count="0" />
       <LineId Id="79" Count="0" />
     </LineIds>
