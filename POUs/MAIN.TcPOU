@@ -262,7 +262,7 @@ VAR
 	//more parameters get:gear;feedback2 direction 
 	//
 	//GetMoreDriveStatus_FunctionON:BOOL:=TRUE;
-
+	GetDriveStatusTON2: TON;
 	//GearNumerator,st182
 	st_p182_LeftTop:ST_P182;
 	FB_SoERead_GearNumerator_LeftTop: FB_SoERead;
@@ -702,6 +702,7 @@ IF bReloadDriveDiagMessageAndNumber THEN
 	bReloadDriveDiagMessageAndNumber:=FALSE;
 END_IF
 GetDriveStatusTON(PT:=T#1S);
+GetDriveStatusTON2(PT:=T#0.1S);
 A_GetDriverStatusMC();
 CASE m_GetDriveStatusState OF
 	0:
@@ -758,10 +759,11 @@ CASE m_GetDriveStatusState OF
 			AND NOT FB_SoERead_Feedback2direction_LeftTop.bBusy 
 			AND NOT FB_SoERead_Feedback2direction_RightTop.bBusy 
 			AND NOT FB_SoERead_Feedback2direction_LeftBottom.bBusy 
-			AND NOT FB_SoERead_Feedback2direction_RightBottom.bBusy 
-
-		THEN
-			m_GetDriveStatusState:=88;
+			AND NOT FB_SoERead_Feedback2direction_RightBottom.bBusy	THEN
+				GetDriveStatusTON2.IN:=TRUE;
+				IF GetDriveStatusTON2.Q THEN
+					m_GetDriveStatusState:=88;
+				END_IF
 		END_IF
 		IF 	fb_SoEReadDiagMessage_LeftTop.bError
 			OR fb_SoEReadDiagMessage_RightTop.bError
@@ -786,6 +788,13 @@ CASE m_GetDriveStatusState OF
 		THEN
 			m_GetDriveStatusState:=-100;
 		END_IF
+		
+	88:
+		bDriveDiagMessageAndNumber:=FALSE;
+		A_GetDriverStatusMC();
+		GetDriveStatusStateDone:=TRUE;
+		GetDriveStatusStateError:=FALSE;
+		//
 		(*Drive Status*)
 		//D012, Axis state machine: Control and power section ready
 		IF DriveDiagNumber_LeftTop=16#D012 AND DriveDiagNumber_RightTop=16#D012
@@ -798,7 +807,9 @@ CASE m_GetDriveStatusState OF
 		ELSE
 			DriveStatus:=0;
 		END_IF
-		//check statusGet and status configured
+		//
+		//
+		//	//check statusGet and status configured
 		IF 	GearNumeratorGet_LeftTop<>GearNumeratorConfigured_LeftTop 
 			OR GearNumeratorGet_RightTop<>GearNumeratorConfigured_RightTop
 			OR GearNumeratorGet_LeftBottom<>GearNumeratorConfigured_LeftBottom 
@@ -820,12 +831,6 @@ CASE m_GetDriveStatusState OF
 				ErrorDescription:='gearOrfb2direction Error';
 				Plc_EmergencyStop:=FALSE;
 		END_IF
-	88:
-		bDriveDiagMessageAndNumber:=FALSE;
-		A_GetDriverStatusMC();
-		GetDriveStatusStateDone:=TRUE;
-		GetDriveStatusStateError:=FALSE;
-		m_GetDriveStatusState:=0;
 	-100:
 		bDriveDiagMessageAndNumber:=FALSE;
 		A_GetDriverStatusMC();
@@ -8209,6 +8214,7 @@ END_CASE]]></ST>
       <LineId Id="192" Count="2" />
       <LineId Id="191" Count="0" />
       <LineId Id="215" Count="0" />
+      <LineId Id="290" Count="0" />
       <LineId Id="102" Count="0" />
       <LineId Id="104" Count="1" />
       <LineId Id="209" Count="1" />
@@ -8236,35 +8242,15 @@ END_CASE]]></ST>
       <LineId Id="246" Count="0" />
       <LineId Id="251" Count="2" />
       <LineId Id="250" Count="0" />
-      <LineId Id="242" Count="0" />
-      <LineId Id="241" Count="0" />
+      <LineId Id="291" Count="2" />
       <LineId Id="140" Count="9" />
       <LineId Id="256" Count="10" />
       <LineId Id="255" Count="0" />
       <LineId Id="254" Count="0" />
       <LineId Id="150" Count="1" />
-      <LineId Id="199" Count="0" />
-      <LineId Id="204" Count="0" />
-      <LineId Id="195" Count="1" />
-      <LineId Id="198" Count="0" />
-      <LineId Id="205" Count="0" />
-      <LineId Id="202" Count="1" />
-      <LineId Id="200" Count="1" />
-      <LineId Id="206" Count="0" />
-      <LineId Id="197" Count="0" />
-      <LineId Id="267" Count="1" />
-      <LineId Id="271" Count="0" />
-      <LineId Id="275" Count="0" />
-      <LineId Id="273" Count="0" />
-      <LineId Id="276" Count="2" />
-      <LineId Id="274" Count="0" />
-      <LineId Id="280" Count="2" />
-      <LineId Id="279" Count="0" />
-      <LineId Id="283" Count="5" />
-      <LineId Id="269" Count="0" />
-      <LineId Id="289" Count="0" />
       <LineId Id="270" Count="0" />
-      <LineId Id="152" Count="4" />
+      <LineId Id="152" Count="0" />
+      <LineId Id="294" Count="39" />
       <LineId Id="207" Count="0" />
       <LineId Id="157" Count="4" />
       <LineId Id="212" Count="1" />
