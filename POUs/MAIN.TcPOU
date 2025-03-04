@@ -359,19 +359,16 @@ END_IF
 IF SafePLCRunOK OR Simulation THEN
 	IF pbSingleCarrierMode AND NOT pbTaperMode AND NOT pbGapMode AND NOT pbDebugMode AND NOT pbBCGapMode AND NOT pbUserMode THEN
 		SingleCarrierMode();
-		ModeStatus:=2;
 	ELSIF pbTaperMode  AND NOT pbSingleCarrierMode AND NOT pbGapMode  AND NOT pbDebugMode AND NOT pbBCGapMode AND NOT pbUserMode THEN
 		TaperMode();
 	ELSIF pbGapMode AND  NOT pbSingleCarrierMode AND NOT pbTaperMode  AND NOT pbDebugMode AND NOT pbBCGapMode AND NOT pbUserMode THEN
 		GapMode();
 	ELSIF pbDebugMode AND NOT pbGapMode AND NOT pbSingleCarrierMode AND NOT pbTaperMode AND NOT pbBCGapMode  AND NOT pbUserMode THEN
 		DebugMode();
-		ModeStatus:=3;
 	ELSIF pbBCGapMode AND NOT pbGapMode AND NOT pbSingleCarrierMode AND NOT pbTaperMode AND NOT pbDebugMode AND NOT pbUserMode THEN
 		BCGapMode();
 	ELSIF pbUserMode AND NOT pbGapMode AND NOT pbSingleCarrierMode AND NOT pbTaperMode AND NOT pbDebugMode AND NOT pbBCGapMode THEN
 		UserMode();
-		ModeStatus:=1;
 	END_IF
 END_IF
 (*******Led Show******)
@@ -796,14 +793,18 @@ CASE m_GetDriveStatusState OF
 		GetDriveStatusStateError:=FALSE;
 		//
 		(*Drive Status*)
-		//D012, Axis state machine: Control and power section ready
+		//D012, Axis state machine: Control and power section ready,53266
 		IF DriveDiagNumber_LeftTop=16#D012 AND DriveDiagNumber_RightTop=16#D012
 			AND DriveDiagNumber_LeftBottom=16#D012 AND DriveDiagNumber_RightBottom=16#D012 THEN
 			DriveStatus:=1;
-		//D013, Axis state machine: Axis in operation
+		//D013, Axis state machine: Axis in operation,53267
 		ELSIF DriveDiagNumber_LeftTop=16#D013 AND DriveDiagNumber_RightTop=16#D013
 			AND DriveDiagNumber_LeftBottom=16#D013 AND DriveDiagNumber_RightBottom=16#D013 THEN
 			DriveStatus:=2;
+		//D014，Axis state machine: Axis halt.53266和53267中间会经历这么一个状态，算正常状态
+		ELSIF DriveDiagNumber_LeftTop=16#D014 AND DriveDiagNumber_RightTop=16#D014
+			AND DriveDiagNumber_LeftBottom=16#D014 AND DriveDiagNumber_RightBottom=16#D014 THEN
+			DriveStatus:=3;
 		ELSE
 			DriveStatus:=0;
 		END_IF
@@ -831,6 +832,7 @@ CASE m_GetDriveStatusState OF
 				ErrorDescription:='gearOrfb2direction Error';
 				Plc_EmergencyStop:=FALSE;
 		END_IF
+		m_GetDriveStatusState:=0;
 	-100:
 		bDriveDiagMessageAndNumber:=FALSE;
 		A_GetDriverStatusMC();
@@ -8122,13 +8124,7 @@ END_CASE]]></ST>
       <LineId Id="2284" Count="0" />
       <LineId Id="2378" Count="0" />
       <LineId Id="2285" Count="0" />
-      <LineId Id="2287" Count="25" />
-      <LineId Id="3049" Count="0" />
-      <LineId Id="2313" Count="5" />
-      <LineId Id="3051" Count="0" />
-      <LineId Id="2319" Count="3" />
-      <LineId Id="3050" Count="0" />
-      <LineId Id="2323" Count="9" />
+      <LineId Id="2287" Count="45" />
       <LineId Id="2334" Count="2" />
       <LineId Id="2338" Count="17" />
       <LineId Id="2581" Count="0" />
@@ -8250,8 +8246,14 @@ END_CASE]]></ST>
       <LineId Id="150" Count="1" />
       <LineId Id="270" Count="0" />
       <LineId Id="152" Count="0" />
-      <LineId Id="294" Count="39" />
+      <LineId Id="294" Count="13" />
+      <LineId Id="337" Count="0" />
+      <LineId Id="334" Count="1" />
+      <LineId Id="308" Count="0" />
+      <LineId Id="336" Count="0" />
+      <LineId Id="309" Count="24" />
       <LineId Id="207" Count="0" />
+      <LineId Id="338" Count="0" />
       <LineId Id="157" Count="4" />
       <LineId Id="212" Count="1" />
       <LineId Id="211" Count="0" />
