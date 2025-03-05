@@ -6669,10 +6669,10 @@ temperature_averageh:=DINT_TO_LREAL(LREAL_TO_DINT((TemperatureSensors_h1+Tempera
 	Velo_LeftBottomLin:=DINT_TO_LREAL(LREAL_TO_DINT(LeftBottomLin.NcToPlc.ActVelo*100000))/100000;
 	Velo_RightBottomLin:=DINT_TO_LREAL(LREAL_TO_DINT(RightBottomLin.NcToPlc.ActVelo*100000))/100000;
 
-	PosDiff_LeftTopLin_actual:=LeftTopLin.NcToPlc.PosDiff;
-	PosDiff_RightTopLin_actual:=RightTopLin.NcToPlc.PosDiff;
-	PosDiff_LeftBottomLin_actual:=LeftBottomLin.NcToPlc.PosDiff;
-	PosDiff_RightBottomLin_actual:=RightBottomLin.NcToPlc.PosDiff;
+	PosDiff_LeftTopLin_actual:=DINT_TO_LREAL(LREAL_TO_DINT(LeftTopLin.NcToPlc.PosDiff*100000))/100000;
+	PosDiff_RightTopLin_actual:=DINT_TO_LREAL(LREAL_TO_DINT(RightTopLin.NcToPlc.PosDiff*100000))/100000;
+	PosDiff_LeftBottomLin_actual:=DINT_TO_LREAL(LREAL_TO_DINT(LeftBottomLin.NcToPlc.PosDiff*100000))/100000;
+	PosDiff_RightBottomLin_actual:=DINT_TO_LREAL(LREAL_TO_DINT(RightBottomLin.NcToPlc.PosDiff*100000))/100000;
 
 	LeftTopLin.ReadStatus();
 	RightTopLin.ReadStatus();
