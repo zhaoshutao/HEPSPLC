@@ -252,6 +252,7 @@ VAR_GLOBAL
 	Diff_UserBottomVelo_actual: LREAL;
 	Diff_UserLeftVelo_actual: LREAL;
 	Diff_UserRightVelo_actual:  LREAL;
+	TaperFunctionSolidOn:BOOL;//该ID是否有taper需求，taper总开关，只在参数表生效
 	TaperOrNot:BOOL;
 	UserTaperPositionActual:LREAL;
 	UserTaperVelocityActual:LREAL;

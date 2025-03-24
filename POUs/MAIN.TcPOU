@@ -6490,11 +6490,6 @@ END_CASE
         </NWL>
       </Implementation>
     </Action>
-    <Action Name="A_GetMoreDriverMessage" Id="{ccbb44b9-4ef1-41da-a7bb-98963681377d}">
-      <Implementation>
-        <ST><![CDATA[]]></ST>
-      </Implementation>
-    </Action>
     <Action Name="A_GetTemperatureSensorsData" Id="{d73fb87c-9e06-4b36-8cf6-68d5032eab30}" FolderPath="Temperature\">
       <Implementation>
         <ST><![CDATA[//sensor_1
@@ -8259,9 +8254,6 @@ END_CASE]]></ST>
       <LineId Id="211" Count="0" />
       <LineId Id="162" Count="0" />
       <LineId Id="39" Count="0" />
-    </LineIds>
-    <LineIds Name="MAIN.A_GetMoreDriverMessage">
-      <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="MAIN.A_GetTemperatureSensorsData">
       <LineId Id="37" Count="0" />
