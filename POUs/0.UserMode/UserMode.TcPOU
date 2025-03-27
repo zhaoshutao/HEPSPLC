@@ -793,13 +793,13 @@ IF Global_ChainProtection_EPS_Triggered THEN
 					Global_ChainProtection_EPS_State:=4;
 				END_IF
 			END_IF
-		4://4判断当前磁间隙是否大于联锁最大间隙，如果是，则直接联锁到位	
-			IF UserGapPositionDisplay-Global_ChainProtection_EPS_MaxGapValue>=0.01 THEN
+		4://当前磁间隙如何和最大磁间隙差别不大，不超过0.1，则直接保护
+			IF ABS(UserGapPositionDisplay-Global_ChainProtection_EPS_MaxGapValue)<=0.1 THEN
 				Global_ChainProtection_EPS_Done:=TRUE;
 				Plc_EmergencyStop:=FALSE;	
 				Error:=TRUE;
 				ErrorID:=1506;
-				ErrorDescription:='EPS Triggered,but UserGapPositionDisplay-Global_ChainProtection_EPS_MaxGapValue>0.01 ';	
+				ErrorDescription:='EPS Triggered,but ABS(UserGapPositionDisplay-Global_ChainProtection_EPS_MaxGapValue)<=0.1 ';	
 			ELSE
 				Global_ChainProtection_EPS_State:=5;
 			END_IF
@@ -919,13 +919,13 @@ IF Global_ChainProtection_MPS_Triggered THEN
 					Global_ChainProtection_MPS_State:=4;
 				END_IF
 			END_IF
-		4://4判断当前磁间隙是否大于联锁最大间隙，如果是，则直接联锁到位	
-			IF UserGapPositionDisplay-Global_ChainProtection_MPS_MaxGapValue>=0.01 THEN
+		4://当前磁间隙如何和最大磁间隙差别不大，不超过0.1，则直接保护
+			IF ABS(UserGapPositionDisplay-Global_ChainProtection_MPS_MaxGapValue)<=0.1 THEN
 				Global_ChainProtection_MPS_Done:=TRUE;
 				Plc_EmergencyStop:=FALSE;	
 				Error:=TRUE;
 				ErrorID:=1406;
-				ErrorDescription:='MPS Triggered,but UserGapPositionDisplay-Global_ChainProtection_EPS_MaxGapValue>0.01 ';	
+				ErrorDescription:='MPS Triggered,but ABS(UserGapPositionDisplay-Global_ChainProtection_MPS_MaxGapValue)<=0.1 ';	
 			ELSE
 				Global_ChainProtection_MPS_State:=5;
 			END_IF
@@ -1881,7 +1881,8 @@ END_IF
     </LineIds>
     <LineIds Name="UserMode.A_GlobalChainProtection_EPS">
       <LineId Id="354" Count="82" />
-      <LineId Id="465" Count="1" />
+      <LineId Id="476" Count="0" />
+      <LineId Id="466" Count="0" />
       <LineId Id="469" Count="3" />
       <LineId Id="467" Count="0" />
       <LineId Id="474" Count="1" />
