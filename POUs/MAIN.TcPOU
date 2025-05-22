@@ -9,7 +9,6 @@ VAR
 	pbDebugMode:BOOL:=FALSE;
 	pbBCGapMode:BOOL:=FALSE;
 	fb_led_Show: FB_LedShow;
-	btn_reset: BOOL;
 	CPMU_PLC_Reset: PLC_Reset;
 	d_state: DINT;
 	CPMU_PLC_Start: PLC_Start;
@@ -315,7 +314,23 @@ VAR
 	Feedback2directionConfigured_LeftBottom:UINT;
 	Feedback2directionConfigured_RightBottom:UINT;
 	//
-
+	//RestartDrivers
+		(*重启驱动器*)
+	btn_RestartDriversAll:BOOL;
+	btn_RestartDriver1:BOOL;
+	btn_RestartDriver2:BOOL;
+	btn_RestartDriver3:BOOL;
+	btn_RestartDriver4:BOOL;
+	btn_RestartDriver5:BOOL;
+	btn_RestartDriver6:BOOL;
+	btn_RestartDriver7:BOOL;
+	btn_RestartDriver8:BOOL;
+	Relay_EL2624 AT %Q*:ARRAY[0..7]OF  BOOL;
+	RestartDriver_RTRIG:R_TRIG;
+	RestartDriver_TON:TON;
+	RestartDriver_Triggered:BOOL;
+	RestartDriver_State:DINT;
+	RestartDriver_Done:BOOL;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[(*加载Ricipe参数*)
@@ -413,6 +428,9 @@ END_IF
 //END_IF
 
 (*reset*)
+
+(*RestartDrivers*)
+A_RestartDrivers();
 ]]></ST>
     </Implementation>
     <Folder Name="Axis" Id="{1f5db9b2-f074-43bd-a7a5-f28b002c6ac6}" />
@@ -6878,6 +6896,63 @@ END_IF
 ]]></ST>
       </Implementation>
     </Action>
+    <Action Name="A_RestartDrivers" Id="{d1732994-27d5-4d0a-bd2e-fb077b65c9a9}" FolderPath="Driver\">
+      <Implementation>
+        <ST><![CDATA[Relay_EL2624[0]:=btn_RestartDriver1;
+Relay_EL2624[1]:=btn_RestartDriver2;
+Relay_EL2624[2]:=btn_RestartDriver3;
+Relay_EL2624[3]:=btn_RestartDriver4;
+Relay_EL2624[4]:=btn_RestartDriver5;
+Relay_EL2624[5]:=btn_RestartDriver6;
+Relay_EL2624[6]:=btn_RestartDriver7;
+Relay_EL2624[7]:=btn_RestartDriver8;
+///
+//1.上升沿触发，btn_RestartDrivers上升沿后，btn_RestartDriver1~8全部高电平
+//2、3s后，Driver1~8全部恢复低电平
+//3、恢复全部状态到初始
+///
+RestartDriver_RTRIG(CLK:=btn_RestartDriversAll);
+IF RestartDriver_RTRIG.Q THEN
+	RestartDriver_Triggered:=TRUE;
+	RestartDriver_Done:=FALSE;
+END_IF
+IF RestartDriver_Triggered THEN
+	CASE RestartDriver_State OF
+		0:
+			btn_RestartDriver1:=TRUE;
+			btn_RestartDriver2:=TRUE;
+			btn_RestartDriver3:=TRUE;
+			btn_RestartDriver4:=TRUE;
+			btn_RestartDriver5:=TRUE;
+			btn_RestartDriver6:=TRUE;
+			btn_RestartDriver7:=TRUE;
+			btn_RestartDriver8:=TRUE;
+			//计时开始
+			RestartDriver_TON(PT:=T#3S);
+			RestartDriver_TON.IN:=TRUE;
+			IF RestartDriver_TON.Q THEN
+				RestartDriver_State:=1;
+			END_IF
+		1:
+			btn_RestartDriver1:=FALSE;
+			btn_RestartDriver2:=FALSE;
+			btn_RestartDriver3:=FALSE;
+			btn_RestartDriver4:=FALSE;
+			btn_RestartDriver5:=FALSE;
+			btn_RestartDriver6:=FALSE;
+			btn_RestartDriver7:=FALSE;
+			btn_RestartDriver8:=FALSE;
+			RestartDriver_State:=88;
+		88:
+			RestartDriver_TON.IN:=FALSE;
+			btn_RestartDriversAll:=FALSE;
+			RestartDriver_State:=0;
+			RestartDriver_Triggered:=FALSE;
+			RestartDriver_Done:=TRUE;
+	END_CASE
+END_IF]]></ST>
+      </Implementation>
+    </Action>
     <Action Name="A_RestartTC" Id="{737d9420-c364-46ec-805e-ce283c214994}" FolderPath="TC\">
       <Implementation>
         <NWL>
@@ -8132,6 +8207,8 @@ END_CASE]]></ST>
       <LineId Id="2372" Count="0" />
       <LineId Id="3046" Count="0" />
       <LineId Id="3045" Count="0" />
+      <LineId Id="3380" Count="1" />
+      <LineId Id="3379" Count="0" />
       <LineId Id="3047" Count="0" />
     </LineIds>
     <LineIds Name="MAIN.A_CheckHardwareEmergencyStopStatus">
@@ -8394,6 +8471,24 @@ END_CASE]]></ST>
       <LineId Id="34" Count="1" />
       <LineId Id="23" Count="0" />
       <LineId Id="21" Count="0" />
+    </LineIds>
+    <LineIds Name="MAIN.A_RestartDrivers">
+      <LineId Id="1" Count="12" />
+      <LineId Id="15" Count="5" />
+      <LineId Id="14" Count="0" />
+      <LineId Id="21" Count="0" />
+      <LineId Id="23" Count="0" />
+      <LineId Id="29" Count="1" />
+      <LineId Id="32" Count="4" />
+      <LineId Id="28" Count="0" />
+      <LineId Id="25" Count="1" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="37" Count="2" />
+      <LineId Id="41" Count="6" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="48" Count="6" />
+      <LineId Id="22" Count="0" />
+      <LineId Id="27" Count="0" />
     </LineIds>
     <LineIds Name="MAIN.A_SafePlcStartInit">
       <LineId Id="0" Count="45" />
