@@ -84,7 +84,7 @@ END_IF
 IF btn_PowerOn THEN
 	A_PowerOn();
 END_IF
-(******************************************************ÉÏµç×´Ì¬£¬´¦ÓÚñîºÏ×´Ì¬£¬ESTOP***********************************************)
+(****************************************************ESTOP***********************************************)
 IF NOT btn_PowerOff THEN
 	IF st_Power=1 AND st_Couple<>0THEN
 		Error:=TRUE;
@@ -110,25 +110,25 @@ END_IF
 		END_IF
 		CASE LeftTopLin_m_state OF
 			0:
-				FB_Move.Mode:=4;						(*1£ºgapÄ£Ê½£»2£ºµ¥ÁºÄ£Ê½£¬3£ºtaperÄ£Ê½£¬4£ºDebugÄ£Ê½*)
-				FB_Move.CoupleState:=st_Couple;			(*ñîºÏ×´Ì¬ÊäÈë*)
-				FB_Move.PowerState:=st_Power;			(*µçÔ´×´Ì¬ÊäÈë*)
-				FB_Move.LeftTopMove:=TRUE;				(*Execute TRUE*)
-				FB_Move.LeftTopPosition:=LeftTopLinPositionNew;	(*Î»ÖÃ*)
-				FB_Move.LeftTopVelocity:=LeftTopLinVelocityNew;	(*ËÙ¶È*)
-				FB_Move();								(*Æô¶¯FB*)
+				FB_Move.Mode:=4;					
+				FB_Move.CoupleState:=st_Couple;
+				FB_Move.PowerState:=st_Power;		
+				FB_Move.LeftTopMove:=TRUE;			
+				FB_Move.LeftTopPosition:=LeftTopLinPositionNew;
+				FB_Move.LeftTopVelocity:=LeftTopLinVelocityNew;	
+				FB_Move();								
 				LeftTopLin_m_state:=1;
 			1:
 				FB_Move();
-				IF NOT FB_Move.LeftTopDone THEN			(*ÔË¶¯Î´Íê³É£¬Ñ­»·*)
+				IF NOT FB_Move.LeftTopDone THEN		
 					LeftTopLin_m_state:=1;
 					LED_Run:=TRUE;
-				ELSE									(*ÔË¶¯Íê³É£¬ÏÂÒ»²½*)
+				ELSE							
 					LeftTopLin_m_state:=88;
 				END_IF
 
 			88:
-				btn_LeftTopLinMove:=FALSE;					(*×´Ì¬»Ö¸´*)
+				btn_LeftTopLinMove:=FALSE;				
 				LeftTopLin_m_state:=0;
 				LED_Run:=FALSE;
 		END_CASE
@@ -137,28 +137,28 @@ END_IF
 (*******************************************************************LeftTop_STOP********************************************************************)
 IF btn_LeftTopLinStop OR btn_reset THEN
 	LED_Run:=FALSE;
-	FB_Move.LeftTopReset:=TRUE;							(*¸øÔË¶¯FB¸øÍ£Ö¹ÐÅºÅ£¬Ê¹FB_Move×´Ì¬»Ö¸´*)
-	FB_Move();											(*Æô¶¯FB_Move*)
-	btn_LeftTopLinMove:=FALSE;							(*btn_GapMove:=FALSE*)
-	LeftTopLin_m_state:=0;											(*m_state:=0;*)
+	FB_Move.LeftTopReset:=TRUE;							
+	FB_Move();										
+	btn_LeftTopLinMove:=FALSE;						
+	LeftTopLin_m_state:=0;										
 	CASE LeftTopLin_s_state OF
 			0:
-				FB_Stop.Mode:=4;							(*1£ºgapÄ£Ê½£»2£ºµ¥ÁºÄ£Ê½£»3£ºtaperÄ£Ê½*)
-				FB_Stop.CoupleState:=st_Couple;			(*ñîºÏ×´Ì¬ÊäÈë*)
-				FB_Stop.PowerState:=st_Power;				(*µçÔ´×´Ì¬ÊäÈë*)
-				FB_Stop.LeftTopStop:=TRUE;				(*Execute TRUE*)
-				FB_Stop();								(*Æô¶¯FB*)
+				FB_Stop.Mode:=4;							
+				FB_Stop.CoupleState:=st_Couple;			
+				FB_Stop.PowerState:=st_Power;				
+				FB_Stop.LeftTopStop:=TRUE;				
+				FB_Stop();							
 				LeftTopLin_s_state:=1;
 			1:
 				FB_Stop();
-				IF NOT FB_Stop.LeftTopDone THEN			(*Í£Ö¹Î´Íê³É£¬Ñ­»·*)
+				IF NOT FB_Stop.LeftTopDone THEN		
 					LeftTopLin_s_state:=1;
-				ELSE									(*Í£Ö¹Íê³É£¬ÏÂÒ»²½*)
+				ELSE								
 					LeftTopLin_s_state:=88;
 				END_IF
 			88:
-				btn_LeftTopLinStop:=FALSE;						(*»Ö¸´×´Ì¬*)
-				FB_Move.LeftTopReset:=FALSE;					(*ÔËÐÐFB*)
+				btn_LeftTopLinStop:=FALSE;					
+				FB_Move.LeftTopReset:=FALSE;				
 				LeftTopLin_s_state:=0;
 				btn_reset:=FALSE;
 		END_CASE
@@ -181,25 +181,25 @@ END_IF
 		END_IF
 		CASE RightTopLin_m_state OF
 			0:
-				FB_Move.Mode:=4;						(*1£ºgapÄ£Ê½£»2£ºµ¥ÁºÄ£Ê½£¬3£ºtaperÄ£Ê½£¬4£ºDebugÄ£Ê½*)
-				FB_Move.CoupleState:=st_Couple;			(*ñîºÏ×´Ì¬ÊäÈë*)
-				FB_Move.PowerState:=st_Power;			(*µçÔ´×´Ì¬ÊäÈë*)
-				FB_Move.RightTopMove:=TRUE;				(*Execute TRUE*)
-				FB_Move.RightTopPosition:=RightTopLinPositionNew;	(*Î»ÖÃ*)
-				FB_Move.RightTopVelocity:=RightTopLinVelocityNew;	(*ËÙ¶È*)
-				FB_Move();								(*Æô¶¯FB*)
+				FB_Move.Mode:=4;						
+				FB_Move.CoupleState:=st_Couple;			
+				FB_Move.PowerState:=st_Power;			
+				FB_Move.RightTopMove:=TRUE;			
+				FB_Move.RightTopPosition:=RightTopLinPositionNew;	
+				FB_Move.RightTopVelocity:=RightTopLinVelocityNew;	
+				FB_Move();								
 				RightTopLin_m_state:=1;
 			1:
 				FB_Move();
-				IF NOT FB_Move.RightTopDone THEN			(*ÔË¶¯Î´Íê³É£¬Ñ­»·*)
+				IF NOT FB_Move.RightTopDone THEN		
 					RightTopLin_m_state:=1;
 					LED_Run:=TRUE;
-				ELSE									(*ÔË¶¯Íê³É£¬ÏÂÒ»²½*)
+				ELSE								
 					RightTopLin_m_state:=88;
 				END_IF
 
 			88:
-				btn_RightTopLinMove:=FALSE;					(*×´Ì¬»Ö¸´*)
+				btn_RightTopLinMove:=FALSE;				
 				RightTopLin_m_state:=0;
 				LED_Run:=FALSE;
 		END_CASE
@@ -208,28 +208,28 @@ END_IF
 (*******************************************************************RightTop_STOP********************************************************************)
 IF btn_RightTopLinStop OR btn_reset THEN
 	LED_Run:=FALSE;
-	FB_Move.RightTopReset:=TRUE;							(*¸øÔË¶¯FB¸øÍ£Ö¹ÐÅºÅ£¬Ê¹FB_Move×´Ì¬»Ö¸´*)
-	FB_Move();											(*Æô¶¯FB_Move*)
-	btn_RightTopLinMove:=FALSE;							(*btn_GapMove:=FALSE*)
-	RightTopLin_m_state:=0;											(*m_state:=0;*)
+	FB_Move.RightTopReset:=TRUE;						
+	FB_Move();										
+	btn_RightTopLinMove:=FALSE;							
+	RightTopLin_m_state:=0;										
 	CASE RightTopLin_s_state OF
 			0:
-				FB_Stop.Mode:=4;							(*1£ºgapÄ£Ê½£»2£ºµ¥ÁºÄ£Ê½£»3£ºtaperÄ£Ê½*)
-				FB_Stop.CoupleState:=st_Couple;			(*ñîºÏ×´Ì¬ÊäÈë*)
-				FB_Stop.PowerState:=st_Power;				(*µçÔ´×´Ì¬ÊäÈë*)
-				FB_Stop.RightTopStop:=TRUE;				(*Execute TRUE*)
-				FB_Stop();								(*Æô¶¯FB*)
+				FB_Stop.Mode:=4;							
+				FB_Stop.CoupleState:=st_Couple;		
+				FB_Stop.PowerState:=st_Power;			
+				FB_Stop.RightTopStop:=TRUE;				
+				FB_Stop();							
 				RightTopLin_s_state:=1;
 			1:
 				FB_Stop();
-				IF NOT FB_Stop.RightTopDone THEN			(*Í£Ö¹Î´Íê³É£¬Ñ­»·*)
+				IF NOT FB_Stop.RightTopDone THEN			
 					RightTopLin_s_state:=1;
-				ELSE									(*Í£Ö¹Íê³É£¬ÏÂÒ»²½*)
+				ELSE								
 					RightTopLin_s_state:=88;
 				END_IF
 			88:
-				btn_RightTopLinStop:=FALSE;						(*»Ö¸´×´Ì¬*)
-				FB_Move.RightTopReset:=FALSE;					(*ÔËÐÐFB*)
+				btn_RightTopLinStop:=FALSE;					
+				FB_Move.RightTopReset:=FALSE;				
 				RightTopLin_s_state:=0;
 				btn_reset:=FALSE;
 		END_CASE
@@ -252,25 +252,25 @@ END_IF
 		END_IF
 		CASE LeftBottomLin_m_state OF
 			0:
-				FB_Move.Mode:=4;						(*1£ºgapÄ£Ê½£»2£ºµ¥ÁºÄ£Ê½£¬3£ºtaperÄ£Ê½£¬4£ºDebugÄ£Ê½*)
-				FB_Move.CoupleState:=st_Couple;			(*ñîºÏ×´Ì¬ÊäÈë*)
-				FB_Move.PowerState:=st_Power;			(*µçÔ´×´Ì¬ÊäÈë*)
+				FB_Move.Mode:=4;					
+				FB_Move.CoupleState:=st_Couple;			
+				FB_Move.PowerState:=st_Power;		
 				FB_Move.LeftBottomMove:=TRUE;				(*Execute TRUE*)
-				FB_Move.LeftBottomPosition:=LeftBottomLinPositionNew;	(*Î»ÖÃ*)
-				FB_Move.LeftBottomVelocity:=LeftBottomLinVelocityNew;	(*ËÙ¶È*)
-				FB_Move();								(*Æô¶¯FB*)
+				FB_Move.LeftBottomPosition:=LeftBottomLinPositionNew;	
+				FB_Move.LeftBottomVelocity:=LeftBottomLinVelocityNew;
+				FB_Move();								
 				LeftBottomLin_m_state:=1;
 			1:
 				FB_Move();
-				IF NOT FB_Move.LeftBottomDone THEN			(*ÔË¶¯Î´Íê³É£¬Ñ­»·*)
+				IF NOT FB_Move.LeftBottomDone THEN		
 					LeftBottomLin_m_state:=1;
 					LED_Run:=TRUE;
-				ELSE									(*ÔË¶¯Íê³É£¬ÏÂÒ»²½*)
+				ELSE								
 					LeftBottomLin_m_state:=88;
 				END_IF
 
 			88:
-				btn_LeftBottomLinMove:=FALSE;					(*×´Ì¬»Ö¸´*)
+				btn_LeftBottomLinMove:=FALSE;				
 				LeftBottomLin_m_state:=0;
 				LED_Run:=FALSE;
 		END_CASE
@@ -279,28 +279,28 @@ END_IF
 (*******************************************************************LeftBottom_STOP********************************************************************)
 IF btn_LeftBottomLinStop OR btn_reset THEN
 	LED_Run:=FALSE;
-	FB_Move.LeftBottomReset:=TRUE;							(*¸øÔË¶¯FB¸øÍ£Ö¹ÐÅºÅ£¬Ê¹FB_Move×´Ì¬»Ö¸´*)
-	FB_Move();											(*Æô¶¯FB_Move*)
-	btn_LeftBottomLinMove:=FALSE;							(*btn_GapMove:=FALSE*)
-	LeftBottomLin_m_state:=0;											(*m_state:=0;*)
+	FB_Move.LeftBottomReset:=TRUE;						
+	FB_Move();										
+	btn_LeftBottomLinMove:=FALSE;						
+	LeftBottomLin_m_state:=0;									
 	CASE LeftBottomLin_s_state OF
 			0:
-				FB_Stop.Mode:=4;							(*1£ºgapÄ£Ê½£»2£ºµ¥ÁºÄ£Ê½£»3£ºtaperÄ£Ê½*)
-				FB_Stop.CoupleState:=st_Couple;			(*ñîºÏ×´Ì¬ÊäÈë*)
-				FB_Stop.PowerState:=st_Power;				(*µçÔ´×´Ì¬ÊäÈë*)
-				FB_Stop.LeftBottomStop:=TRUE;				(*Execute TRUE*)
-				FB_Stop();								(*Æô¶¯FB*)
+				FB_Stop.Mode:=4;						
+				FB_Stop.CoupleState:=st_Couple;		
+				FB_Stop.PowerState:=st_Power;			
+				FB_Stop.LeftBottomStop:=TRUE;				
+				FB_Stop();						
 				LeftBottomLin_s_state:=1;
 			1:
 				FB_Stop();
-				IF NOT FB_Stop.LeftBottomDone THEN			(*Í£Ö¹Î´Íê³É£¬Ñ­»·*)
+				IF NOT FB_Stop.LeftBottomDone THEN			
 					LeftBottomLin_s_state:=1;
-				ELSE									(*Í£Ö¹Íê³É£¬ÏÂÒ»²½*)
+				ELSE								
 					LeftBottomLin_s_state:=88;
 				END_IF
 			88:
-				btn_LeftBottomLinStop:=FALSE;						(*»Ö¸´×´Ì¬*)
-				FB_Move.LeftBottomReset:=FALSE;					(*ÔËÐÐFB*)
+				btn_LeftBottomLinStop:=FALSE;					
+				FB_Move.LeftBottomReset:=FALSE;			
 				LeftBottomLin_s_state:=0;
 				btn_reset:=FALSE;
 		END_CASE
@@ -324,25 +324,25 @@ END_IF
 		END_IF
 		CASE RightBottomLin_m_state OF
 			0:
-				FB_Move.Mode:=4;						(*1£ºgapÄ£Ê½£»2£ºµ¥ÁºÄ£Ê½£¬3£ºtaperÄ£Ê½£¬4£ºDebugÄ£Ê½*)
-				FB_Move.CoupleState:=st_Couple;			(*ñîºÏ×´Ì¬ÊäÈë*)
-				FB_Move.PowerState:=st_Power;			(*µçÔ´×´Ì¬ÊäÈë*)
-				FB_Move.RightBottomMove:=TRUE;				(*Execute TRUE*)
-				FB_Move.RightBottomPosition:=RightBottomLinPositionNew;	(*Î»ÖÃ*)
-				FB_Move.RightBottomVelocity:=RightBottomLinVelocityNew;	(*ËÙ¶È*)
-				FB_Move();								(*Æô¶¯FB*)
+				FB_Move.Mode:=4;						
+				FB_Move.CoupleState:=st_Couple;			
+				FB_Move.PowerState:=st_Power;			
+				FB_Move.RightBottomMove:=TRUE;				
+				FB_Move.RightBottomPosition:=RightBottomLinPositionNew;	
+				FB_Move.RightBottomVelocity:=RightBottomLinVelocityNew;	
+				FB_Move();								
 				RightBottomLin_m_state:=1;
 			1:
 				FB_Move();
-				IF NOT FB_Move.RightBottomDone THEN			(*ÔË¶¯Î´Íê³É£¬Ñ­»·*)
+				IF NOT FB_Move.RightBottomDone THEN			
 					RightBottomLin_m_state:=1;
 					LED_Run:=TRUE;
-				ELSE									(*ÔË¶¯Íê³É£¬ÏÂÒ»²½*)
+				ELSE									
 					RightBottomLin_m_state:=88;
 				END_IF
 
 			88:
-				btn_RightBottomLinMove:=FALSE;					(*×´Ì¬»Ö¸´*)
+				btn_RightBottomLinMove:=FALSE;					
 				RightBottomLin_m_state:=0;
 				LED_Run:=FALSE;
 		END_CASE
@@ -351,28 +351,28 @@ END_IF
 (*******************************************************************RightBottom_STOP********************************************************************)
 IF btn_RightBottomLinStop OR btn_reset THEN
 	LED_Run:=FALSE;
-	FB_Move.RightBottomReset:=TRUE;							(*¸øÔË¶¯FB¸øÍ£Ö¹ÐÅºÅ£¬Ê¹FB_Move×´Ì¬»Ö¸´*)
-	FB_Move();											(*Æô¶¯FB_Move*)
-	btn_RightBottomLinMove:=FALSE;							(*btn_GapMove:=FALSE*)
-	RightBottomLin_m_state:=0;											(*m_state:=0;*)
+	FB_Move.RightBottomReset:=TRUE;							
+	FB_Move();											
+	btn_RightBottomLinMove:=FALSE;							
+	RightBottomLin_m_state:=0;											
 	CASE RightBottomLin_s_state OF
 			0:
-				FB_Stop.Mode:=4;							(*1£ºgapÄ£Ê½£»2£ºµ¥ÁºÄ£Ê½£»3£ºtaperÄ£Ê½*)
-				FB_Stop.CoupleState:=st_Couple;			(*ñîºÏ×´Ì¬ÊäÈë*)
-				FB_Stop.PowerState:=st_Power;				(*µçÔ´×´Ì¬ÊäÈë*)
-				FB_Stop.RightBottomStop:=TRUE;				(*Execute TRUE*)
-				FB_Stop();								(*Æô¶¯FB*)
+				FB_Stop.Mode:=4;							
+				FB_Stop.CoupleState:=st_Couple;			
+				FB_Stop.PowerState:=st_Power;				
+				FB_Stop.RightBottomStop:=TRUE;				
+				FB_Stop();								
 				RightBottomLin_s_state:=1;
 			1:
 				FB_Stop();
-				IF NOT FB_Stop.RightBottomDone THEN			(*Í£Ö¹Î´Íê³É£¬Ñ­»·*)
+				IF NOT FB_Stop.RightBottomDone THEN			
 					RightBottomLin_s_state:=1;
-				ELSE									(*Í£Ö¹Íê³É£¬ÏÂÒ»²½*)
+				ELSE									
 					RightBottomLin_s_state:=88;
 				END_IF
 			88:
-				btn_RightBottomLinStop:=FALSE;						(*»Ö¸´×´Ì¬*)
-				FB_Move.RightBottomReset:=FALSE;					(*ÔËÐÐFB*)
+				btn_RightBottomLinStop:=FALSE;						
+				FB_Move.RightBottomReset:=FALSE;				
 				RightBottomLin_s_state:=0;
 				btn_reset:=FALSE;
 		END_CASE
@@ -430,7 +430,6 @@ IF btn_LeftBottomLinStop THEN
 	btn_RightBottomLinStop:=TRUE;
 END_IF
 
-(*Èç¹û¼ì²âµ½TopÏÞÎ»¿ª¹ØFALSE£¬ÇÒÄ¿±êÎ»ÖÃ´óÓÚµ±Ç°Î»ÖÃÊ±£¬»òÕßÏà·´Ê±£¬»Ö¸´Move×´Ì¬*)
 IF NOT Unreach_LS_Far AND LeftTopLinPositionNew-Pos_LeftTopLin>0.0005 AND btn_LeftTopLinMove THEN
 	btn_LeftTopLinStop:=TRUE;
 END_IF
@@ -451,33 +450,15 @@ NAME:			A_MonitoringAllAxis
 DATA:			2017.5.8
 VERSION:		1.0.0
 DESCRIPTION:	
-				Ã¿´ÎÑ­»·¾ùÖ´ÐÐÖáÎ»ÖÃºÍÖáÔË¶¯µÄ¼ì²é
-				1.4ÖáÏà¶ÔÔË¶¯¼ì²é
-				2.4Öá¹âÕ¤³ßÎ»ÖÃ¡¢ËÙ¶È¶Ô±È¼ì²é
-				3.Ã¿Öá¹âÕ¤ºÍ±àÂëÆ÷Î»ÖÃ¶Ô±È¼ì²é
+
 HISTORY:
 				2017.5.8	NEW
 
 ***************************************************************)
-(*************************************************************************************1.4ÖáÏà¶ÔÔË¶¯¼ì²é************************************************************************************)
-(*DebugÄ£Ê½£¬Öá¾ù×ÔÓÉ»î¶¯*)
-(*(*³ýÁËÓÒÉÏºÍÓÒÏÂÖáÒ»Æð¶¯£¬ÆäÓàÖá¶¯¶¼ESTOP*)
-(*×óÉÏ¡¢×óÏÂÖá¶¯*)
-IF  LeftTopLin.Status.Moving OR LeftBottomLin.Status.Moving THEN
-	FB_PlcEmergencyStop();
-	Error:=TRUE;
-	ErrorID:=11;
-END_IF
-(*ÓÒÉÏ¶¯¡¢ÓÒÏÂ²»¶¯£¬»òÕßÓÒÏÂ¶¯¡¢ÓÒÉÏ²»¶¯¡£ESTOP*)
-IF (RightTopLin.Status.Moving AND RightBottomLin.Status.NotMoving) OR (RightTopLin.Status.NotMoving AND RightBottomLin.Status.Moving) THEN
-		FB_PlcEmergencyStop();
-		Error:=TRUE;
-		ErrorID:=12;
-END_IF
-*)
-(*************************************************************************************2.4Öá¹âÕ¤³ßÎ»ÖÃ¡¢ËÙ¶È¶Ô±È¼ì²é**********************************************************************)
+
+(******************************************************************************************************************************************************)
 IF st_power<>0 THEN
-(*×óÖáÉÏÏÂÎ»ÖÃ¶Ô±È£¬³¬³öESTOP*)
+
 IF ABS(Pos_LeftTopLin-Pos_LeftBottomLin)>Threshold_LeftPos_Debug  THEN
 		btn_LeftTopLinStop:=TRUE;
 		btn_RightTopLinStop:=TRUE;
@@ -488,7 +469,7 @@ IF ABS(Pos_LeftTopLin-Pos_LeftBottomLin)>Threshold_LeftPos_Debug  THEN
 		ErrorID:=11;
 		LED_Error:=TRUE;
 END_IF
-(*ÓÒÖáÉÏÏÂÎ»ÖÃËÙ¶È¶Ô±È£¬³¬³öESTOP*)
+
 IF ABS(Pos_RightTopLin-Pos_RightBottomLin)>Threshold_RightPos_Debug  THEN
 		btn_LeftTopLinStop:=TRUE;
 		btn_RightTopLinStop:=TRUE;
@@ -499,7 +480,7 @@ IF ABS(Pos_RightTopLin-Pos_RightBottomLin)>Threshold_RightPos_Debug  THEN
 		ErrorID:=12;
 		LED_Error:=TRUE;
 END_IF
-(*ÉÏÖá×óÓÒÎ»ÖÃ¶Ô±È£¬³¬³öESTOP*)
+
 IF ABS(Pos_LeftTopLin-Pos_RightTopLin)>Threshold_TopPos_Debug  THEN
 		btn_LeftTopLinStop:=TRUE;
 		btn_RightTopLinStop:=TRUE;
@@ -510,7 +491,7 @@ IF ABS(Pos_LeftTopLin-Pos_RightTopLin)>Threshold_TopPos_Debug  THEN
 		ErrorID:=13;
 		LED_Error:=TRUE;
 END_IF
-(*ÏÂÖá×óÓÒÎ»ÖÃ¶Ô±È£¬³¬³öESTOP*)
+
 IF ABS(Pos_LeftBottomLin-Pos_RightBottomLin)>Threshold_BottomPos_Debug  THEN
 		btn_LeftTopLinStop:=TRUE;
 		btn_RightTopLinStop:=TRUE;
@@ -619,14 +600,10 @@ NAME:			A_SetAxisPositionAndPowerOn
 DATA:			2017.3.27
 VERSION:		1.0.0
 DESCRIPTION:	
-				ÉÏµãÃüÁîºó£¬Ë³ÐòÖ´ÐÐ£º
-				1.FB_SetAxisPosition
-				2.FB_PowerOn
-				·µ»ØÖ´ÐÐÊÇ·ñ³É¹¦
+
 HISTORY:
 				2017.3.27		NEW
-				2017.5.8		É¾³ýÁËsetAxisPosition£¬ÒÆ¶¯µ½MAIN³ÌÐòÖÐ
-							±ä¸üNAMEÎªA_PowerOn
+				
 
 ***************************************************************)
 fb_ton(PT:=t#0.5s);
@@ -695,10 +672,13 @@ END_CASE]]></ST>
       <LineId Id="680" Count="0" />
       <LineId Id="260" Count="51" />
       <LineId Id="583" Count="0" />
-      <LineId Id="312" Count="67" />
+      <LineId Id="312" Count="53" />
+      <LineId Id="367" Count="12" />
     </LineIds>
     <LineIds Name="DebugMode.A_monitoringAllAxis">
-      <LineId Id="0" Count="76" />
+      <LineId Id="0" Count="4" />
+      <LineId Id="8" Count="4" />
+      <LineId Id="28" Count="48" />
     </LineIds>
     <LineIds Name="DebugMode.A_PosDiffDetection">
       <LineId Id="0" Count="19" />
@@ -707,7 +687,9 @@ END_CASE]]></ST>
       <LineId Id="0" Count="58" />
     </LineIds>
     <LineIds Name="DebugMode.A_PowerOn">
-      <LineId Id="0" Count="51" />
+      <LineId Id="0" Count="4" />
+      <LineId Id="8" Count="3" />
+      <LineId Id="13" Count="38" />
     </LineIds>
   </POU>
 </TcPlcObject>

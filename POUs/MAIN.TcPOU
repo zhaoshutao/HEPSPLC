@@ -429,6 +429,9 @@ END_IF
 
 (*reset*)
 
+(*检查光栅读数是否在范围内*)
+A_CheckLinearEncoder();
+
 (*RestartDrivers*)
 A_RestartDrivers();
 ]]></ST>
@@ -653,6 +656,108 @@ IF (NOT LS_LeftTop_Top AND NOT LS_LeftTop_Bottom) OR  (NOT  LS_RightTop_Top AND 
 	ErrorID:=2;
 END_IF
 *)]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_CheckLinearEncoder" Id="{eefb124b-755b-4f72-bc94-66974b5135d7}" FolderPath="Check\">
+      <Implementation>
+        <ST><![CDATA[//如果没有使用光栅、或者光栅参数没设置好，则不检查光栅位置
+IF NOT USELinearEncoder OR NOT PositionBiasDone THEN
+	RETURN;
+END_IF
+IF Pos_LeftTopLin <=0 THEN
+	ErrorID:=1101;
+	Error:=TRUE;
+	ErrorDescription:='Pos_LeftTopLin <=0';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF Pos_RightTopLin <=0 THEN
+	ErrorID:=1102;
+	Error:=TRUE;
+	ErrorDescription:='Pos_RightTopLin <=0';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF Pos_LeftBottomLin <=0 THEN
+	ErrorID:=1103;
+	Error:=TRUE;
+	ErrorDescription:='Pos_LeftBottomLin <=0';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF Pos_RightBottomLin <=0 THEN
+	ErrorID:=1104;
+	Error:=TRUE;
+	ErrorDescription:='Pos_RightBottomLin <=0';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+
+//
+//Gap方向
+//
+min_UserLEProtectionGapPosition:=min_UserGapPositionNew-min_ThresholdGapSoft2LEProtection;//回程误差有0.1mm
+max_UserLEProtectionGapPosition:=max_UserGapPositionNew+max_ThresholdGapSoft2LEProtection;
+//
+IF Pos_LeftTopLin >max_UserLEProtectionGapPosition/2 THEN
+	ErrorID:=1105;
+	Error:=TRUE;
+	ErrorDescription:='Pos_LeftTopLin >max_UserLEProtectionGapPosition/2';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF Pos_RightTopLin >max_UserLEProtectionGapPosition/2 THEN
+	ErrorID:=1106;
+	Error:=TRUE;
+	ErrorDescription:='Pos_RightTopLin>max_UserLEProtectionGapPosition/2';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF Pos_LeftBottomLin >max_UserLEProtectionGapPosition/2 THEN
+	ErrorID:=1107;
+	Error:=TRUE;
+	ErrorDescription:='Pos_LeftBottomLin >max_UserLEProtectionGapPosition/2';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF Pos_RightBottomLin >max_UserLEProtectionGapPosition/2 THEN
+	ErrorID:=1108;
+	Error:=TRUE;
+	ErrorDescription:='Pos_RightBottomLin >max_UserLEProtectionGapPosition/2';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+
+
+IF Pos_LeftTopLin <min_UserLEProtectionGapPosition/2 THEN
+	ErrorID:=1109;
+	Error:=TRUE;
+	ErrorDescription:='Pos_LeftTopLin <min_UserLEProtectionGapPosition/2';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF Pos_RightTopLin <min_UserLEProtectionGapPosition/2 THEN
+	ErrorID:=1110;
+	Error:=TRUE;
+	ErrorDescription:='Pos_RightTopLin<min_UserLEProtectionGapPosition/2';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF Pos_LeftBottomLin <min_UserLEProtectionGapPosition/2 THEN
+	ErrorID:=1111;
+	Error:=TRUE;
+	ErrorDescription:='Pos_LeftBottomLin <min_UserLEProtectionGapPosition';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF Pos_RightBottomLin <min_UserLEProtectionGapPosition/2 THEN
+	ErrorID:=1112;
+	Error:=TRUE;
+	ErrorDescription:='Pos_RightBottomLin <min_UserLEProtectionGapPosition';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+]]></ST>
       </Implementation>
     </Action>
     <Action Name="A_CryogenicCompensationMonitoring" Id="{196f46d5-b4be-43fe-a564-735eda66c49f}" FolderPath="Temperature\">
@@ -7224,7 +7329,7 @@ CASE SetAxisPosState OF
 		SetAxisPosState:=1;
 	1:	(*wait*)
 		FB_Set_AxisPosition();
-		IF NOT FB_Set_AxisPosition.Done THEN		(*FB_Set_AxisPositionÃ»ÓÐÖ´ÐÐÍê£¬wait£¬³¬Ê±FB Error*)
+		IF NOT FB_Set_AxisPosition.Done THEN		
 			IF NOT fb_ton4.Q THEN
 				SetAxisPosState:=1;
 			ELSE
@@ -8206,9 +8311,11 @@ END_CASE]]></ST>
       <LineId Id="2367" Count="0" />
       <LineId Id="2372" Count="0" />
       <LineId Id="3046" Count="0" />
-      <LineId Id="3045" Count="0" />
-      <LineId Id="3380" Count="1" />
-      <LineId Id="3379" Count="0" />
+      <LineId Id="4050" Count="0" />
+      <LineId Id="3714" Count="1" />
+      <LineId Id="3712" Count="0" />
+      <LineId Id="4048" Count="1" />
+      <LineId Id="4046" Count="0" />
       <LineId Id="3047" Count="0" />
     </LineIds>
     <LineIds Name="MAIN.A_CheckHardwareEmergencyStopStatus">
@@ -8265,6 +8372,10 @@ END_CASE]]></ST>
       <LineId Id="102" Count="0" />
       <LineId Id="112" Count="0" />
       <LineId Id="21" Count="79" />
+    </LineIds>
+    <LineIds Name="MAIN.A_CheckLinearEncoder">
+      <LineId Id="106" Count="96" />
+      <LineId Id="104" Count="0" />
     </LineIds>
     <LineIds Name="MAIN.A_CryogenicCompensationMonitoring">
       <LineId Id="2" Count="35" />

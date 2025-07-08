@@ -37,15 +37,15 @@ InGear:=FALSE;
 fb_ton(PT:=t#0.1s);
 CASE State OF
 	0:	(*Check*)
-		IF LeftTopLin.NcToPlc.CoupleState=3 OR LeftBottomLin.NcToPlc.CoupleState=3 THEN	(*LeftTop»òÕßLeftBottomÎª´ÓÖá£¬Emergency Error*)
+		IF LeftTopLin.NcToPlc.CoupleState=3 OR LeftBottomLin.NcToPlc.CoupleState=3 THEN	
 			ErrorID:=1;
 			State:=-100;
 		ELSIF LeftTopLin.NcToPlc.CoupleState=2 OR LeftBottomLin.NcToPlc.CoupleState=2
-			OR RightTopLin.NcToPlc.CoupleState=2 OR RightBottomLin.NcToPlc.CoupleState=2 THEN	(*ÓÐÒ»ÖáCoupleStateÎª2£¬Emergency Error*)
+			OR RightTopLin.NcToPlc.CoupleState=2 OR RightBottomLin.NcToPlc.CoupleState=2 THEN
 			ErrorID:=2;
 			State:=-100;
 		ELSIF LeftTopLin.NcToPlc.CoupleState=1 AND LeftBottomLin.NcToPlc.CoupleState=1
-			AND RightTopLin.NcToPlc.CoupleState=3 AND RightBottomLin.NcToPlc.CoupleState=3 THEN	(*ÒÑ¾­´¦ÓÚñîºÏ×´Ì¬*)
+			AND RightTopLin.NcToPlc.CoupleState=3 AND RightBottomLin.NcToPlc.CoupleState=3 THEN	
 			ErrorID:=3;
 			State:=-100;
 		ELSIF LeftTopLin.Status.Moving OR  RightTopLin.Status.Moving OR LeftBottomLin.Status.Moving OR RightBottomLin.Status.Moving THEN	(*ÓÐÖáÔË¶¯*)
@@ -54,11 +54,11 @@ CASE State OF
 		ELSIF  Top_MC_GearIn.Error OR Bottom_MC_GearIn.Error THEN		(*FB Error*)
 			ErrorID:=5;
 			State:=99;
-		ELSIF Top_MC_GearIn.InGear OR Bottom_MC_GearIn.InGear THEN	(*ÒÑ¾­InGear£¬²»¿ÉÄÜ·¢Éú£¬FB Error*)
+		ELSIF Top_MC_GearIn.InGear OR Bottom_MC_GearIn.InGear THEN
 			ErrorID:=6;
 			State:=99;
 		ELSIF LeftTopLin.NcToPlc.CoupleState=0 AND LeftBottomLin.NcToPlc.CoupleState=0
-			AND RightTopLin.NcToPlc.CoupleState=0 AND RightBottomLin.NcToPlc.CoupleState=0 THEN	(*Öá¾ù´¦ÓÚÎÞñîºÏ×´Ì¬£¬×ªÏÂÒ»²½*)
+			AND RightTopLin.NcToPlc.CoupleState=0 AND RightBottomLin.NcToPlc.CoupleState=0 THEN
 			State:=1;
 		ELSE
 			ErrorID:=7;
@@ -66,7 +66,7 @@ CASE State OF
 		END_IF
 	1:	(*Couple*)
 		IF LeftTopLin.NcToPlc.CoupleState=0 AND LeftBottomLin.NcToPlc.CoupleState=0
-			AND RightTopLin.NcToPlc.CoupleState=0 AND RightBottomLin.NcToPlc.CoupleState=0 THEN	(*ÔÙ¼ì²é£¬Öá¾ù´¦ÓÚÎÞñîºÏ×´Ì¬£¬¿ªÊ¼ñîºÏ*)
+			AND RightTopLin.NcToPlc.CoupleState=0 AND RightBottomLin.NcToPlc.CoupleState=0 THEN	
 			Top_MC_GearIn.Execute:=TRUE;
 			Bottom_MC_GearIn.Execute:=TRUE;
 			A_CoupleMC();
@@ -78,7 +78,7 @@ CASE State OF
 		END_IF
 	2:	(*Couple Wait*)
 		A_CoupleMC();
-		IF NOT Top_MC_GearIn.InGear OR NOT Bottom_MC_GearIn.InGear THEN		(*InGearÐÅºÅ²»µ½£¬¼ÌÐøµÈ´ý£¬Èç¹û³¬Ê±ÔòFB Error*)
+		IF NOT Top_MC_GearIn.InGear OR NOT Bottom_MC_GearIn.InGear THEN	
 			IF NOT fb_ton.Q THEN
 				State:=2;
 			ELSE
@@ -86,11 +86,11 @@ CASE State OF
 				State:=99;
 			END_IF
 		ELSIF  LeftTopLin.NcToPlc.CoupleState<>1 OR  RightTopLin.NcToPlc.CoupleState<>3
-			OR LeftBottomLin.NcToPlc.CoupleState<>1 OR  RightBottomLin.NcToPlc.CoupleState<>3 THEN		(*ñîºÏ×´Ì¬²»¶Ô£¬Emergency Error*)
+			OR LeftBottomLin.NcToPlc.CoupleState<>1 OR  RightBottomLin.NcToPlc.CoupleState<>3 THEN	
 				ErrorID:=9;
 				State:=-100;
 		ELSIF   LeftTopLin.NcToPlc.CoupleState=1 AND  RightTopLin.NcToPlc.CoupleState=3
-			AND LeftBottomLin.NcToPlc.CoupleState=1 AND  RightBottomLin.NcToPlc.CoupleState=3 THEN		(*ÕýÈ·ñîºÏ×´Ì¬£¬×ªÏÂÒ»²½*)
+			AND LeftBottomLin.NcToPlc.CoupleState=1 AND  RightBottomLin.NcToPlc.CoupleState=3 THEN	
 				State:=88;
 		ELSE
 				ErrorID:=10;

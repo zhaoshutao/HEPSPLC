@@ -203,32 +203,17 @@ IF btn_BottomStop OR btn_reset THEN
 				btn_reset:=FALSE;
 		END_CASE
 END_IF
-(*********************************************************************ÏÞÎ»Åö´¥×´Ì¬»Ö¸´************************************************************)
+(************************************************************************************************************************)
 
-(*Èç¹û¼ì²âµ½ÏØÏÞÎ»¿ª¹ØÏÂ½µÑØ£¬»Ö¸´Move×´Ì¬*)
 FTrig_ReachLS(CLK:=Unreach_LS_Far AND Unreach_LS_Near);
-IF FTrig_ReachLS.Q THEN		(*FTrig_ReachLS.QÌ«¿ì£¬Ö»ÄÜÊ¹btn_TopStopÎªTRUE*)
+IF FTrig_ReachLS.Q THEN		
 	btn_TopStop:=TRUE;
 	btn_BottomStop:=TRUE;
 END_IF
-IF btn_TopStop THEN			(*Òò´Ë£¬´Ë´¦Îªµ±Ö®Ç°btn_TopStopÎªTRUEÊ±£¬ÈËÎªÈÃbtn_BottomStopÎªTRUE*)
+IF btn_TopStop THEN			
 	btn_BottomStop:=TRUE;
 END_IF
-(*
-(*Èç¹û¼ì²âµ½TopÏÞÎ»¿ª¹ØFALSE£¬ÇÒÄ¿±êÎ»ÖÃ´óÓÚµ±Ç°Î»ÖÃÊ±£¬»òÕßÏà·´Ê±£¬»Ö¸´Move×´Ì¬*)
-IF NOT Unreach_LS_Top AND TopPositionNew-TopPositionActual>0.0005 AND btn_TopMove THEN
-	btn_TopStop:=TRUE;
-END_IF
-IF NOT Unreach_LS_Bottom AND TopPositionNew-TopPositionActual<0.0005 AND btn_TopMove THEN
-	btn_TopStop:=TRUE;
-END_IF
-IF NOT Unreach_LS_Top AND BottomPositionNew-BottomPositionActual>0.0005 AND btn_BottomMove THEN
-	btn_BottomStop:=TRUE;
-END_IF
-IF NOT Unreach_LS_Bottom AND BottomPositionNew-BottomPositionActual<0.0005 AND btn_BottomMove THEN
-	btn_BottomStop:=TRUE;
-END_IF
-*)]]></ST>
+]]></ST>
     </Implementation>
     <Action Name="A_MonitoringAllAxis" Id="{eb43239b-219b-4196-a91d-cc3c414c514e}">
       <Implementation>
@@ -237,10 +222,7 @@ NAME:			A_MonitoringAllAxis
 DATA:			2017.3.20
 VERSION:		1.0.0
 DESCRIPTION:	
-				Ã¿´ÎÑ­»·¾ùÖ´ÐÐÖáÎ»ÖÃºÍÖáÔË¶¯µÄ¼ì²é
-				1.4ÖáÏà¶ÔÔË¶¯¼ì²é
-				2.4Öá¹âÕ¤³ßÎ»ÖÃ¡¢ËÙ¶È¶Ô±È¼ì²é
-				3.Ã¿Öá¹âÕ¤ºÍ±àÂëÆ÷Î»ÖÃ¶Ô±È¼ì²é
+
 HISTORY:
 				2017.3.20		NEW
 
@@ -261,7 +243,7 @@ ELSIF ABS(Velo_leftTopLin-Velo_RightTopLin)>Threshold_TopVelo_SingleCarrier  THE
 		FB_PlcEmergencyStop();*)
 		Error:=TRUE;
 		ErrorID:=15;
-(*Bottom Î»ÖÃºÍËÙ¶È±È¶Ô*)
+
 ELSIF ABS(Pos_LeftBottomLin-Pos_RightBottomLin)>Threshold_BottomPos_SingleCarrier THEN
 		btn_TopStop:=TRUE;
 		btn_BottomStop:=TRUE;
@@ -275,10 +257,10 @@ ELSIF ABS(Velo_leftBottomLin-Velo_RightBottomLin)>Threshold_BottomVelo_SingleCar
 		FB_PlcEmergencyStop();*)
 		Error:=TRUE;
 		ErrorID:=17;
-(*ÎÞLeftºÍRightËÙ¶ÈÎ»ÖÃµÄ¶Ô±È*)
+
 END_IF
 END_IF
-(*********************************************************************************3.Ã¿Öá¹âÕ¤ºÍ±àÂëÆ÷Î»ÖÃ¶Ô±È¼ì²é**********************************************************************)]]></ST>
+(**************************************************************************************************************************************)]]></ST>
       </Implementation>
     </Action>
     <Action Name="A_PowerOff" Id="{3f10ae79-5a18-4a8f-8e8f-36886ee92bba}">
@@ -331,9 +313,7 @@ NAME:			A_PowerOn
 DATA:			2018.1.9
 VERSION:		1.0.0
 DESCRIPTION:	
-				ÉÏµãÃüÁîºó£¬Ë³ÐòÖ´ÐÐ£º
-				1.FB_PowerOn
-				·µ»ØÖ´ÐÐÊÇ·ñ³É¹¦
+
 HISTORY:
 				2019.1.9		NEW
 
@@ -346,7 +326,7 @@ CASE State OF
 		State:=1;
 	1:	(*wait*)
 		FB_power();
-		IF NOT FB_power.OnStatus THEN		(*FB_Power_OnÃ»ÓÐÖ´ÐÐÍê£¬wait£¬³¬Ê±FB Error*)
+		IF NOT FB_power.OnStatus THEN
 			IF NOT fb_ton3.Q THEN
 				State:=1;
 			ELSE
@@ -407,13 +387,12 @@ END_CASE]]></ST>
       <LineId Id="192" Count="1" />
       <LineId Id="198" Count="0" />
       <LineId Id="389" Count="0" />
-      <LineId Id="199" Count="8" />
-      <LineId Id="391" Count="0" />
-      <LineId Id="208" Count="12" />
+      <LineId Id="200" Count="7" />
       <LineId Id="390" Count="0" />
     </LineIds>
     <LineIds Name="SingleCarrierMode.A_MonitoringAllAxis">
-      <LineId Id="0" Count="12" />
+      <LineId Id="0" Count="4" />
+      <LineId Id="8" Count="4" />
       <LineId Id="47" Count="0" />
       <LineId Id="49" Count="32" />
     </LineIds>
@@ -428,7 +407,8 @@ END_CASE]]></ST>
       <LineId Id="35" Count="1" />
     </LineIds>
     <LineIds Name="SingleCarrierMode.A_PowerOn">
-      <LineId Id="0" Count="40" />
+      <LineId Id="0" Count="4" />
+      <LineId Id="7" Count="33" />
       <LineId Id="51" Count="1" />
       <LineId Id="41" Count="0" />
       <LineId Id="50" Count="0" />

@@ -1162,7 +1162,7 @@ END_IF]]></ST>
       <Implementation>
         <ST><![CDATA[(*
 IF NOT LeftTopLin_MC_Power.Status OR NOT RightTopLin_MC_Power.Status
-			OR NOT LeftBottomLin_MC_Power.Status OR NOT RightBottomLin_MC_Power.Status THEN		(*ÔÙ¼ì²é£¬Öá¶¼Ã»ÓÐPower*)
+			OR NOT LeftBottomLin_MC_Power.Status OR NOT RightBottomLin_MC_Power.Status THEN		
 			LeftTopLin_MC_Power.Enable:=TRUE;
 			RightTopLin_MC_Power.Enable:=TRUE;
 			LeftBottomLin_MC_Power.Enable:=TRUE;
@@ -1179,7 +1179,7 @@ OffBusy:=TRUE;
 CASE OffState OF
 	0:
 		IF NOT LeftTopLin_MC_Power.Status AND NOT RightTopLin_MC_Power.Status
-			AND NOT LeftBottomLin_MC_Power.Status AND NOT RightBottomLin_MC_Power.Status THEN	(*¶¼Ã»ÉÏµç*)
+			AND NOT LeftBottomLin_MC_Power.Status AND NOT RightBottomLin_MC_Power.Status THEN	
 			OffState:=88;
 		ELSE
 			OffState:=1;
@@ -1193,7 +1193,7 @@ CASE OffState OF
 		OffState:=2;
 	2:
 		IF NOT LeftTopLin_MC_Power.Status AND NOT RightTopLin_MC_Power.Status
-			AND NOT LeftBottomLin_MC_Power.Status AND NOT RightBottomLin_MC_Power.Status THEN	(*¶¼Ã»ÉÏµç*)
+			AND NOT LeftBottomLin_MC_Power.Status AND NOT RightBottomLin_MC_Power.Status THEN	
 			OffState:=88;
 		ELSE
 			ErrorId:=11;
@@ -1232,11 +1232,11 @@ CASE OnState OF
 			ErrorID:=1;
 			OnState:=99;
 		ELSIF LeftTopLin_MC_Power.Status OR RightTopLin_MC_Power.Status
-			OR LeftBottomLin_MC_Power.Status OR RightBottomLin_MC_Power.Status THEN		(*ÖáÒÑ¾­¶¼PowerOn£¬²»·ûºÏ¹¦ÄÜ¿éµ÷ÓÃÌõ¼þ*)
+			OR LeftBottomLin_MC_Power.Status OR RightBottomLin_MC_Power.Status THEN		
 			ErrorID:=2;
 			OnState:=-100;
 		ELSIF NOT LeftTopLin_MC_Power.Status OR NOT RightTopLin_MC_Power.Status
-			OR NOT LeftBottomLin_MC_Power.Status OR NOT RightBottomLin_MC_Power.Status THEN		(*Öá¶¼Ã»ÓÐPower£¬×ªÏÂÒ»²½*)
+			OR NOT LeftBottomLin_MC_Power.Status OR NOT RightBottomLin_MC_Power.Status THEN	
 			OnState:=1;
 		ELSE
 			ErrorID:=3;
@@ -1244,7 +1244,7 @@ CASE OnState OF
 		END_IF
 	1:	(*Execute*)
 		IF NOT LeftTopLin_MC_Power.Status OR NOT RightTopLin_MC_Power.Status
-			OR NOT LeftBottomLin_MC_Power.Status OR NOT RightBottomLin_MC_Power.Status THEN		(*ÔÙ¼ì²é£¬Öá¶¼Ã»ÓÐPower*)
+			OR NOT LeftBottomLin_MC_Power.Status OR NOT RightBottomLin_MC_Power.Status THEN		
 			LeftTopLin_MC_Power.Enable:=TRUE;
 			RightTopLin_MC_Power.Enable:=TRUE;
 			LeftBottomLin_MC_Power.Enable:=TRUE;
@@ -1259,7 +1259,7 @@ CASE OnState OF
 	2:	(*Wait*)
 		A_PowerMC();
 		IF NOT LeftTopLin_MC_Power.Status OR NOT RightTopLin_MC_Power.Status
-			OR NOT LeftBottomLin_MC_Power.Status OR NOT RightBottomLin_MC_Power.Status THEN		(*Power StatusÐÅºÅ²»µ½£¬¼ÌÐøµÈ´ý£¬Èç¹û³¬Ê±ÔòFB Error*)
+			OR NOT LeftBottomLin_MC_Power.Status OR NOT RightBottomLin_MC_Power.Status THEN		
 			IF NOT fb_ton.Q THEN
 				OnState:=2;
 			ELSE
@@ -1267,7 +1267,7 @@ CASE OnState OF
 				OnState:=99;
 			END_IF
 		ELSIF  LeftTopLin_MC_Power.Status AND RightTopLin_MC_Power.Status
-			AND LeftBottomLin_MC_Power.Status AND RightBottomLin_MC_Power.Status THEN			(*ÕýÈ·µç»úÉÏµã×´Ì¬£¬×ªÏÂÒ»²½*)
+			AND LeftBottomLin_MC_Power.Status AND RightBottomLin_MC_Power.Status THEN			
 				OnState:=88;
 		ELSE
 				ErrorID:=9;
