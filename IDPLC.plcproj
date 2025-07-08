@@ -177,9 +177,8 @@
   </ItemGroup>
   <ItemGroup>
     <PlaceholderReference Include="RecipeManagement">
-      <DefaultResolution>Recipe Management, 3.3.1.0 (System)</DefaultResolution>
+      <DefaultResolution>Recipe Management, * (System)</DefaultResolution>
       <Namespace>Recipe_Management</Namespace>
-      <SystemLibrary>true</SystemLibrary>
     </PlaceholderReference>
     <PlaceholderReference Include="System_VisuElemMeter">
       <DefaultResolution>VisuElemMeter, 3.5.13.0 (System)</DefaultResolution>
@@ -286,9 +285,6 @@
     <PlaceholderResolution Include="CAA Types">
       <Resolution>CAA Types Extern, 3.5.13.0 (CAA Technical Workgroup)</Resolution>
     </PlaceholderResolution>
-    <PlaceholderResolution Include="CBML">
-      <Resolution>Common Behaviour Model, 3.5.13.0 (3S - Smart Software Solutions GmbH)</Resolution>
-    </PlaceholderResolution>
     <PlaceholderResolution Include="CmpApp">
       <Resolution>CmpApp, 3.5.13.0 (System)</Resolution>
     </PlaceholderResolution>
@@ -300,9 +296,6 @@
     </PlaceholderResolution>
     <PlaceholderResolution Include="CmpEventMgr">
       <Resolution>CmpEventMgr, 3.5.12.0 (System)</Resolution>
-    </PlaceholderResolution>
-    <PlaceholderResolution Include="CmpIecTask">
-      <Resolution>CmpIecTask, 3.5.13.0 (System)</Resolution>
     </PlaceholderResolution>
     <PlaceholderResolution Include="CmpLog">
       <Resolution>CmpLog, 3.5.5.0 (System)</Resolution>
@@ -348,9 +341,6 @@
     </PlaceholderResolution>
     <PlaceholderResolution Include="SysProcess">
       <Resolution>SysProcess, 3.5.7.0 (System)</Resolution>
-    </PlaceholderResolution>
-    <PlaceholderResolution Include="SysSem">
-      <Resolution>SysSem, 3.5.5.0 (System)</Resolution>
     </PlaceholderResolution>
     <PlaceholderResolution Include="SysShm">
       <Resolution>SysShm, 3.5.8.0 (System)</Resolution>
@@ -403,17 +393,11 @@
     <PlaceholderResolution Include="Tc3_Module">
       <Resolution>Tc3_Module, 3.3.21.0 (Beckhoff Automation GmbH)</Resolution>
     </PlaceholderResolution>
-    <PlaceholderResolution Include="TextListUtils">
-      <Resolution>TextListUtils, 3.5.8.10 (System)</Resolution>
-    </PlaceholderResolution>
     <PlaceholderResolution Include="Util">
       <Resolution>Util, 3.5.11.0 (System)</Resolution>
     </PlaceholderResolution>
     <PlaceholderResolution Include="VisuDialogs">
       <Resolution>VisuDialogs, 3.5.12.0 (System)</Resolution>
-    </PlaceholderResolution>
-    <PlaceholderResolution Include="VisuUtils">
-      <Resolution>Visu Utils, 3.5.12.0 (System)</Resolution>
     </PlaceholderResolution>
   </ItemGroup>
   <ProjectExtensions>

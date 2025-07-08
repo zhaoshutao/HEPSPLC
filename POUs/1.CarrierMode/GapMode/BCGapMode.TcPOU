@@ -72,11 +72,11 @@ IF InitPowerDone AND InitCompensationDatasDone THEN
 	IF btn_BCGapMove THEN
 		CASE m_state OF
 			0:
-				FB_Move.Mode:=5;						(*1£ºgapÄ£Ê½£»2£ºµ¥ÁºÄ£Ê½£¬3£ºtaperÄ£Ê½£¬4:DebugÄ£Ê½£¬5£º²¹³¥GapÄ£Ê½*)
-				FB_Move.CoupleState:=st_Couple;			(*ñîºÏ×´Ì¬ÊäÈë*)
-				FB_Move.PowerState:=st_Power;			(*µçÔ´×´Ì¬ÊäÈë*)
-				FB_Move.BCGapMove:=TRUE;				(*Execute TRUE*)
-				FB_Move.BCLeftTopPosition:=LeftTopLinPositionNew;(*Ã¿ÖáËÙ¶ÈÎ»ÖÃÊäÈë*)
+				FB_Move.Mode:=5;					
+				FB_Move.CoupleState:=st_Couple;		
+				FB_Move.PowerState:=st_Power;	
+				FB_Move.BCGapMove:=TRUE;			
+				FB_Move.BCLeftTopPosition:=LeftTopLinPositionNew;
 				FB_Move.BCLeftTopVelocity:=BCGapVelocityNew/2;
 				FB_Move.BCRightTopPosition:=RightTopLinPositionNew;
 				FB_Move.BCRightTopVelocity:=BCGapVelocityNew/2;
@@ -84,29 +84,29 @@ IF InitPowerDone AND InitCompensationDatasDone THEN
 				FB_Move.BCLeftBottomVelocity:=BCGapVelocityNew/2;
 				FB_Move.BCRightBottomPosition:=RightBottomLinPositionNew;
 				FB_Move.BCRightBottomVelocity:=BCGapVelocityNew/2;
-				FB_Move();								(*Æô¶¯FB*)
-				IF LeftTopLinPositionNew-Pos_LeftTopLin>0.001 THEN	(*ÔË¶¯·½ÏòÖ¸Ê¾*)
+				FB_Move();							
+				IF LeftTopLinPositionNew-Pos_LeftTopLin>0.001 THEN	
 					LeftTopLinMoveIndicator:=1;
 				ELSIF LeftTopLinPositionNew-Pos_LeftTopLin<0.001 THEN
 					LeftTopLinMoveIndicator:=-1;
 				ELSE
 					LeftTopLinMoveIndicator:=0;
 				END_IF
-				IF RightTopLinPositionNew-Pos_RightTopLin>0.001 THEN	(*ÔË¶¯·½ÏòÖ¸Ê¾*)
+				IF RightTopLinPositionNew-Pos_RightTopLin>0.001 THEN
 					RightTopLinMoveIndicator:=1;
 				ELSIF RightTopLinPositionNew-Pos_RightTopLin<0.001 THEN
 					RightTopLinMoveIndicator:=-1;
 				ELSE
 					RightTopLinMoveIndicator:=0;
 				END_IF
-				IF LeftBottomLinPositionNew-Pos_LeftBottomLin>0.001 THEN	(*ÔË¶¯·½ÏòÖ¸Ê¾*)
+				IF LeftBottomLinPositionNew-Pos_LeftBottomLin>0.001 THEN
 					LeftBottomLinMoveIndicator:=1;
 				ELSIF LeftBottomLinPositionNew-Pos_LeftBottomLin<0.001 THEN
 					LeftBottomLinMoveIndicator:=-1;
 				ELSE
 					LeftBottomLinMoveIndicator:=0;
 				END_IF
-				IF RightBottomLinPositionNew-Pos_RightBottomLin>0.001 THEN	(*ÔË¶¯·½ÏòÖ¸Ê¾*)
+				IF RightBottomLinPositionNew-Pos_RightBottomLin>0.001 THEN
 					RightBottomLinMoveIndicator:=1;
 				ELSIF RightBottomLinPositionNew-Pos_RightBottomLin<0.001 THEN
 					RightBottomLinMoveIndicator:=-1;
@@ -116,15 +116,15 @@ IF InitPowerDone AND InitCompensationDatasDone THEN
 				m_state:=1;
 			1:
 				FB_Move();
-				IF NOT FB_Move.BCGapDone THEN			(*ÔË¶¯Î´Íê³É£¬Ñ­»·*)
+				IF NOT FB_Move.BCGapDone THEN	
 					Led_Run:=TRUE;
 					m_state:=1;
 
-				ELSE									(*ÔË¶¯Íê³É£¬ÏÂÒ»²½*)
+				ELSE							
 					m_state:=88;
 				END_IF
 			88:
-				btn_BCGapMove:=FALSE;					(*×´Ì¬»Ö¸´*)
+				btn_BCGapMove:=FALSE;				
 				Led_Run:=FALSE;
 				m_state:=0;
 				LeftTopLinMoveIndicator:=0;
@@ -141,28 +141,28 @@ IF btn_BCGapStop THEN
 	RightTopLinMoveIndicator:=0;
 	LeftBottomLinMoveIndicator:=0;
 	RightBottomLinMoveIndicator:=0;
-	FB_Move.BCGapReset:=TRUE;							(*¸øÔË¶¯FB¸øÍ£Ö¹ÐÅºÅ£¬Ê¹FB_Move×´Ì¬»Ö¸´*)
-	FB_Move();											(*Æô¶¯FB_Move*)
-	btn_BCGapMove:=FALSE;								(*btn_GapMove:=FALSE*)
-	m_state:=0;											(*m_state:=0;*)
+	FB_Move.BCGapReset:=TRUE;							
+	FB_Move();										
+	btn_BCGapMove:=FALSE;							
+	m_state:=0;										
 	CASE s_state OF
 			0:
-				FB_Stop.Mode:=5;							(*1£ºgapÄ£Ê½£»2£ºµ¥ÁºÄ£Ê½£»3£ºtaperÄ£Ê½£»4£ºDebugÄ£Ê½£»5£ºBCGapÄ£Ê½*)
-				FB_Stop.CoupleState:=st_Couple;			(*ñîºÏ×´Ì¬ÊäÈë*)
-				FB_Stop.PowerState:=st_Power;				(*µçÔ´×´Ì¬ÊäÈë*)
-				FB_Stop.BCGapStop:=TRUE;				(*Execute TRUE*)
-				FB_Stop();								(*Æô¶¯FB*)
+				FB_Stop.Mode:=5;						
+				FB_Stop.CoupleState:=st_Couple;			
+				FB_Stop.PowerState:=st_Power;				
+				FB_Stop.BCGapStop:=TRUE;				
+				FB_Stop();							
 				s_state:=1;
 			1:
 				FB_Stop();
-				IF NOT FB_Stop.BCGapDone THEN			(*Í£Ö¹Î´Íê³É£¬Ñ­»·*)
+				IF NOT FB_Stop.BCGapDone THEN		
 					s_state:=1;
-				ELSE									(*Í£Ö¹Íê³É£¬ÏÂÒ»²½*)
+				ELSE								
 					s_state:=88;
 				END_IF
 			88:
-				btn_BCGapStop:=FALSE;						(*»Ö¸´×´Ì¬*)
-				FB_Move.BCGapReset:=FALSE;				(*ÔËÐÐFB*)
+				btn_BCGapStop:=FALSE;					
+				FB_Move.BCGapReset:=FALSE;			
 				s_state:=0;
 		END_CASE
 END_IF
@@ -170,13 +170,12 @@ END_IF
 IF btn_PowerOff THEN
 	A_PowerOff();
 END_IF
-(*********************************************************************ÏÞÎ»Åö´¥×´Ì¬»Ö¸´************************************************************)
-(*Èç¹û¼ì²âµ½ÏØÏÞÎ»¿ª¹ØÏÂ½µÑØ£¬»Ö¸´Move×´Ì¬*)
+(****************************************************************************************************************************)
+
 FTrig_ReachLS(CLK:=Unreach_LS_Far AND Unreach_LS_Near);
 IF FTrig_ReachLS.Q THEN
 	btn_BCGapStop:=TRUE;
 END_IF
-(*Èç¹û¼ì²âµ½TopÏÞÎ»¿ª¹ØFALSE£¬ÇÒÄ¿±êÎ»ÖÃ´óÓÚµ±Ç°Î»ÖÃÊ±£¬»òÕßÏà·´Ê±£¬»Ö¸´Move×´Ì¬*)
 IF NOT Unreach_LS_Far AND BCGapPositionNew-BCGapPositionDisplay>0.0005 AND btn_BCGapMove THEN
 	btn_BCGapStop:=TRUE;
 END_IF
@@ -203,7 +202,6 @@ ELSIF  BCGapVelocityNew<0 OR  BCGapVelocityNew>2 THEN
 	InitCompensationDatasDone:=FALSE;
 END_IF
 *)
-(*¸ù¾ÝÊäÈëGapPosition²¹³¥²¢·Ö½âµ½Ã¿¸öÖá£¬¼ÆËãÃ¿¸öÖáµÄÎ»ÖÃ*)
 IF USE_SingleAxis_Compensation THEN
 	(*IF LeftTopLin.Status.NotMoving AND RightTopLin.Status.NotMoving AND LeftBottomLin.Status.NotMoving AND RightBottomLin.Status.NotMoving THEN*)
 		FOR	i:= 1 TO 17 DO
@@ -268,7 +266,7 @@ IF USE_SingleAxis_Compensation THEN
 		FOR j:= 1 TO 17 DO
 			IF Pos_RightBottomLin<M_Compensation[j+1].RightBottom AND Pos_RightBottomLin>=M_Compensation[j].RightBottom THEN
 				IF j<>18 THEN
-					(*¸ù¾ÝÃ¿¸öÖáµÄÊµ¼ÊÎ»ÖÃ£¬·´ËãÐèÒªÔÚ¿ØÖÆÏµÍ³UIÖÐÏÔÊ¾µÄÎ»ÖÃ*)
+
 					LeftTopLinPositionDisplay:=(((M_Compensation[j+1].Encoder-M_Compensation[j].Encoder)*(Pos_LeftTopLin-M_Compensation[j].LeftTop))
 							/(M_Compensation[j+1].LeftTop-M_Compensation[j].LeftTop))+M_Compensation[j].Encoder;
 					RightTopLinPositionDisplay:=(((M_Compensation[j+1].Encoder-M_Compensation[j].Encoder)*(Pos_RightTopLin-M_Compensation[j].RightTop))
@@ -289,7 +287,7 @@ IF USE_SingleAxis_Compensation THEN
 					RightBottomLinPositionDisplay:=(((M_Compensation[j+1].Encoder-M_Compensation[j].Encoder)*(Pos_RightBottomLin-M_Compensation[j].RightBottom))
 							/(M_Compensation[j+1].RightBottom-M_Compensation[j].RightBottom))+M_Compensation[j].Encoder;
 					M_DisplayNumber:=j;
-				ELSE(*Gap>14µÄÇé¿ö*)
+				ELSE
 					(**)
 					LeftTopLinPositionDisplay:=Pos_LeftTopLin;
 					RightTopLinPositionDisplay:=Pos_RightTopLin;
@@ -327,19 +325,17 @@ NAME:			A_MonitoringAllAxis
 DATA:			2018.1.9
 VERSION:		1.0.0
 DESCRIPTION:	
-				Ã¿´ÎÑ­»·¾ùÖ´ÐÐÖáÎ»ÖÃºÍÖáÔË¶¯µÄ¼ì²é
-				2.4Öá¹âÕ¤³ßÎ»ÖÃ¡¢ËÙ¶È¶Ô±È¼ì²é
+
 HISTORY:
 				2017.1.9		NEW
 
 ***************************************************************)
 
-(*************************************************************************************2.4Öá¹âÕ¤³ßÎ»ÖÃ¡¢ËÙ¶È¶Ô±È¼ì²é**********************************************************************)
+(***************************************************************************************************************************)
 IF  st_Power<>0 THEN
 CASE moni_State OF
-(*Top Î»ÖÃºÍËÙ¶È±È¶Ô*)
+
 0:
-		(*Î»ÖÃ*)
 		(*Top*)
 		Diff_BCTopPos_actual:=ABS(Pos_leftTopLin-Pos_RightTopLin);
 		(*Bottom*)
@@ -363,21 +359,21 @@ CASE moni_State OF
 		ELSIF Diff_BCTopVelo_actual>Threshold_BCTopVelo  THEN
 				ErrorID:=12;
 				moni_State:=-100;
-		(*Bottom Î»ÖÃºÍËÙ¶È±È¶Ô*)
+	
 		ELSIF Diff_BCBottomPos_actual>Threshold_BCBottomPos THEN
 				ErrorID:=13;
 				moni_State:=-100;
 		ELSIF Diff_BCBottomVelo_actual>Threshold_BCBottomVelo  THEN
 				ErrorID:=14;
 				moni_State:=-100;
-		(*Left Î»ÖÃºÍËÙ¶È±È¶Ô*)
+	
 		ELSIF Diff_BCLeftPos_actual>Threshold_BCLeftPos  THEN
 				ErrorID:=15;
 				moni_State:=-100;
 		ELSIF  Diff_BCLeftVelo_actual>Threshold_BCLeftVelo THEN
 				ErrorID:=16;
 				moni_State:=-100;
-		(*Right Î»ÖÃºÍËÙ¶È±È¶Ô*)
+		
 		ELSIF Diff_BCRightPos_actual>Threshold_BCRightPos  THEN
 				ErrorID:=17;
 				moni_State:=-100;
@@ -460,9 +456,7 @@ NAME:			A_PowerOn
 DATA:			2018.1.9
 VERSION:		1.0.0
 DESCRIPTION:	
-				ÉÏµãÃüÁîºó£¬Ë³ÐòÖ´ÐÐ£º
-				1.FB_PowerOn
-				·µ»ØÖ´ÐÐÊÇ·ñ³É¹¦
+
 HISTORY:
 				2019.1.9		NEW
 
@@ -475,7 +469,7 @@ CASE State OF
 		State:=1;
 	1:	(*wait*)
 		FB_power();
-		IF NOT FB_power.OnStatus THEN		(*FB_Power_OnÃ»ÓÐÖ´ÐÐÍê£¬wait£¬³¬Ê±FB Error*)
+		IF NOT FB_power.OnStatus THEN
 			IF NOT fb_ton3.Q THEN
 				State:=1;
 			ELSE
@@ -516,16 +510,21 @@ END_CASE]]></ST>
       <LineId Id="222" Count="0" />
       <LineId Id="39" Count="0" />
       <LineId Id="228" Count="0" />
-      <LineId Id="41" Count="135" />
+      <LineId Id="41" Count="128" />
+      <LineId Id="171" Count="5" />
     </LineIds>
     <LineIds Name="BCGapMode.A_InitCompensationData">
       <LineId Id="0" Count="14" />
       <LineId Id="133" Count="0" />
       <LineId Id="139" Count="0" />
-      <LineId Id="16" Count="114" />
+      <LineId Id="17" Count="113" />
     </LineIds>
     <LineIds Name="BCGapMode.A_MonitoringAllAxis">
-      <LineId Id="0" Count="69" />
+      <LineId Id="0" Count="4" />
+      <LineId Id="6" Count="10" />
+      <LineId Id="18" Count="21" />
+      <LineId Id="71" Count="1" />
+      <LineId Id="42" Count="27" />
     </LineIds>
     <LineIds Name="BCGapMode.A_PosDiffDetection">
       <LineId Id="0" Count="13" />
@@ -534,7 +533,8 @@ END_CASE]]></ST>
       <LineId Id="0" Count="36" />
     </LineIds>
     <LineIds Name="BCGapMode.A_PowerOn">
-      <LineId Id="0" Count="48" />
+      <LineId Id="0" Count="4" />
+      <LineId Id="7" Count="41" />
     </LineIds>
   </POU>
 </TcPlcObject>

@@ -47,11 +47,11 @@ CASE State OF
 			OR LeftBottomLin_MC_SetPosition.Error OR RightBottomLin_MC_SetPosition.Error THEN		(*FB Error*)
 			ErrorID:=1;
 			State:=99;
-		ELSIF FB_Couple_Axis.InGear THEN		(*²»ÄÜ³öÏÖÒÑ¾­ñîºÏÔÙÉèÖÃÎ»ÖÃµÄÇé¿ö£¬±ØÐëÏÈ½âñîºÏ£¬ÔÙÉèÖÃÎ»ÖÃ*)
+		ELSIF FB_Couple_Axis.InGear THEN		
 			ErrorID:=2;
 			State:=99;
 		ELSIF LeftTopLin.NcToPlc.CoupleState=0 AND LeftBottomLin.NcToPlc.CoupleState=0
-			AND RightTopLin.NcToPlc.CoupleState=0 AND RightBottomLin.NcToPlc.CoupleState=0 THEN	(*Öá¾ù´¦ÓÚÎÞñîºÏ×´Ì¬£¬¿ÉÒÔÉèÖÃÎ»ÖÃ£¬×ªÏÂÒ»²½*)
+			AND RightTopLin.NcToPlc.CoupleState=0 AND RightBottomLin.NcToPlc.CoupleState=0 THEN	
 			State:=1;
 		ELSE
 			ErrorID:=3;
@@ -72,7 +72,7 @@ CASE State OF
 	2:	(*Wait*)
 		A_SetPositionMC();
 		IF NOT LeftTopLin_MC_SetPosition.Done OR NOT RightTopLin_MC_SetPosition.Done
-			OR NOT LeftBottomLin_MC_SetPosition.Done OR NOT RightBottomLin_MC_SetPosition.Done THEN		(*DoneÐÅºÅ²»µ½£¬¼ÌÐøµÈ´ý£¬Èç¹û³¬Ê±ÔòFB Error*)
+			OR NOT LeftBottomLin_MC_SetPosition.Done OR NOT RightBottomLin_MC_SetPosition.Done THEN		
 			IF NOT fb_ton.Q THEN
 				State:=2;
 			ELSE
@@ -80,7 +80,7 @@ CASE State OF
 				State:=99;
 			END_IF
 		ELSIF  LeftTopLin_MC_SetPosition.Done AND RightTopLin_MC_SetPosition.Done
-			AND LeftBottomLin_MC_SetPosition.Done AND RightBottomLin_MC_SetPosition.Done THEN		(*Done£¬×ªÏÂÒ»²½*)
+			AND LeftBottomLin_MC_SetPosition.Done AND RightBottomLin_MC_SetPosition.Done THEN		
 			State:=88;
 		ELSE
 			ErrorID:=5;
