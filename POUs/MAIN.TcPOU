@@ -941,19 +941,30 @@ CASE m_GetDriveStatusState OF
 			OR GearDenominatorGet_LeftTop<>GearDenominatorConfigured_LeftTop 
 			OR GearDenominatorGet_RightTop<>GearDenominatorConfigured_RightTop
 			OR GearDenominatorGet_LeftBottom<>GearDenominatorConfigured_LeftBottom 
-			OR GearDenominatorGet_RightBottom<>GearDenominatorConfigured_RightBottom
-			OR Feedback2directionGet_LeftTop<>Feedback2directionConfigured_LeftTop 
-			OR Feedback2directionGet_RightTop<>Feedback2directionConfigured_RightTop
-			OR Feedback2directionGet_LeftBottom<>Feedback2directionConfigured_LeftBottom 
-			OR Feedback2directionGet_RightBottom<Feedback2directionConfigured_RightBottom THEN
-				bDriveDiagMessageAndNumber:=FALSE;
+			OR GearDenominatorGet_RightBottom<>GearDenominatorConfigured_RightBottom	THEN
+						bDriveDiagMessageAndNumber:=FALSE;
 				A_GetDriverStatusMC();
 				GetDriveStatusStateDone:=FALSE;
 				GetDriveStatusStateError:=TRUE;
 				Error:=TRUE;
 				ErrorId:=1302;
-				ErrorDescription:='gearOrfb2direction Error';
+				ErrorDescription:='gearParameters Error';
 				Plc_EmergencyStop:=FALSE;
+		END_IF
+		IF USELinearEncoder THEN
+			IF Feedback2directionGet_LeftTop<>Feedback2directionConfigured_LeftTop 
+				OR Feedback2directionGet_RightTop<>Feedback2directionConfigured_RightTop
+				OR Feedback2directionGet_LeftBottom<>Feedback2directionConfigured_LeftBottom 
+				OR Feedback2directionGet_RightBottom<Feedback2directionConfigured_RightBottom THEN
+					bDriveDiagMessageAndNumber:=FALSE;
+					A_GetDriverStatusMC();
+					GetDriveStatusStateDone:=FALSE;
+					GetDriveStatusStateError:=TRUE;
+					Error:=TRUE;
+					ErrorId:=1303;
+					ErrorDescription:='fb2direction Error';
+					Plc_EmergencyStop:=FALSE;	
+			END_IF				
 		END_IF
 		m_GetDriveStatusState:=0;
 	-100:
@@ -8434,7 +8445,12 @@ END_CASE]]></ST>
       <LineId Id="334" Count="1" />
       <LineId Id="308" Count="0" />
       <LineId Id="336" Count="0" />
-      <LineId Id="309" Count="24" />
+      <LineId Id="309" Count="12" />
+      <LineId Id="340" Count="7" />
+      <LineId Id="339" Count="0" />
+      <LineId Id="348" Count="1" />
+      <LineId Id="323" Count="10" />
+      <LineId Id="350" Count="0" />
       <LineId Id="207" Count="0" />
       <LineId Id="338" Count="0" />
       <LineId Id="157" Count="4" />
