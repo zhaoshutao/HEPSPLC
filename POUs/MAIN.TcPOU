@@ -437,7 +437,7 @@ A_RestartDrivers();
 
 (*ColiControl Function*)
 (*Use in HALF *)
-IF ColiControlFunction THEN
+IF CoilControlFunction THEN
 	PS1();
 	PS2();
 	PS3();

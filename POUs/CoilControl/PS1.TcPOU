@@ -3,6 +3,7 @@
   <POU Name="PS1" Id="{bf72f9e0-1891-4de3-80b7-8a25542daf93}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM PS1
 VAR
+	CoilName:STRING:='';
 	AutoOrManualMode:BOOL;
 	AutoMode:BOOL;
 	ManualMode:BOOL:=FALSE;
@@ -10,15 +11,16 @@ VAR
 	CoilErrorId: INT;
 	CoilErrorDescription: STRING;
 	//
-	IPAddr:STRING:='192.168.205.191';
-	TCPPort:UINT:=502;
+	IPAddr:STRING:='';
+	TCPPort:UINT:=0;
 	//获取电源版本信息
 	fb_GetPSVersion: FB_MBReadRegs;
 	PSVersion_MBAddr:WORD:=16#80;//寄存器地址
 	PSVersion_PSProtocal:ARRAY[0..1] OF WORD;//从PS获取到的WORD
 	PSVersion_PSProtocal_LowByte:ARRAY[0..1] OF WORD;//格式转换
 	PSVersion_PSProtocal_HighByte:ARRAY[0..1] OF WORD;//格式转换
-	PSVersion:ARRAY[0..1] OF WORD;//PLC系统
+	PSVersion_Word:ARRAY[0..1] OF WORD;//PLC系统
+	PSVersion:STRING;
 	btn_GetPSVersion: BOOL;
 	GetPSVersion_RTRIG:R_TRIG;
 	GetPSVersion_TON:TON;
@@ -330,6 +332,20 @@ VAR
 	i_ChB: INT;
 	TargetCoilCurrent_ChB:REAL;
 	AutoMode_ChB_TON:TON;
+	//
+	//recipe
+	state_loadParameters:DINT;
+	RecipeINT:INT;
+	RecipeBOOL:BOOL;
+	RecipeManCommands: RecipeManCommands;
+	SaveParameter : BOOL;  //保存文件
+	LoadParameter : BOOL;  //读取文件
+	Save_R_TRIG   : R_TRIG;
+	Read_R_TRIG   : R_TRIG;
+	loadparameterStatus: INT;
+	RecipeBOOL2:BOOL;
+	ReturnDwordLoad: DWORD;
+	
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -375,6 +391,10 @@ IF  AutoOrManualMode THEN
 	//A_AutoMode_ChB();
 END_IF
 
+A_Reset_ChA();
+A_Reset_ChB();
+
+A_InitRecipeParameters();
 ]]></ST>
     </Implementation>
     <Folder Name="AutoMode" Id="{ae87d75d-2510-4a97-9ee2-bd8e723514c4}" />
@@ -678,10 +698,11 @@ END_IF
 //字节调换，转为电源规定的格式
 PSVersion_PSProtocal_LowByte[0]:=SHL((PSVersion_PSProtocal[0] AND 16#00FF),8);
 PSVersion_PSProtocal_HighByte[0]:=SHR((PSVersion_PSProtocal[0] AND 16#FF00),8);
-PSVersion[0]:=PSVersion_PSProtocal_LowByte[0] OR PSVersion_PSProtocal_HighByte[0];
+PSVersion_Word[0]:=PSVersion_PSProtocal_LowByte[0] OR PSVersion_PSProtocal_HighByte[0];
 PSVersion_PSProtocal_LowByte[1]:=SHL((PSVersion_PSProtocal[1] AND 16#00FF),8);
 PSVersion_PSProtocal_HighByte[1]:=SHR((PSVersion_PSProtocal[1] AND 16#FF00),8);
-PSVersion[1]:=PSVersion_PSProtocal_LowByte[1] OR PSVersion_PSProtocal_HighByte[1];
+PSVersion_Word[1]:=PSVersion_PSProtocal_LowByte[1] OR PSVersion_PSProtocal_HighByte[1];
+PSVersion:=CONCAT(WORD_TO_STRING(PSVersion[1]),WORD_TO_STRING(PSVersion[0]));
 ////功能块
 fb_GetPSVersion(
 	sIPAddr:=IPAddr , 		//Server IP地址
@@ -963,6 +984,54 @@ fb_GetVoltage_ChB(
 	bError=> , 
 	nErrId=> , 
 	cbRead=> );]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_InitRecipeParameters" Id="{a9d2c9c4-0c1c-4f6b-a4b7-d5a73623f39a}">
+      <Implementation>
+        <ST><![CDATA[CASE state_loadParameters OF
+	0:
+		LoadParameter:=TRUE;
+		Read_R_TRIG(CLK:=LoadParameter , Q=> );
+		IF Read_R_TRIG.Q THEN
+			state_loadParameters:=1;
+		END_IF
+	1:
+		 ReturnDwordLoad:=RecipeManCommands.LoadAndWriteRecipe(RecipeDefinitionName:='PS1Recipes' , RecipeName:='PS1Parameters');
+    	 LoadParameter:=FALSE;
+		 IF ReturnDwordLoad<>0 THEN
+		 	state_loadParameters:=-100;
+		ELSE
+			LoadRecipeParameters:=TRUE;
+			LoadParameter:=FALSE;
+			state_loadParameters:=88;
+	 	END_IF
+	88:
+		loadParametersDone:=TRUE;
+	-100:
+		loadParametersDone:=FALSE;
+		CoilError:=TRUE;
+		CoilErrorId:=101;
+		CoilErrorDescription:='LoadCoilRecipeParameters Error';
+		//Plc_EmergencyStop:=FALSE;
+END_CASE
+//Save_R_TRIG(CLK:=SaveParameter , Q=> );
+//Read_R_TRIG(CLK:=LoadParameter , Q=> );
+//IF Save_R_TRIG.Q THEN  //将plc数据以文件形式保存在工控机中
+//	 RecipeManCommands.CreateRecipe(RecipeDefinitionName:='PS1Recipes' , RecipeName:='PS1Parameters' );
+//	 RecipeManCommands.ReadAndSaveRecipe(RecipeDefinitionName:='PS1Recipes' , RecipeName:='PS1Parameters' );
+//	 SaveParameter:=FALSE;
+//END_IF
+//IF Read_R_TRIG.Q THEN  //将工控机中的文件数据读取到plc中
+//     ReturnDwordLoad:=RecipeManCommands.LoadAndWriteRecipe(RecipeDefinitionName:='PS1Recipes' , RecipeName:='PS1Parameters');
+//     LoadParameter:=FALSE;
+//	 IF ReturnDwordLoad<>0 THEN
+//		 Error:=TRUE;
+//		 ErrorId:=101;
+//		 ErrorDescription:='LoadRecipeParameters Error';
+//		 Plc_EmergencyStop:=FALSE;
+//	 END_IF
+//END_IF 
+]]></ST>
       </Implementation>
     </Action>
     <Action Name="A_PowerOff_ChA" Id="{0a1cc717-b3d7-4662-8bdd-41f04688900e}" FolderPath="Set\">
@@ -1572,7 +1641,11 @@ fb_SetRampingSpd_ChB(
       <LineId Id="563" Count="3" />
       <LineId Id="584" Count="1" />
       <LineId Id="568" Count="0" />
+      <LineId Id="1205" Count="0" />
       <LineId Id="581" Count="0" />
+      <LineId Id="1206" Count="0" />
+      <LineId Id="1216" Count="0" />
+      <LineId Id="1215" Count="0" />
       <LineId Id="5" Count="0" />
     </LineIds>
     <LineIds Name="PS1.A_AutoMode_ChA">
@@ -1709,6 +1782,7 @@ fb_SetRampingSpd_ChB(
       <LineId Id="103" Count="0" />
       <LineId Id="106" Count="1" />
       <LineId Id="102" Count="0" />
+      <LineId Id="108" Count="0" />
       <LineId Id="94" Count="0" />
       <LineId Id="73" Count="12" />
       <LineId Id="72" Count="0" />
@@ -1754,6 +1828,28 @@ fb_SetRampingSpd_ChB(
     <LineIds Name="PS1.A_GetVoltage_ChB">
       <LineId Id="98" Count="39" />
       <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="PS1.A_InitRecipeParameters">
+      <LineId Id="78" Count="5" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="59" Count="3" />
+      <LineId Id="66" Count="1" />
+      <LineId Id="84" Count="1" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="86" Count="1" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="74" Count="2" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="52" Count="5" />
+      <LineId Id="8" Count="3" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="37" Count="2" />
+      <LineId Id="33" Count="1" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="31" Count="0" />
     </LineIds>
     <LineIds Name="PS1.A_PowerOff_ChA">
       <LineId Id="14" Count="0" />

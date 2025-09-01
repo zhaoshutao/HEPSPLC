@@ -1,22 +1,26 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
-  <POU Name="PS2" Id="{bda1bf9e-f08b-4035-9892-0ce48d7b5bbe}" SpecialFunc="None">
+  <POU Name="PS2" Id="{cad729a9-7a37-4c98-b99d-56fded9b8992}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM PS2
 VAR
-
+	CoilName:STRING:='';
+	AutoOrManualMode:BOOL;
+	AutoMode:BOOL;
+	ManualMode:BOOL:=FALSE;
 	CoilError: BOOL;
 	CoilErrorId: INT;
 	CoilErrorDescription: STRING;
 	//
-	IPAddr:STRING:='192.168.205.191';
-	TCPPort:UINT:=502;
+	IPAddr:STRING:='';
+	TCPPort:UINT:=0;
 	//获取电源版本信息
 	fb_GetPSVersion: FB_MBReadRegs;
 	PSVersion_MBAddr:WORD:=16#80;//寄存器地址
 	PSVersion_PSProtocal:ARRAY[0..1] OF WORD;//从PS获取到的WORD
 	PSVersion_PSProtocal_LowByte:ARRAY[0..1] OF WORD;//格式转换
 	PSVersion_PSProtocal_HighByte:ARRAY[0..1] OF WORD;//格式转换
-	PSVersion:ARRAY[0..1] OF WORD;//PLC系统
+	PSVersion_Word:ARRAY[0..1] OF WORD;//PLC系统
+	PSVersion:STRING;
 	btn_GetPSVersion: BOOL;
 	GetPSVersion_RTRIG:R_TRIG;
 	GetPSVersion_TON:TON;
@@ -64,6 +68,16 @@ VAR
 	fb_PowerOff_ChA_ResetReg: FB_MBWriteRegs;
 	PowerOff_ChA_ResetRegs:WORD:=16#0;
 	btn_PowerOff_ChA_ResetRegs:BOOL;
+	//复位-ChA
+	fb_Reset_ChA: FB_MBWriteRegs;
+	Reset_ChA_MBAddr:WORD:=16#56C;//寄存器地址
+	Reset_ChARegs:WORD:=16#400;//寄存器数据
+	btn_Reset_ChA:BOOL;
+	Reset_ChA_State:DINT;
+	Reset_ChA_TON:TON;
+	fb_Reset_ChA_ResetReg: FB_MBWriteRegs;
+	Reset_ChA_ResetRegs:WORD:=16#0;
+	btn_Reset_ChA_ResetRegs:BOOL;
 	//设定电流_ChA
 	fb_SetCurrent_ChA: FB_MBWriteRegs;		
 	SetCurrent_ChA_MBAddr:WORD:=16#540;//寄存器地址
@@ -160,6 +174,16 @@ VAR
 	fb_PowerOff_ChB_ResetReg: FB_MBWriteRegs;
 	PowerOff_ChB_ResetRegs:WORD:=16#0;
 	btn_PowerOff_ChB_ResetRegs:BOOL;
+	//复位-ChB
+	fb_Reset_ChB: FB_MBWriteRegs;
+	Reset_ChB_MBAddr:WORD:=16#56C;//寄存器地址
+	Reset_ChBRegs:WORD:=16#4;//寄存器数据
+	btn_Reset_ChB:BOOL;
+	Reset_ChB_State:DINT;
+	Reset_ChB_TON:TON;
+	fb_Reset_ChB_ResetReg: FB_MBWriteRegs;
+	Reset_ChB_ResetRegs:WORD:=16#0;
+	btn_Reset_ChB_ResetRegs:BOOL;
 	//设定电流_ChB
 	fb_SetCurrent_ChB: FB_MBWriteRegs;		
 	SetCurrent_ChB_MBAddr:WORD:=16#570;//寄存器地址
@@ -232,33 +256,263 @@ VAR
 	GetSetCurrent_ChB_TON:TON;
 	GetSetCurrent_ChB:REAL;
 	ieee754_GetSetCurrent_ChB:IEEE754_Convert;
+	//
+	//AutoMode(AM)
+	//
+	AM_ChA_State:DINT;
+	M_Compensation_Gap2Coil_ChA:ARRAY[1..31] OF Struct_M_Gap2Coil
+	:=[	(Gap:=0,	CoilCurrent:=0.1),
+		(Gap:=14,	CoilCurrent:=0.2),
+		(Gap:=15,	CoilCurrent:=0.4),
+		(Gap:=16,	CoilCurrent:=0.6),
+		(Gap:=17,	CoilCurrent:=0.8),
+		(Gap:=18,	CoilCurrent:=0.9),
+		(Gap:=19,	CoilCurrent:=1.0),
+		(Gap:=20,	CoilCurrent:=1.1),
+		(Gap:=21,	CoilCurrent:=1.2),
+		(Gap:=22,	CoilCurrent:=1.3),
+		(Gap:=23,	CoilCurrent:=1.4),
+		(Gap:=24,	CoilCurrent:=1.5),
+		(Gap:=25,	CoilCurrent:=1.6),
+		(Gap:=26,	CoilCurrent:=1.7),
+		(Gap:=27,	CoilCurrent:=1.8),
+		(Gap:=28,	CoilCurrent:=2.0),
+		(Gap:=29,	CoilCurrent:=2.1),
+		(Gap:=30,	CoilCurrent:=2.2),
+		(Gap:=31,	CoilCurrent:=2.3),
+		(Gap:=32,	CoilCurrent:=2.4),
+		(Gap:=33,	CoilCurrent:=2.5),
+		(Gap:=34,	CoilCurrent:=2.5),
+		(Gap:=35,	CoilCurrent:=2.5),
+		(Gap:=36,	CoilCurrent:=2.5),
+		(Gap:=37,	CoilCurrent:=2.5),
+		(Gap:=38,	CoilCurrent:=2.5),
+		(Gap:=39,	CoilCurrent:=2.5),
+		(Gap:=40,	CoilCurrent:=2.5),
+		(Gap:=41,	CoilCurrent:=2.5),
+		(Gap:=42,	CoilCurrent:=2.5),
+		(Gap:=220,	CoilCurrent:=2.5)];
+	i_ChA: INT;
+	TargetCoilCurrent_ChA:REAL;
+	AutoMode_ChA_TON:TON;
+	//ChB
+	AM_ChB_State:DINT;
+	M_Compensation_Gap2Coil_ChB:ARRAY[1..31] OF Struct_M_Gap2Coil
+	:=[	(Gap:=0,	CoilCurrent:=0.1),
+		(Gap:=14,	CoilCurrent:=0.2),
+		(Gap:=15,	CoilCurrent:=0.4),
+		(Gap:=16,	CoilCurrent:=0.6),
+		(Gap:=17,	CoilCurrent:=0.8),
+		(Gap:=18,	CoilCurrent:=0.9),
+		(Gap:=19,	CoilCurrent:=1.0),
+		(Gap:=20,	CoilCurrent:=1.1),
+		(Gap:=21,	CoilCurrent:=1.2),
+		(Gap:=22,	CoilCurrent:=1.3),
+		(Gap:=23,	CoilCurrent:=1.4),
+		(Gap:=24,	CoilCurrent:=1.5),
+		(Gap:=25,	CoilCurrent:=1.6),
+		(Gap:=26,	CoilCurrent:=1.7),
+		(Gap:=27,	CoilCurrent:=1.8),
+		(Gap:=28,	CoilCurrent:=2.0),
+		(Gap:=29,	CoilCurrent:=2.1),
+		(Gap:=30,	CoilCurrent:=2.2),
+		(Gap:=31,	CoilCurrent:=2.3),
+		(Gap:=32,	CoilCurrent:=2.4),
+		(Gap:=33,	CoilCurrent:=2.5),
+		(Gap:=34,	CoilCurrent:=2.5),
+		(Gap:=35,	CoilCurrent:=2.5),
+		(Gap:=36,	CoilCurrent:=2.5),
+		(Gap:=37,	CoilCurrent:=2.5),
+		(Gap:=38,	CoilCurrent:=2.5),
+		(Gap:=39,	CoilCurrent:=2.5),
+		(Gap:=40,	CoilCurrent:=2.5),
+		(Gap:=41,	CoilCurrent:=2.5),
+		(Gap:=42,	CoilCurrent:=2.5),
+		(Gap:=220,	CoilCurrent:=2.5)];
+	i_ChB: INT;
+	TargetCoilCurrent_ChB:REAL;
+	AutoMode_ChB_TON:TON;
+	//
+	//recipe
+	state_loadParameters:DINT;
+	RecipeINT:INT;
+	RecipeBOOL:BOOL;
+	RecipeManCommands: RecipeManCommands;
+	SaveParameter : BOOL;  //保存文件
+	LoadParameter : BOOL;  //读取文件
+	Save_R_TRIG   : R_TRIG;
+	Read_R_TRIG   : R_TRIG;
+	loadparameterStatus: INT;
+	RecipeBOOL2:BOOL;
+	ReturnDwordLoad: DWORD;
+	
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[//
+      <ST><![CDATA[//自动or手动模式选择
+IF AutoOrManualMode THEN
+	AutoMode:=TRUE;
+	ManualMode:=FALSE;
+ELSE
+	AutoMode:=FALSE;
+	ManualMode:=TRUE;
+END_IF
+//
+//Get状态下，部分手动还是自动，一直进行
+//
+//ChA
 A_GetPSVersion();
 A_GetPSStatus();
-//ChA
-A_PowerOn_ChA();
-A_PowerOff_ChA();
-A_SetCurrent_ChA();
 A_GetCurrent_ChA();
 A_GetVoltage_ChA();
 A_GetSetCurrent_ChA();
-A_GetRampSpd_ChA();
-A_SetRampingSpd_ChA();
+A_GetRampSpd_ChA();	
+A_PowerOn_ChA();
+A_PowerOff_ChA();
 //ChB
-A_PowerOn_ChB();
-A_PowerOff_ChB();
-A_SetCurrent_ChB();
 A_GetCurrent_ChB();
 A_GetVoltage_ChB();
 A_GetSetCurrent_ChB();
 A_GetRampSpd_ChB();
+A_PowerOn_ChB();
+A_PowerOff_ChB();
+
+//ChA
+A_SetCurrent_ChA();
+A_SetRampingSpd_ChA();
+//ChB
+A_SetCurrent_ChB();
 A_SetRampingSpd_ChB();
+//
+//set，分自动模式和手动模式
+//
+IF  AutoOrManualMode THEN
+	A_AutoMode_ChA();
+	//A_AutoMode_ChB();
+END_IF
+
+A_Reset_ChA();
+A_Reset_ChB();
+
+A_InitRecipeParameters();
 ]]></ST>
     </Implementation>
-    <Action Name="A_GetCurrent_ChA" Id="{d866137a-de4c-4799-9e0a-6c3d6c8ed19c}">
+    <Folder Name="AutoMode" Id="{5da7478f-3930-4964-babe-4dcea0466a56}" />
+    <Folder Name="Get" Id="{aec226e7-28a1-4bfd-ac2b-a05858e97730}" />
+    <Folder Name="Set" Id="{318c3f5b-c841-49ef-b593-26dd9968e971}" />
+    <Action Name="A_AutoMode_ChA" Id="{0c82ac42-95eb-492c-bfa9-d5dd5674d812}" FolderPath="AutoMode\">
+      <Implementation>
+        <ST><![CDATA[//
+//0、/法，根据当前gap计算对应的电流。如果gap=0，不计算，保持当前状态，等到不为0时，继续计算
+//1、检查电源状态，如果没有就打开
+//2、电流设置为计算值
+//3、回采当前电流值，当ABS(当前电流值-设定电流值)<阈值，该回合结束，返回第二步。超时，报错
+//4、END
+//
+//
+//如果当前磁间隙低于最小阈值或者大于最大阈值，则目标电流等于当前电流，也即不设置
+IF UserMode.UserGapPositionDisplay<min_UserLEProtectionGapPosition OR UserMode.UserGapPositionDisplay>max_UserLEProtectionGapPosition THEN
+	TargetCoilCurrent_ChA:=GetCurrent_ChA;
+ELSE
+	//插补法计算gap对应电流值
+	FOR	i_ChA:= 1 TO 30 DO
+		IF UserMode.UserGapPositionDisplay <M_Compensation_Gap2Coil_ChA[i_ChA+1].Gap AND UserMode.UserGapPositionDisplay>=M_Compensation_Gap2Coil_ChA[i_ChA].Gap THEN
+				TargetCoilCurrent_ChA:=(((UserMode.UserGapPositionDisplay-M_Compensation_Gap2Coil_ChA[i_ChA].Gap)*(M_Compensation_Gap2Coil_ChA[i_ChA+1].CoilCurrent-M_Compensation_Gap2Coil_ChA[i_ChA].CoilCurrent))
+						/(M_Compensation_Gap2Coil_ChA[i_ChA+1].Gap-M_Compensation_Gap2Coil_ChA[i_ChA].Gap))+M_Compensation_Gap2Coil_ChA[i_ChA].CoilCurrent;
+		END_IF
+	END_FOR
+END_IF
+//
+CASE AM_ChA_State OF
+	0:
+		//如果电源未上电，上电,上电成功，转下一步
+		IF NOT st_Power_ChA THEN
+			btn_PowerOn_ChA:=TRUE;
+		ELSE
+			AM_ChA_State:=1;
+		END_IF
+	1:
+		btn_PowerOn_ChA:=FALSE;
+		//目标电流已实时计算得出，开始设置电流
+		SetCurrent_ChA:=TargetCoilCurrent_ChA;
+		btn_SetCurrent_ChA:=TRUE;
+		AutoMode_ChA_TON.IN:=TRUE;
+		IF ABS(SetCurrent_ChA-GetCurrent_ChA)<0.001 THEN
+			AM_ChA_State:=88;
+		END_IF
+		IF AutoMode_ChA_TON.Q THEN
+			AM_ChA_State:=99;
+		END_IF
+	88:
+		btn_SetCurrent_ChA:=FALSE;
+		AutoMode_ChA_TON.IN:=FALSE;
+		AM_ChA_State:=0;
+	99:
+		btn_SetCurrent_ChA:=FALSE;
+		AutoMode_ChA_TON.IN:=FALSE;
+		AM_ChA_State:=0;
+
+END_CASE
+AutoMode_ChA_TON(PT:=T#0.1S);]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_AutoMode_ChB" Id="{dc4900f4-da02-4668-a596-9ed63075303c}" FolderPath="AutoMode\">
+      <Implementation>
+        <ST><![CDATA[//
+//0、/法，根据当前gap计算对应的电流。如果gap=0，不计算，保持当前状态，等到不为0时，继续计算
+//1、检查电源状态，如果没有就打开
+//2、电流设置为计算值
+//3、回采当前电流值，当ABS(当前电流值-设定电流值)<阈值，该回合结束，返回第二步。超时，报错
+//4、END
+//
+//
+//如果当前磁间隙低于最小阈值或者大于最大阈值，则目标电流等于当前电流，也即不设置
+IF UserMode.UserGapPositionDisplay<min_UserLEProtectionGapPosition OR UserMode.UserGapPositionDisplay>max_UserLEProtectionGapPosition THEN
+	TargetCoilCurrent_ChB:=GetCurrent_ChB;
+ELSE
+	//插补法计算gap对应电流值
+	FOR	i_ChB:= 1 TO 30 DO
+		IF UserMode.UserGapPositionDisplay <M_Compensation_Gap2Coil_ChB[i_ChB+1].Gap AND UserMode.UserGapPositionDisplay>=M_Compensation_Gap2Coil_ChB[i_ChB].Gap THEN
+				TargetCoilCurrent_ChB:=(((UserMode.UserGapPositionDisplay-M_Compensation_Gap2Coil_ChB[i_ChB].Gap)*(M_Compensation_Gap2Coil_ChB[i_ChB+1].CoilCurrent-M_Compensation_Gap2Coil_ChB[i_ChB].CoilCurrent))
+						/(M_Compensation_Gap2Coil_ChB[i_ChB+1].Gap-M_Compensation_Gap2Coil_ChB[i_ChB].Gap))+M_Compensation_Gap2Coil_ChB[i_ChB].CoilCurrent;
+		END_IF
+	END_FOR
+END_IF
+//
+CASE AM_ChB_State OF
+	0:
+		//如果电源未上电，上电,上电成功，转下一步
+		IF NOT st_Power_ChB THEN
+			btn_PowerOn_ChB:=TRUE;
+		ELSE
+			AM_ChB_State:=1;
+		END_IF
+	1:
+		btn_PowerOn_ChB:=FALSE;
+		//目标电流已实时计算得出，开始设置电流
+		SetCurrent_ChB:=TargetCoilCurrent_ChB;
+		btn_SetCurrent_ChB:=TRUE;
+		AutoMode_ChB_TON.IN:=TRUE;
+		IF ABS(SetCurrent_ChB-GetCurrent_ChB)<0.001 THEN
+			AM_ChB_State:=88;
+		END_IF
+		IF AutoMode_ChB_TON.Q THEN
+			AM_ChB_State:=99;
+		END_IF
+	88:
+		btn_SetCurrent_ChB:=FALSE;
+		AutoMode_ChB_TON.IN:=FALSE;
+		AM_ChB_State:=0;
+	99:
+		btn_SetCurrent_ChB:=FALSE;
+		AutoMode_ChB_TON.IN:=FALSE;
+		AM_ChB_State:=0;
+
+END_CASE
+AutoMode_ChB_TON(PT:=T#0.1S);]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_GetCurrent_ChA" Id="{73fa9476-f6d6-4af3-9d60-17f54f85fc2f}" FolderPath="Get\">
       <Implementation>
         <ST><![CDATA[//上升沿触发
 GetCurrent_ChA_RTRIG(CLK:=btn_GetCurrent_ChA);
@@ -266,7 +520,7 @@ IF GetCurrent_ChA_RTRIG.Q THEN
 	btn_GetCurrent_ChA:=FALSE;
 END_IF
 //每隔固定时间获取一次
-GetCurrent_ChA_TON(PT:=T#0.2S);
+GetCurrent_ChA_TON(PT:=T#0.02S);
 GetCurrent_ChA_TON.IN:=TRUE;
 IF GetCurrent_ChA_TON.Q THEN
 	btn_GetCurrent_ChA:=TRUE;
@@ -302,7 +556,7 @@ fb_GetCurrent_ChA(
 	cbRead=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_GetCurrent_ChB" Id="{8d59a01a-5dcc-4e08-9d3c-2494791525e2}">
+    <Action Name="A_GetCurrent_ChB" Id="{74169795-955e-4d62-806f-4f89deacf518}" FolderPath="Get\">
       <Implementation>
         <ST><![CDATA[//上升沿触发
 GetCurrent_ChB_RTRIG(CLK:=btn_GetCurrent_ChB);
@@ -346,7 +600,7 @@ fb_GetCurrent_ChB(
 	cbRead=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_GetPSStatus" Id="{93710d82-f4a7-4120-bee0-01ee05ff2715}">
+    <Action Name="A_GetPSStatus" Id="{8d90d55d-0d8a-4837-8ca6-e7cfa802c26f}" FolderPath="Get\">
       <Implementation>
         <ST><![CDATA[//获取版本信息
 GetPSStatus_RTRIG(CLK:=btn_GetPSStatus);
@@ -427,7 +681,7 @@ fb_GetPSStatus(
 	]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_GetPSVersion" Id="{d5acd90e-2b95-44ac-9b23-07cdf42dea16}">
+    <Action Name="A_GetPSVersion" Id="{205a4a52-191f-4d1c-a6af-90df70b22837}" FolderPath="Get\">
       <Implementation>
         <ST><![CDATA[//获取版本信息
 GetPSVersion_RTRIG(CLK:=btn_GetPSVersion);
@@ -444,10 +698,11 @@ END_IF
 //字节调换，转为电源规定的格式
 PSVersion_PSProtocal_LowByte[0]:=SHL((PSVersion_PSProtocal[0] AND 16#00FF),8);
 PSVersion_PSProtocal_HighByte[0]:=SHR((PSVersion_PSProtocal[0] AND 16#FF00),8);
-PSVersion[0]:=PSVersion_PSProtocal_LowByte[0] OR PSVersion_PSProtocal_HighByte[0];
+PSVersion_Word[0]:=PSVersion_PSProtocal_LowByte[0] OR PSVersion_PSProtocal_HighByte[0];
 PSVersion_PSProtocal_LowByte[1]:=SHL((PSVersion_PSProtocal[1] AND 16#00FF),8);
 PSVersion_PSProtocal_HighByte[1]:=SHR((PSVersion_PSProtocal[1] AND 16#FF00),8);
-PSVersion[1]:=PSVersion_PSProtocal_LowByte[1] OR PSVersion_PSProtocal_HighByte[1];
+PSVersion_Word[1]:=PSVersion_PSProtocal_LowByte[1] OR PSVersion_PSProtocal_HighByte[1];
+PSVersion:=CONCAT(WORD_TO_STRING(PSVersion[1]),WORD_TO_STRING(PSVersion[0]));
 ////功能块
 fb_GetPSVersion(
 	sIPAddr:=IPAddr , 		//Server IP地址
@@ -465,7 +720,7 @@ fb_GetPSVersion(
 	cbRead=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_GetRampSpd_ChA" Id="{e32b477f-3678-49d0-a52b-5b1a6034d577}">
+    <Action Name="A_GetRampSpd_ChA" Id="{4d4f7bd0-b1c1-4126-9f1c-d011bf787acd}" FolderPath="Get\">
       <Implementation>
         <ST><![CDATA[//上升沿触发
 GetRampingSpd_ChA_RTRIG(CLK:=btn_GetRampingSpd_ChA);
@@ -509,7 +764,7 @@ fb_GetRampingSpd_ChA(
 	cbRead=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_GetRampSpd_ChB" Id="{1c17e9cd-e1f1-4b22-8dbc-ca7db2ce3714}">
+    <Action Name="A_GetRampSpd_ChB" Id="{04054f1e-d02b-4221-a6ae-838b5da525c2}" FolderPath="Get\">
       <Implementation>
         <ST><![CDATA[//上升沿触发
 GetRampingSpd_ChB_RTRIG(CLK:=btn_GetRampingSpd_ChB);
@@ -553,7 +808,7 @@ fb_GetRampingSpd_ChB(
 	cbRead=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_GetSetCurrent_ChA" Id="{d5faa195-2e9d-4fcc-9028-dfa042346560}">
+    <Action Name="A_GetSetCurrent_ChA" Id="{954930b3-56a7-41c1-a31d-96166d9e3673}" FolderPath="Get\">
       <Implementation>
         <ST><![CDATA[
 
@@ -598,7 +853,7 @@ fb_GetSetCurrent_ChA(
 	cbRead=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_GetSetCurrent_ChB" Id="{370419ac-7d46-42da-b08c-acc32d8b2542}">
+    <Action Name="A_GetSetCurrent_ChB" Id="{a8b6554d-100b-493f-a03a-a2bb1f31f612}" FolderPath="Get\">
       <Implementation>
         <ST><![CDATA[GetSetCurrent_ChB_RTRIG(CLK:=btn_GetSetCurrent_ChB);
 IF GetSetCurrent_ChB_RTRIG.Q THEN
@@ -641,7 +896,7 @@ fb_GetSetCurrent_ChB(
 	cbRead=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_GetVoltage_ChA" Id="{9cdbac02-969d-482e-b4a5-388e965fcc00}">
+    <Action Name="A_GetVoltage_ChA" Id="{11b33db8-1905-49a4-af51-e344f7403f08}" FolderPath="Get\">
       <Implementation>
         <ST><![CDATA[//上升沿触发
 GetVoltage_ChA_RTRIG(CLK:=btn_GetVoltage_ChA);
@@ -686,7 +941,7 @@ fb_GetVoltage_ChA(
 	cbRead=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_GetVoltage_ChB" Id="{ee0c9b18-33c8-491a-83c2-a4feb103a478}">
+    <Action Name="A_GetVoltage_ChB" Id="{20201a25-8f95-4b3e-90a5-878f91986f50}" FolderPath="Get\">
       <Implementation>
         <ST><![CDATA[//上升沿触发
 GetVoltage_ChB_RTRIG(CLK:=btn_GetVoltage_ChB);
@@ -731,7 +986,55 @@ fb_GetVoltage_ChB(
 	cbRead=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_PowerOff_ChA" Id="{d0a55fd6-9512-4b63-89b5-88a7ca587433}">
+    <Action Name="A_InitRecipeParameters" Id="{0876f8fa-a3be-4a3c-bd2e-a43358001d51}">
+      <Implementation>
+        <ST><![CDATA[CASE state_loadParameters OF
+	0:
+		LoadParameter:=TRUE;
+		Read_R_TRIG(CLK:=LoadParameter , Q=> );
+		IF Read_R_TRIG.Q THEN
+			state_loadParameters:=1;
+		END_IF
+	1:
+		 ReturnDwordLoad:=RecipeManCommands.LoadAndWriteRecipe(RecipeDefinitionName:='PS2Recipes' , RecipeName:='PS2Parameters');
+    	 LoadParameter:=FALSE;
+		 IF ReturnDwordLoad<>0 THEN
+		 	state_loadParameters:=-100;
+		ELSE
+			LoadRecipeParameters:=TRUE;
+			LoadParameter:=FALSE;
+			state_loadParameters:=88;
+	 	END_IF
+	88:
+		loadParametersDone:=TRUE;
+	-100:
+		loadParametersDone:=FALSE;
+		CoilError:=TRUE;
+		CoilErrorId:=101;
+		CoilErrorDescription:='LoadCoilRecipeParameters Error';
+		//Plc_EmergencyStop:=FALSE;
+END_CASE
+//Save_R_TRIG(CLK:=SaveParameter , Q=> );
+//Read_R_TRIG(CLK:=LoadParameter , Q=> );
+//IF Save_R_TRIG.Q THEN  //将plc数据以文件形式保存在工控机中
+//	 RecipeManCommands.CreateRecipe(RecipeDefinitionName:='PS1Recipes' , RecipeName:='PS1Parameters' );
+//	 RecipeManCommands.ReadAndSaveRecipe(RecipeDefinitionName:='PS1Recipes' , RecipeName:='PS1Parameters' );
+//	 SaveParameter:=FALSE;
+//END_IF
+//IF Read_R_TRIG.Q THEN  //将工控机中的文件数据读取到plc中
+//     ReturnDwordLoad:=RecipeManCommands.LoadAndWriteRecipe(RecipeDefinitionName:='PS1Recipes' , RecipeName:='PS1Parameters');
+//     LoadParameter:=FALSE;
+//	 IF ReturnDwordLoad<>0 THEN
+//		 Error:=TRUE;
+//		 ErrorId:=101;
+//		 ErrorDescription:='LoadRecipeParameters Error';
+//		 Plc_EmergencyStop:=FALSE;
+//	 END_IF
+//END_IF 
+]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_PowerOff_ChA" Id="{ecc6e8c0-4160-45d3-93c8-aa6ad473bcaa}" FolderPath="Set\">
       <Implementation>
         <ST><![CDATA[CASE PowerOff_ChA_State OF
 	0:
@@ -789,7 +1092,7 @@ fb_PowerOff_ChA_ResetReg(
 	nErrId=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_PowerOff_ChB" Id="{8c178d64-2f3b-4864-b2f0-a1ebf1e3bdad}">
+    <Action Name="A_PowerOff_ChB" Id="{b378967a-3209-4ce2-b73a-66959c143540}" FolderPath="Set\">
       <Implementation>
         <ST><![CDATA[CASE PowerOff_ChB_State OF
 	0:
@@ -847,7 +1150,7 @@ fb_PowerOff_ChB_ResetReg(
 	nErrId=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_PowerOn_ChA" Id="{8f726f89-a96e-462a-8d3c-449e9fa3ab81}">
+    <Action Name="A_PowerOn_ChA" Id="{f8ccf2f7-8521-404c-bc6e-4d5a4e16e524}" FolderPath="Set\">
       <Implementation>
         <ST><![CDATA[CASE PowerOn_ChA_State OF
 	0:
@@ -920,7 +1223,7 @@ fb_PowerOn_ChA_ResetReg(
 	nErrId=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_PowerOn_ChB" Id="{116fa984-3bbe-49ef-a729-65575f71af25}">
+    <Action Name="A_PowerOn_ChB" Id="{d0345d71-f09b-4c53-8975-56a2085341e8}" FolderPath="Set\">
       <Implementation>
         <ST><![CDATA[CASE PowerOn_ChB_State OF
 	0:
@@ -993,7 +1296,117 @@ fb_PowerOn_ChB_ResetReg(
 	nErrId=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_SetCurrent_ChA" Id="{36d57e7a-8a3b-483d-911e-e1da4547a87c}">
+    <Action Name="A_Reset_ChA" Id="{8f8582ac-7ef5-48e4-8a5d-f6e8c6c4a8db}" FolderPath="Set\">
+      <Implementation>
+        <ST><![CDATA[CASE Reset_ChA_State OF
+	0:
+		IF btn_Reset_ChA THEN
+			Reset_ChA_State:=1;
+		END_IF
+	1:
+		fb_Reset_ChA.bExecute:=TRUE;//功能块上电
+		Reset_ChA_TON.IN:=TRUE;//开始计时
+		IF Reset_ChA_TON.Q THEN
+				Reset_ChA_State:=2;
+		END_IF
+	2:
+		//对寄存器置下降沿，恢复寄存器原始状态，方便下次操作
+		fb_Reset_ChA.bExecute:=FALSE;
+		btn_Reset_ChA_ResetRegs:=TRUE;
+		Reset_ChA_TON.IN:=FALSE;
+		btn_Reset_ChA:=FALSE;
+		Reset_ChA_State:=88;
+	88:
+		btn_Reset_ChA_ResetRegs:=FALSE;
+		Reset_ChA_State:=0;
+END_CASE
+
+////功能块
+Reset_ChA_TON(PT:=T#0.1S);
+fb_Reset_ChA(
+	sIPAddr:= IPAddr, 
+	nTCPPort:= TCPPort, 
+	nUnitID:= 1, 
+	nQuantity:=1 , 
+	nMBAddr:=Reset_ChA_MBAddr , 
+	cbLength:= SIZEOF(Reset_ChARegs), 
+	pSrcAddr:= ADR(Reset_ChARegs), 
+	bExecute:= , 
+	tTimeout:= , 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> );
+fb_Reset_ChA_ResetReg(
+	sIPAddr:= IPAddr, 
+	nTCPPort:= TCPPort, 
+	nUnitID:= 1, 
+	nQuantity:=1 , 
+	nMBAddr:=Reset_ChA_MBAddr , 
+	cbLength:= SIZEOF(Reset_ChA_ResetRegs), 
+	pSrcAddr:= ADR(Reset_ChA_ResetRegs), 
+	bExecute:= btn_Reset_ChA_ResetRegs, 
+	tTimeout:= , 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> );]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_Reset_ChB" Id="{04e0cb7c-8334-4e14-8ddc-aaa5c53f1006}" FolderPath="Set\">
+      <Implementation>
+        <ST><![CDATA[CASE Reset_ChB_State OF
+	0:
+		IF btn_Reset_ChB THEN
+			Reset_ChB_State:=1;
+		END_IF
+	1:
+		fb_Reset_ChB.bExecute:=TRUE;//功能块上电
+		Reset_ChB_TON.IN:=TRUE;//开始计时
+		IF Reset_ChB_TON.Q THEN
+				Reset_ChB_State:=2;
+		END_IF
+	2:
+		//对寄存器置下降沿，恢复寄存器原始状态，方便下次操作
+		fb_Reset_ChB.bExecute:=FALSE;
+		btn_Reset_ChB_ResetRegs:=TRUE;
+		Reset_ChB_TON.IN:=FALSE;
+		btn_Reset_ChB:=FALSE;
+		Reset_ChB_State:=88;
+	88:
+		btn_Reset_ChB_ResetRegs:=FALSE;
+		Reset_ChB_State:=0;
+END_CASE
+
+////功能块
+Reset_ChB_TON(PT:=T#0.1S);
+fb_Reset_ChB(
+	sIPAddr:= IPAddr, 
+	nTCPPort:= TCPPort, 
+	nUnitID:= 1, 
+	nQuantity:=1 , 
+	nMBAddr:=Reset_ChB_MBAddr , 
+	cbLength:= SIZEOF(Reset_ChBRegs), 
+	pSrcAddr:= ADR(Reset_ChBRegs), 
+	bExecute:= , 
+	tTimeout:= , 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> );
+fb_Reset_ChB_ResetReg(
+	sIPAddr:= IPAddr, 
+	nTCPPort:= TCPPort, 
+	nUnitID:= 1, 
+	nQuantity:=1 , 
+	nMBAddr:=Reset_ChB_MBAddr , 
+	cbLength:= SIZEOF(Reset_ChB_ResetRegs), 
+	pSrcAddr:= ADR(Reset_ChB_ResetRegs), 
+	bExecute:= btn_Reset_ChB_ResetRegs, 
+	tTimeout:= , 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> );]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_SetCurrent_ChA" Id="{992daac6-1bcd-4b44-82e1-d012e0157f1f}" FolderPath="Set\">
       <Implementation>
         <ST><![CDATA[//IEEE754转化,REAL到WORD
 ieee754_SetCurrent_ChA.data_float:=SetCurrent_ChA;
@@ -1029,7 +1442,7 @@ END_CASE
 
 
 ////功能块
-SetCurrent_ChA_TON(PT:=T#1S);
+SetCurrent_ChA_TON(PT:=T#0.02S);
 fb_SetCurrent_ChA(
 	sIPAddr:= IPAddr, 
 	nTCPPort:= TCPPort, 
@@ -1045,7 +1458,7 @@ fb_SetCurrent_ChA(
 	nErrId=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_SetCurrent_ChB" Id="{a87457e6-b143-4d9b-b73a-49084b7d4bac}">
+    <Action Name="A_SetCurrent_ChB" Id="{b3b4743c-bb29-4bbe-8fa8-ba5caf6e27a0}" FolderPath="Set\">
       <Implementation>
         <ST><![CDATA[//IEEE754转化,REAL到WORD
 ieee754_SetCurrent_ChB.data_float:=SetCurrent_ChB;
@@ -1097,7 +1510,7 @@ fb_SetCurrent_ChB(
 	nErrId=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_SetRampingSpd_ChA" Id="{fdf3784c-2c50-46c3-a6d7-0337ecade5bb}">
+    <Action Name="A_SetRampingSpd_ChA" Id="{52937ce6-602d-490e-a8ac-60c571e74064}" FolderPath="Set\">
       <Implementation>
         <ST><![CDATA[//IEEE754转化,REAL到WORD
 ieee754_SetRampingSpd_ChA.data_float:=SetRampingSpd_ChA;
@@ -1149,7 +1562,7 @@ fb_SetRampingSpd_ChA(
 	nErrId=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_SetRampingSpd_ChB" Id="{1ee479bf-0332-408d-a030-4d4362a899ba}">
+    <Action Name="A_SetRampingSpd_ChB" Id="{ed80512c-ebaa-4ad4-8a1a-471148c77f45}" FolderPath="Set\">
       <Implementation>
         <ST><![CDATA[//IEEE754转化,REAL到WORD
 ieee754_SetRampingSpd_ChB.data_float:=SetRampingSpd_ChB;
@@ -1202,20 +1615,106 @@ fb_SetRampingSpd_ChB(
       </Implementation>
     </Action>
     <LineIds Name="PS2">
+      <LineId Id="528" Count="0" />
+      <LineId Id="521" Count="1" />
+      <LineId Id="526" Count="0" />
+      <LineId Id="524" Count="1" />
+      <LineId Id="527" Count="0" />
+      <LineId Id="523" Count="0" />
       <LineId Id="219" Count="0" />
-      <LineId Id="15" Count="1" />
-      <LineId Id="220" Count="0" />
-      <LineId Id="17" Count="4" />
-      <LineId Id="213" Count="0" />
-      <LineId Id="250" Count="0" />
-      <LineId Id="262" Count="0" />
-      <LineId Id="221" Count="0" />
-      <LineId Id="218" Count="0" />
-      <LineId Id="214" Count="3" />
-      <LineId Id="22" Count="0" />
-      <LineId Id="286" Count="0" />
-      <LineId Id="285" Count="0" />
+      <LineId Id="529" Count="0" />
+      <LineId Id="531" Count="0" />
+      <LineId Id="555" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="536" Count="0" />
+      <LineId Id="556" Count="2" />
+      <LineId Id="554" Count="0" />
+      <LineId Id="592" Count="0" />
+      <LineId Id="591" Count="0" />
+      <LineId Id="562" Count="0" />
+      <LineId Id="559" Count="2" />
+      <LineId Id="553" Count="0" />
+      <LineId Id="594" Count="0" />
+      <LineId Id="593" Count="0" />
+      <LineId Id="869" Count="5" />
+      <LineId Id="868" Count="0" />
+      <LineId Id="563" Count="3" />
+      <LineId Id="584" Count="1" />
+      <LineId Id="568" Count="0" />
+      <LineId Id="1205" Count="0" />
+      <LineId Id="581" Count="0" />
+      <LineId Id="1206" Count="0" />
+      <LineId Id="1216" Count="0" />
+      <LineId Id="1215" Count="0" />
       <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="PS2.A_AutoMode_ChA">
+      <LineId Id="1" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="4" Count="3" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="70" Count="1" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="76" Count="5" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="8" Count="1" />
+      <LineId Id="12" Count="2" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="82" Count="2" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="85" Count="2" />
+      <LineId Id="91" Count="2" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="94" Count="1" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="96" Count="1" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="52" Count="0" />
+    </LineIds>
+    <LineIds Name="PS2.A_AutoMode_ChB">
+      <LineId Id="1" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="4" Count="3" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="70" Count="1" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="76" Count="5" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="8" Count="1" />
+      <LineId Id="12" Count="2" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="82" Count="2" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="85" Count="2" />
+      <LineId Id="91" Count="2" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="94" Count="1" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="96" Count="1" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="52" Count="0" />
     </LineIds>
     <LineIds Name="PS2.A_GetCurrent_ChA">
       <LineId Id="43" Count="0" />
@@ -1283,6 +1782,7 @@ fb_SetRampingSpd_ChB(
       <LineId Id="103" Count="0" />
       <LineId Id="106" Count="1" />
       <LineId Id="102" Count="0" />
+      <LineId Id="108" Count="0" />
       <LineId Id="94" Count="0" />
       <LineId Id="73" Count="12" />
       <LineId Id="72" Count="0" />
@@ -1328,6 +1828,28 @@ fb_SetRampingSpd_ChB(
     <LineIds Name="PS2.A_GetVoltage_ChB">
       <LineId Id="98" Count="39" />
       <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="PS2.A_InitRecipeParameters">
+      <LineId Id="78" Count="5" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="59" Count="3" />
+      <LineId Id="66" Count="1" />
+      <LineId Id="84" Count="1" />
+      <LineId Id="49" Count="0" />
+      <LineId Id="86" Count="1" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="74" Count="2" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="52" Count="5" />
+      <LineId Id="8" Count="3" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="37" Count="2" />
+      <LineId Id="33" Count="1" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="31" Count="0" />
     </LineIds>
     <LineIds Name="PS2.A_PowerOff_ChA">
       <LineId Id="14" Count="0" />
@@ -1452,6 +1974,58 @@ fb_SetRampingSpd_ChB(
       <LineId Id="29" Count="1" />
       <LineId Id="48" Count="0" />
       <LineId Id="122" Count="0" />
+      <LineId Id="2" Count="11" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="59" Count="11" />
+      <LineId Id="58" Count="0" />
+    </LineIds>
+    <LineIds Name="PS2.A_Reset_ChA">
+      <LineId Id="14" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="113" Count="2" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="90" Count="1" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="94" Count="1" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="29" Count="1" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="2" Count="11" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="59" Count="11" />
+      <LineId Id="58" Count="0" />
+    </LineIds>
+    <LineIds Name="PS2.A_Reset_ChB">
+      <LineId Id="14" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="113" Count="2" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="90" Count="1" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="94" Count="1" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="29" Count="1" />
+      <LineId Id="48" Count="0" />
       <LineId Id="2" Count="11" />
       <LineId Id="1" Count="0" />
       <LineId Id="59" Count="11" />
