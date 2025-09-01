@@ -447,7 +447,7 @@ Struct_M_lakeshore_168:ARRAY[1..52] OF Struct_M_lakeshore:=(Temperature:=-255.02
 
 (*ColiControl Function*)
 (*Use in HALF *)
-ColiControlFunction:BOOL:=TRUE;
+CoilControlFunction:BOOL:=FALSE;
 END_VAR
 
 ]]></Declaration>
