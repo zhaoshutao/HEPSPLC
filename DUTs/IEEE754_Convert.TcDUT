@@ -1,0 +1,12 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <DUT Name="IEEE754_Convert" Id="{bece0c34-7ef2-4118-9a63-b6d69ddc4f36}">
+    <Declaration><![CDATA[TYPE IEEE754_Convert :
+UNION
+	data_float:REAL;
+	data_word:ARRAY[0..1] OF WORD;
+END_UNION
+END_TYPE
+]]></Declaration>
+  </DUT>
+</TcPlcObject>

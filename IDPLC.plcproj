@@ -69,7 +69,13 @@
     <Compile Include="DUTs\DUT_SENSOR_DATAS_7.TcDUT">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="DUTs\IEEE754_Convert.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="DUTs\Struct_M_Compensation.TcDUT">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="DUTs\Struct_M_Gap2Coil.TcDUT">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="DUTs\Struct_M_lakeshore.TcDUT">
@@ -115,6 +121,15 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="POUs\2.SingleMotorMode\TaperMode\TaperMode.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\CoilControl\PS1.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\CoilControl\PS2.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\CoilControl\PS3.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="POUs\CommonFB\ExternFB\FB_LedShow.TcPOU">
@@ -173,6 +188,7 @@
     <Folder Include="POUs\CommonFB\MainFB" />
     <Folder Include="POUs\MainPRG" />
     <Folder Include="POUs\0.UserMode" />
+    <Folder Include="POUs\CoilControl" />
     <Folder Include="VISUs" />
   </ItemGroup>
   <ItemGroup>
@@ -237,6 +253,10 @@
     <PlaceholderReference Include="Tc2_MC2">
       <DefaultResolution>Tc2_MC2, * (Beckhoff Automation GmbH)</DefaultResolution>
       <Namespace>Tc2_MC2</Namespace>
+    </PlaceholderReference>
+    <PlaceholderReference Include="Tc2_ModbusSrv">
+      <DefaultResolution>Tc2_ModbusSrv, * (Beckhoff Automation GmbH)</DefaultResolution>
+      <Namespace>Tc2_ModbusSrv</Namespace>
     </PlaceholderReference>
     <PlaceholderReference Include="Tc2_NC">
       <DefaultResolution>Tc2_NC, * (Beckhoff Automation GmbH)</DefaultResolution>
