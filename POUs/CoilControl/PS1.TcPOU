@@ -1,0 +1,2015 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <POU Name="PS1" Id="{bf72f9e0-1891-4de3-80b7-8a25542daf93}" SpecialFunc="None">
+    <Declaration><![CDATA[PROGRAM PS1
+VAR
+	AutoOrManualMode:BOOL;
+	AutoMode:BOOL;
+	ManualMode:BOOL:=FALSE;
+	CoilError: BOOL;
+	CoilErrorId: INT;
+	CoilErrorDescription: STRING;
+	//
+	IPAddr:STRING:='192.168.205.191';
+	TCPPort:UINT:=502;
+	//获取电源版本信息
+	fb_GetPSVersion: FB_MBReadRegs;
+	PSVersion_MBAddr:WORD:=16#80;//寄存器地址
+	PSVersion_PSProtocal:ARRAY[0..1] OF WORD;//从PS获取到的WORD
+	PSVersion_PSProtocal_LowByte:ARRAY[0..1] OF WORD;//格式转换
+	PSVersion_PSProtocal_HighByte:ARRAY[0..1] OF WORD;//格式转换
+	PSVersion:ARRAY[0..1] OF WORD;//PLC系统
+	btn_GetPSVersion: BOOL;
+	GetPSVersion_RTRIG:R_TRIG;
+	GetPSVersion_TON:TON;
+	
+	//获取电源状态
+	fb_GetPSStatus: FB_MBReadRegs;
+	PSStatus_MBAddr:WORD:=16#90;//寄存器地址
+	PSStatus_PSProtocal:ARRAY[0..1] OF WORD;//从PS获取到的WORD
+	PSStatus_PSProtocal_LowByte:ARRAY[0..1] OF WORD;//格式转换
+	PSStatus_PSProtocal_HighByte:ARRAY[0..1] OF WORD;//格式转换
+	PSStatus:ARRAY[0..1] OF WORD;//PLC系统
+	btn_GetPSStatus: BOOL;
+	GetPSStatus_RTRIG:R_TRIG;
+	GetPSStatus_TON:TON;
+	PSStatus_List :ARRAY[0..31] OF BOOL;
+	st_Power_ChA: BOOL;
+	st_EStop_ChA:BOOL;
+	st_Fault_ChA:BOOL;
+	st_Power_ChB: BOOL;
+	st_EStop_ChB:BOOL;
+	st_Fault_ChB:BOOL;
+	st_LocalOrRemote:BOOL;
+	st_Reset:BOOL;
+	//
+	//ChA
+	//
+	//电源开-ChA
+	fb_PowerOn_ChA: FB_MBWriteRegs;
+	PowerOn_ChA_MBAddr:WORD:=16#56C;//寄存器地址
+	PowerOn_ChARegs:WORD:=16#200;//寄存器数据
+	btn_PowerOn_ChA:BOOL;
+	PowerOn_ChA_State:DINT;
+	PowerOn_ChA_TON:TON;
+	PowerOn_ChA_TON2:TON;
+	fb_PowerOn_ChA_ResetReg: FB_MBWriteRegs;
+	PowerOn_ChA_ResetRegs:WORD:=16#0;
+	btn_PowerOn_ChA_ResetRegs:BOOL;
+	//电源关_ChA
+	fb_PowerOff_ChA: FB_MBWriteRegs;	
+	PowerOff_ChA_MBAddr:WORD:=16#56C;//寄存器地址
+	PowerOff_ChARegs:WORD:=16#100;
+	btn_PowerOff_ChA:BOOL;
+	PowerOff_ChA_State:DINT;
+	PowerOff_ChA_TON:TON;
+	fb_PowerOff_ChA_ResetReg: FB_MBWriteRegs;
+	PowerOff_ChA_ResetRegs:WORD:=16#0;
+	btn_PowerOff_ChA_ResetRegs:BOOL;
+	//复位-ChA
+	fb_Reset_ChA: FB_MBWriteRegs;
+	Reset_ChA_MBAddr:WORD:=16#56C;//寄存器地址
+	Reset_ChARegs:WORD:=16#400;//寄存器数据
+	btn_Reset_ChA:BOOL;
+	Reset_ChA_State:DINT;
+	Reset_ChA_TON:TON;
+	fb_Reset_ChA_ResetReg: FB_MBWriteRegs;
+	Reset_ChA_ResetRegs:WORD:=16#0;
+	btn_Reset_ChA_ResetRegs:BOOL;
+	//设定电流_ChA
+	fb_SetCurrent_ChA: FB_MBWriteRegs;		
+	SetCurrent_ChA_MBAddr:WORD:=16#540;//寄存器地址
+	SetCurrent_ChA:REAL;//PLC输入float型
+	SetCurrent_ChARegs:ARRAY[0..1] OF WORD;//Unoin转换，float为WORD
+	SetCurrent_ChARegs_LowByte:ARRAY[0..1] OF WORD;//取低字节
+	SetCurrent_ChARegs_HighByte:ARRAY[0..1] OF WORD;//取高字节
+	SetCurrent_ChARegs_PSProtocal:ARRAY[0..1] OF WORD;//重新拼接成电源协议
+	btn_SetCurrent_ChA:BOOL;
+	SetCurrent_ChA_State:DINT;
+	SetCurrent_ChA_TON:TON;
+	ieee754_SetCurrent_ChA:IEEE754_Convert;
+	//设定Ramping速度_ChA
+	fb_SetRampingSpd_ChA: FB_MBWriteRegs;		
+	SetRampingSpd_ChA_MBAddr:WORD:=16#57C;//寄存器地址
+	SetRampingSpd_ChA:REAL;//PLC输入float型
+	SetRampingSpd_ChARegs:ARRAY[0..1] OF WORD;//Unoin转换，float为WORD
+	SetRampingSpd_ChARegs_LowByte:ARRAY[0..1] OF WORD;//取低字节
+	SetRampingSpd_ChARegs_HighByte:ARRAY[0..1] OF WORD;//取高字节
+	SetRampingSpd_ChARegs_PSProtocal:ARRAY[0..1] OF WORD;//重新拼接成电源协议
+	btn_SetRampingSpd_ChA:BOOL;
+	SetRampingSpd_ChA_State:DINT;
+	SetRampingSpd_ChA_TON:TON;
+	ieee754_SetRampingSpd_ChA:IEEE754_Convert;
+	//获取当前电流值_ChA
+	fb_GetCurrent_ChA: FB_MBReadRegs;		
+	GetCurrent_ChA_MBAddr:WORD:=16#94;//寄存器地址
+	GetCurrent_ChARegs_PSProtocal:ARRAY[0..1] OF WORD;//从PS获取到的WORD
+	GetCurrent_ChARegs_PSProtocal_LowByte:ARRAY[0..1] OF WORD;//格式转换
+	GetCurrent_ChARegs_PSProtocal_HighByte:ARRAY[0..1] OF WORD;//格式转换
+	GetCurrent_ChARegs:ARRAY[0..1] OF WORD;
+	btn_GetCurrent_ChA:BOOL;
+	GetCurrent_ChA_RTRIG:R_TRIG;
+	GetCurrent_ChA_TON:TON;
+	GetCurrent_ChA:REAL;
+	ieee754_GetCurrent_ChA:IEEE754_Convert;
+	//获取当前电压值_ChA
+	fb_GetVoltage_ChA: FB_MBReadRegs;		
+	GetVoltage_ChA_MBAddr:WORD:=16#84;//寄存器地址
+	GetVoltage_ChARegs_PSProtocal:ARRAY[0..1] OF WORD;//从PS获取到的WORD
+	GetVoltage_ChARegs_PSProtocal_LowByte:ARRAY[0..1] OF WORD;//格式转换
+	GetVoltage_ChARegs_PSProtocal_HighByte:ARRAY[0..1] OF WORD;//格式转换
+	GetVoltage_ChARegs:ARRAY[0..1] OF WORD;
+	btn_GetVoltage_ChA:BOOL;
+	GetVoltage_ChA_RTRIG:R_TRIG;
+	GetVoltage_ChA_TON:TON;
+	GetVoltage_ChA:REAL;
+	ieee754_GetVoltage_ChA:IEEE754_Convert;
+	//获取当前电流ramping速度_CHA
+	fb_GetRampingSpd_ChA: FB_MBReadRegs;		
+	GetRampingSpd_ChA_MBAddr:WORD:=16#A8;//寄存器地址
+	GetRampingSpd_ChARegs_PSProtocal:ARRAY[0..1] OF WORD;//从PS获取到的WORD
+	GetRampingSpd_ChARegs_PSProtocal_LowByte:ARRAY[0..1] OF WORD;//格式转换
+	GetRampingSpd_ChARegs_PSProtocal_HighByte:ARRAY[0..1] OF WORD;//格式转换
+	GetRampingSpd_ChARegs:ARRAY[0..1] OF WORD;
+	btn_GetRampingSpd_ChA:BOOL;
+	GetRampingSpd_ChA_RTRIG:R_TRIG;
+	GetRampingSpd_ChA_TON:TON;
+	GetRampingSpd_ChA:REAL;
+	ieee754_GetRampingSpd_ChA:IEEE754_Convert;
+	//获取设定电流值_ChA
+	fb_GetSetCurrent_ChA: FB_MBReadRegs;			
+	GetSetCurrent_ChA_MBAddr:WORD:=16#140;//寄存器地址
+	GetSetCurrent_ChARegs_PSProtocal:ARRAY[0..1] OF WORD;//从PS获取到的WORD
+	GetSetCurrent_ChARegs_PSProtocal_LowByte:ARRAY[0..1] OF WORD;//格式转换
+	GetSetCurrent_ChARegs_PSProtocal_HighByte:ARRAY[0..1] OF WORD;//格式转换
+	GetSetCurrent_ChARegs:ARRAY[0..1] OF WORD;
+	btn_GetSetCurrent_ChA:BOOL;
+	GetSetCurrent_ChA_RTRIG:R_TRIG;
+	GetSetCurrent_ChA_TON:TON;
+	GetSetCurrent_ChA:REAL;
+	ieee754_GetSetCurrent_ChA:IEEE754_Convert;
+	//
+	//ChB
+	//	
+	//电源开-ChB
+	fb_PowerOn_ChB: FB_MBWriteRegs;
+	PowerOn_ChB_MBAddr:WORD:=16#56C;//寄存器地址
+	PowerOn_ChBRegs:WORD:=16#2;//寄存器数据
+	btn_PowerOn_ChB:BOOL;
+	PowerOn_ChB_State:DINT;
+	PowerOn_ChB_TON:TON;
+	PowerOn_ChB_TON2:TON;
+	fb_PowerOn_ChB_ResetReg: FB_MBWriteRegs;
+	PowerOn_ChB_ResetRegs:WORD:=16#0;
+	btn_PowerOn_ChB_ResetRegs:BOOL;
+	//电源关_ChB
+	fb_PowerOff_ChB: FB_MBWriteRegs;	
+	PowerOff_ChB_MBAddr:WORD:=16#56C;//寄存器地址
+	PowerOff_ChBRegs:WORD:=16#1;
+	btn_PowerOff_ChB:BOOL;
+	PowerOff_ChB_State:DINT;
+	PowerOff_ChB_TON:TON;
+	fb_PowerOff_ChB_ResetReg: FB_MBWriteRegs;
+	PowerOff_ChB_ResetRegs:WORD:=16#0;
+	btn_PowerOff_ChB_ResetRegs:BOOL;
+	//复位-ChB
+	fb_Reset_ChB: FB_MBWriteRegs;
+	Reset_ChB_MBAddr:WORD:=16#56C;//寄存器地址
+	Reset_ChBRegs:WORD:=16#4;//寄存器数据
+	btn_Reset_ChB:BOOL;
+	Reset_ChB_State:DINT;
+	Reset_ChB_TON:TON;
+	fb_Reset_ChB_ResetReg: FB_MBWriteRegs;
+	Reset_ChB_ResetRegs:WORD:=16#0;
+	btn_Reset_ChB_ResetRegs:BOOL;
+	//设定电流_ChB
+	fb_SetCurrent_ChB: FB_MBWriteRegs;		
+	SetCurrent_ChB_MBAddr:WORD:=16#570;//寄存器地址
+	SetCurrent_ChB:REAL;//PLC输入float型
+	SetCurrent_ChBRegs:ARRAY[0..1] OF WORD;//Unoin转换，float为WORD
+	SetCurrent_ChBRegs_LowByte:ARRAY[0..1] OF WORD;//取低字节
+	SetCurrent_ChBRegs_HighByte:ARRAY[0..1] OF WORD;//取高字节
+	SetCurrent_ChBRegs_PSProtocal:ARRAY[0..1] OF WORD;//重新拼接成电源协议
+	btn_SetCurrent_ChB:BOOL;
+	SetCurrent_ChB_State:DINT;
+	SetCurrent_ChB_TON:TON;
+	ieee754_SetCurrent_ChB:IEEE754_Convert;
+	//设定Ramping速度_ChB
+	fb_SetRampingSpd_ChB: FB_MBWriteRegs;		
+	SetRampingSpd_ChB_MBAddr:WORD:=16#578;//寄存器地址
+	SetRampingSpd_ChB:REAL;//PLC输入float型
+	SetRampingSpd_ChBRegs:ARRAY[0..1] OF WORD;//Unoin转换，float为WORD
+	SetRampingSpd_ChBRegs_LowByte:ARRAY[0..1] OF WORD;//取低字节
+	SetRampingSpd_ChBRegs_HighByte:ARRAY[0..1] OF WORD;//取高字节
+	SetRampingSpd_ChBRegs_PSProtocal:ARRAY[0..1] OF WORD;//重新拼接成电源协议
+	btn_SetRampingSpd_ChB:BOOL;
+	SetRampingSpd_ChB_State:DINT;
+	SetRampingSpd_ChB_TON:TON;
+	ieee754_SetRampingSpd_ChB:IEEE754_Convert;
+	//获取当前电流值_ChB
+	fb_GetCurrent_ChB: FB_MBReadRegs;		
+	GetCurrent_ChB_MBAddr:WORD:=16#9C;//寄存器地址
+	GetCurrent_ChBRegs_PSProtocal:ARRAY[0..1] OF WORD;//从PS获取到的WORD
+	GetCurrent_ChBRegs_PSProtocal_LowByte:ARRAY[0..1] OF WORD;//格式转换
+	GetCurrent_ChBRegs_PSProtocal_HighByte:ARRAY[0..1] OF WORD;//格式转换
+	GetCurrent_ChBRegs:ARRAY[0..1] OF WORD;
+	btn_GetCurrent_ChB:BOOL;
+	GetCurrent_ChB_RTRIG:R_TRIG;
+	GetCurrent_ChB_TON:TON;
+	GetCurrent_ChB:REAL;
+	ieee754_GetCurrent_ChB:IEEE754_Convert;
+	//获取当前电压值_ChB
+	fb_GetVoltage_ChB: FB_MBReadRegs;		
+	GetVoltage_ChB_MBAddr:WORD:=16#A0;//寄存器地址
+	GetVoltage_ChBRegs_PSProtocal:ARRAY[0..1] OF WORD;//从PS获取到的WORD
+	GetVoltage_ChBRegs_PSProtocal_LowByte:ARRAY[0..1] OF WORD;//格式转换
+	GetVoltage_ChBRegs_PSProtocal_HighByte:ARRAY[0..1] OF WORD;//格式转换
+	GetVoltage_ChBRegs:ARRAY[0..1] OF WORD;
+	btn_GetVoltage_ChB:BOOL;
+	GetVoltage_ChB_RTRIG:R_TRIG;
+	GetVoltage_ChB_TON:TON;
+	GetVoltage_ChB:REAL;
+	ieee754_GetVoltage_ChB:IEEE754_Convert;
+	//获取当前电流ramping速度_CHB
+	fb_GetRampingSpd_ChB: FB_MBReadRegs;		
+	GetRampingSpd_ChB_MBAddr:WORD:=16#B4;//寄存器地址
+	GetRampingSpd_ChBRegs_PSProtocal:ARRAY[0..1] OF WORD;//从PS获取到的WORD
+	GetRampingSpd_ChBRegs_PSProtocal_LowByte:ARRAY[0..1] OF WORD;//格式转换
+	GetRampingSpd_ChBRegs_PSProtocal_HighByte:ARRAY[0..1] OF WORD;//格式转换
+	GetRampingSpd_ChBRegs:ARRAY[0..1] OF WORD;
+	btn_GetRampingSpd_ChB:BOOL;
+	GetRampingSpd_ChB_RTRIG:R_TRIG;
+	GetRampingSpd_ChB_TON:TON;
+	GetRampingSpd_ChB:REAL;
+	ieee754_GetRampingSpd_ChB:IEEE754_Convert;
+	//获取设定电流值_ChB
+	fb_GetSetCurrent_ChB: FB_MBReadRegs;			
+	GetSetCurrent_ChB_MBAddr:WORD:=16#170;//寄存器地址
+	GetSetCurrent_ChBRegs_PSProtocal:ARRAY[0..1] OF WORD;//从PS获取到的WORD
+	GetSetCurrent_ChBRegs_PSProtocal_LowByte:ARRAY[0..1] OF WORD;//格式转换
+	GetSetCurrent_ChBRegs_PSProtocal_HighByte:ARRAY[0..1] OF WORD;//格式转换
+	GetSetCurrent_ChBRegs:ARRAY[0..1] OF WORD;
+	btn_GetSetCurrent_ChB:BOOL;
+	GetSetCurrent_ChB_RTRIG:R_TRIG;
+	GetSetCurrent_ChB_TON:TON;
+	GetSetCurrent_ChB:REAL;
+	ieee754_GetSetCurrent_ChB:IEEE754_Convert;
+	//
+	//AutoMode(AM)
+	//
+	AM_ChA_State:DINT;
+	M_Compensation_Gap2Coil_ChA:ARRAY[1..31] OF Struct_M_Gap2Coil
+	:=[	(Gap:=0,	CoilCurrent:=0.1),
+		(Gap:=14,	CoilCurrent:=0.2),
+		(Gap:=15,	CoilCurrent:=0.4),
+		(Gap:=16,	CoilCurrent:=0.6),
+		(Gap:=17,	CoilCurrent:=0.8),
+		(Gap:=18,	CoilCurrent:=0.9),
+		(Gap:=19,	CoilCurrent:=1.0),
+		(Gap:=20,	CoilCurrent:=1.1),
+		(Gap:=21,	CoilCurrent:=1.2),
+		(Gap:=22,	CoilCurrent:=1.3),
+		(Gap:=23,	CoilCurrent:=1.4),
+		(Gap:=24,	CoilCurrent:=1.5),
+		(Gap:=25,	CoilCurrent:=1.6),
+		(Gap:=26,	CoilCurrent:=1.7),
+		(Gap:=27,	CoilCurrent:=1.8),
+		(Gap:=28,	CoilCurrent:=2.0),
+		(Gap:=29,	CoilCurrent:=2.1),
+		(Gap:=30,	CoilCurrent:=2.2),
+		(Gap:=31,	CoilCurrent:=2.3),
+		(Gap:=32,	CoilCurrent:=2.4),
+		(Gap:=33,	CoilCurrent:=2.5),
+		(Gap:=34,	CoilCurrent:=2.5),
+		(Gap:=35,	CoilCurrent:=2.5),
+		(Gap:=36,	CoilCurrent:=2.5),
+		(Gap:=37,	CoilCurrent:=2.5),
+		(Gap:=38,	CoilCurrent:=2.5),
+		(Gap:=39,	CoilCurrent:=2.5),
+		(Gap:=40,	CoilCurrent:=2.5),
+		(Gap:=41,	CoilCurrent:=2.5),
+		(Gap:=42,	CoilCurrent:=2.5),
+		(Gap:=220,	CoilCurrent:=2.5)];
+	i_ChA: INT;
+	TargetCoilCurrent_ChA:REAL;
+	AutoMode_ChA_TON:TON;
+	//ChB
+	AM_ChB_State:DINT;
+	M_Compensation_Gap2Coil_ChB:ARRAY[1..31] OF Struct_M_Gap2Coil
+	:=[	(Gap:=0,	CoilCurrent:=0.1),
+		(Gap:=14,	CoilCurrent:=0.2),
+		(Gap:=15,	CoilCurrent:=0.4),
+		(Gap:=16,	CoilCurrent:=0.6),
+		(Gap:=17,	CoilCurrent:=0.8),
+		(Gap:=18,	CoilCurrent:=0.9),
+		(Gap:=19,	CoilCurrent:=1.0),
+		(Gap:=20,	CoilCurrent:=1.1),
+		(Gap:=21,	CoilCurrent:=1.2),
+		(Gap:=22,	CoilCurrent:=1.3),
+		(Gap:=23,	CoilCurrent:=1.4),
+		(Gap:=24,	CoilCurrent:=1.5),
+		(Gap:=25,	CoilCurrent:=1.6),
+		(Gap:=26,	CoilCurrent:=1.7),
+		(Gap:=27,	CoilCurrent:=1.8),
+		(Gap:=28,	CoilCurrent:=2.0),
+		(Gap:=29,	CoilCurrent:=2.1),
+		(Gap:=30,	CoilCurrent:=2.2),
+		(Gap:=31,	CoilCurrent:=2.3),
+		(Gap:=32,	CoilCurrent:=2.4),
+		(Gap:=33,	CoilCurrent:=2.5),
+		(Gap:=34,	CoilCurrent:=2.5),
+		(Gap:=35,	CoilCurrent:=2.5),
+		(Gap:=36,	CoilCurrent:=2.5),
+		(Gap:=37,	CoilCurrent:=2.5),
+		(Gap:=38,	CoilCurrent:=2.5),
+		(Gap:=39,	CoilCurrent:=2.5),
+		(Gap:=40,	CoilCurrent:=2.5),
+		(Gap:=41,	CoilCurrent:=2.5),
+		(Gap:=42,	CoilCurrent:=2.5),
+		(Gap:=220,	CoilCurrent:=2.5)];
+	i_ChB: INT;
+	TargetCoilCurrent_ChB:REAL;
+	AutoMode_ChB_TON:TON;
+END_VAR
+]]></Declaration>
+    <Implementation>
+      <ST><![CDATA[//自动or手动模式选择
+IF AutoOrManualMode THEN
+	AutoMode:=TRUE;
+	ManualMode:=FALSE;
+ELSE
+	AutoMode:=FALSE;
+	ManualMode:=TRUE;
+END_IF
+//
+//Get状态下，部分手动还是自动，一直进行
+//
+//ChA
+A_GetPSVersion();
+A_GetPSStatus();
+A_GetCurrent_ChA();
+A_GetVoltage_ChA();
+A_GetSetCurrent_ChA();
+A_GetRampSpd_ChA();	
+A_PowerOn_ChA();
+A_PowerOff_ChA();
+//ChB
+A_GetCurrent_ChB();
+A_GetVoltage_ChB();
+A_GetSetCurrent_ChB();
+A_GetRampSpd_ChB();
+A_PowerOn_ChB();
+A_PowerOff_ChB();
+
+//ChA
+A_SetCurrent_ChA();
+A_SetRampingSpd_ChA();
+//ChB
+A_SetCurrent_ChB();
+A_SetRampingSpd_ChB();
+//
+//set，分自动模式和手动模式
+//
+IF  AutoOrManualMode THEN
+	A_AutoMode_ChA();
+	//A_AutoMode_ChB();
+END_IF
+
+]]></ST>
+    </Implementation>
+    <Folder Name="AutoMode" Id="{ae87d75d-2510-4a97-9ee2-bd8e723514c4}" />
+    <Folder Name="Get" Id="{0658d0ed-4d5c-4641-9a58-255fb6cad93b}" />
+    <Folder Name="Set" Id="{801de8f1-0ad0-4bf7-8b4c-436927fa97fd}" />
+    <Action Name="A_AutoMode_ChA" Id="{babb0978-ca02-4440-aab8-aa1b3dbb41c9}" FolderPath="AutoMode\">
+      <Implementation>
+        <ST><![CDATA[//
+//0、/法，根据当前gap计算对应的电流。如果gap=0，不计算，保持当前状态，等到不为0时，继续计算
+//1、检查电源状态，如果没有就打开
+//2、电流设置为计算值
+//3、回采当前电流值，当ABS(当前电流值-设定电流值)<阈值，该回合结束，返回第二步。超时，报错
+//4、END
+//
+//
+//如果当前磁间隙低于最小阈值或者大于最大阈值，则目标电流等于当前电流，也即不设置
+IF UserMode.UserGapPositionDisplay<min_UserLEProtectionGapPosition OR UserMode.UserGapPositionDisplay>max_UserLEProtectionGapPosition THEN
+	TargetCoilCurrent_ChA:=GetCurrent_ChA;
+ELSE
+	//插补法计算gap对应电流值
+	FOR	i_ChA:= 1 TO 30 DO
+		IF UserMode.UserGapPositionDisplay <M_Compensation_Gap2Coil_ChA[i_ChA+1].Gap AND UserMode.UserGapPositionDisplay>=M_Compensation_Gap2Coil_ChA[i_ChA].Gap THEN
+				TargetCoilCurrent_ChA:=(((UserMode.UserGapPositionDisplay-M_Compensation_Gap2Coil_ChA[i_ChA].Gap)*(M_Compensation_Gap2Coil_ChA[i_ChA+1].CoilCurrent-M_Compensation_Gap2Coil_ChA[i_ChA].CoilCurrent))
+						/(M_Compensation_Gap2Coil_ChA[i_ChA+1].Gap-M_Compensation_Gap2Coil_ChA[i_ChA].Gap))+M_Compensation_Gap2Coil_ChA[i_ChA].CoilCurrent;
+		END_IF
+	END_FOR
+END_IF
+//
+CASE AM_ChA_State OF
+	0:
+		//如果电源未上电，上电,上电成功，转下一步
+		IF NOT st_Power_ChA THEN
+			btn_PowerOn_ChA:=TRUE;
+		ELSE
+			AM_ChA_State:=1;
+		END_IF
+	1:
+		btn_PowerOn_ChA:=FALSE;
+		//目标电流已实时计算得出，开始设置电流
+		SetCurrent_ChA:=TargetCoilCurrent_ChA;
+		btn_SetCurrent_ChA:=TRUE;
+		AutoMode_ChA_TON.IN:=TRUE;
+		IF ABS(SetCurrent_ChA-GetCurrent_ChA)<0.001 THEN
+			AM_ChA_State:=88;
+		END_IF
+		IF AutoMode_ChA_TON.Q THEN
+			AM_ChA_State:=99;
+		END_IF
+	88:
+		btn_SetCurrent_ChA:=FALSE;
+		AutoMode_ChA_TON.IN:=FALSE;
+		AM_ChA_State:=0;
+	99:
+		btn_SetCurrent_ChA:=FALSE;
+		AutoMode_ChA_TON.IN:=FALSE;
+		AM_ChA_State:=0;
+
+END_CASE
+AutoMode_ChA_TON(PT:=T#0.1S);]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_AutoMode_ChB" Id="{ea7bd52f-567a-4763-8fe6-fff4c6ae8df3}" FolderPath="AutoMode\">
+      <Implementation>
+        <ST><![CDATA[//
+//0、/法，根据当前gap计算对应的电流。如果gap=0，不计算，保持当前状态，等到不为0时，继续计算
+//1、检查电源状态，如果没有就打开
+//2、电流设置为计算值
+//3、回采当前电流值，当ABS(当前电流值-设定电流值)<阈值，该回合结束，返回第二步。超时，报错
+//4、END
+//
+//
+//如果当前磁间隙低于最小阈值或者大于最大阈值，则目标电流等于当前电流，也即不设置
+IF UserMode.UserGapPositionDisplay<min_UserLEProtectionGapPosition OR UserMode.UserGapPositionDisplay>max_UserLEProtectionGapPosition THEN
+	TargetCoilCurrent_ChB:=GetCurrent_ChB;
+ELSE
+	//插补法计算gap对应电流值
+	FOR	i_ChB:= 1 TO 30 DO
+		IF UserMode.UserGapPositionDisplay <M_Compensation_Gap2Coil_ChB[i_ChB+1].Gap AND UserMode.UserGapPositionDisplay>=M_Compensation_Gap2Coil_ChB[i_ChB].Gap THEN
+				TargetCoilCurrent_ChB:=(((UserMode.UserGapPositionDisplay-M_Compensation_Gap2Coil_ChB[i_ChB].Gap)*(M_Compensation_Gap2Coil_ChB[i_ChB+1].CoilCurrent-M_Compensation_Gap2Coil_ChB[i_ChB].CoilCurrent))
+						/(M_Compensation_Gap2Coil_ChB[i_ChB+1].Gap-M_Compensation_Gap2Coil_ChB[i_ChB].Gap))+M_Compensation_Gap2Coil_ChB[i_ChB].CoilCurrent;
+		END_IF
+	END_FOR
+END_IF
+//
+CASE AM_ChB_State OF
+	0:
+		//如果电源未上电，上电,上电成功，转下一步
+		IF NOT st_Power_ChB THEN
+			btn_PowerOn_ChB:=TRUE;
+		ELSE
+			AM_ChB_State:=1;
+		END_IF
+	1:
+		btn_PowerOn_ChB:=FALSE;
+		//目标电流已实时计算得出，开始设置电流
+		SetCurrent_ChB:=TargetCoilCurrent_ChB;
+		btn_SetCurrent_ChB:=TRUE;
+		AutoMode_ChB_TON.IN:=TRUE;
+		IF ABS(SetCurrent_ChB-GetCurrent_ChB)<0.001 THEN
+			AM_ChB_State:=88;
+		END_IF
+		IF AutoMode_ChB_TON.Q THEN
+			AM_ChB_State:=99;
+		END_IF
+	88:
+		btn_SetCurrent_ChB:=FALSE;
+		AutoMode_ChB_TON.IN:=FALSE;
+		AM_ChB_State:=0;
+	99:
+		btn_SetCurrent_ChB:=FALSE;
+		AutoMode_ChB_TON.IN:=FALSE;
+		AM_ChB_State:=0;
+
+END_CASE
+AutoMode_ChB_TON(PT:=T#0.1S);]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_GetCurrent_ChA" Id="{1a94db46-22fa-4058-9a6b-348b652d2748}" FolderPath="Get\">
+      <Implementation>
+        <ST><![CDATA[//上升沿触发
+GetCurrent_ChA_RTRIG(CLK:=btn_GetCurrent_ChA);
+IF GetCurrent_ChA_RTRIG.Q THEN
+	btn_GetCurrent_ChA:=FALSE;
+END_IF
+//每隔固定时间获取一次
+GetCurrent_ChA_TON(PT:=T#0.02S);
+GetCurrent_ChA_TON.IN:=TRUE;
+IF GetCurrent_ChA_TON.Q THEN
+	btn_GetCurrent_ChA:=TRUE;
+	GetCurrent_ChA_TON.IN:=FALSE;
+END_IF
+
+//字节调换，转为电源规定的格式
+GetCurrent_ChARegs_PSProtocal_LowByte[0]:=SHL((GetCurrent_ChARegs_PSProtocal[0] AND 16#00FF),8);
+GetCurrent_ChARegs_PSProtocal_HighByte[0]:=SHR((GetCurrent_ChARegs_PSProtocal[0] AND 16#FF00),8);
+GetCurrent_ChARegs[0]:=GetCurrent_ChARegs_PSProtocal_LowByte[0] OR GetCurrent_ChARegs_PSProtocal_HighByte[0];
+GetCurrent_ChARegs_PSProtocal_LowByte[1]:=SHL((GetCurrent_ChARegs_PSProtocal[1] AND 16#00FF),8);
+GetCurrent_ChARegs_PSProtocal_HighByte[1]:=SHR((GetCurrent_ChARegs_PSProtocal[1] AND 16#FF00),8);
+GetCurrent_ChARegs[1]:=GetCurrent_ChARegs_PSProtocal_LowByte[1] OR GetCurrent_ChARegs_PSProtocal_HighByte[1];
+//IEEE转换，WORD 到 REAL
+ieee754_GetCurrent_ChA.data_word[0]:=GetCurrent_ChARegs[0];
+ieee754_GetCurrent_ChA.data_word[1]:=GetCurrent_ChARegs[1];
+GetCurrent_ChA:=DINT_TO_REAL(REAL_TO_DINT(ieee754_GetCurrent_ChA.data_float*10000))/10000;
+
+////功能块
+fb_GetCurrent_ChA(
+	sIPAddr:=IPAddr , 		//Server IP地址
+	nTCPPort:=TCPPort, 						//Modbus-Tcp端口号
+	nUnitID:=1 , 						//Modbus-Tcp从站号
+	nQuantity:=2 , 						//读取保持寄存器个数
+	nMBAddr:=GetCurrent_ChA_MBAddr , 					//读取保持寄存器Modbus起始地址
+	cbLength:= SIZEOF(GetCurrent_ChARegs_PSProtocal), 		//存放保持寄存器变量的个数
+	pDestAddr:= ADR(GetCurrent_ChARegs_PSProtocal), 		//存放保持寄存器变量指针起始地址
+	bExecute:= btn_GetCurrent_ChA, 		//执行
+	tTimeout:= T#1S, 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> , 
+	cbRead=> );]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_GetCurrent_ChB" Id="{5b527001-77bc-419e-9f72-4ca31d48c06a}" FolderPath="Get\">
+      <Implementation>
+        <ST><![CDATA[//上升沿触发
+GetCurrent_ChB_RTRIG(CLK:=btn_GetCurrent_ChB);
+IF GetCurrent_ChB_RTRIG.Q THEN
+	btn_GetCurrent_ChB:=FALSE;
+END_IF
+//每隔固定时间获取一次
+GetCurrent_ChB_TON(PT:=T#0.2S);
+GetCurrent_ChB_TON.IN:=TRUE;
+IF GetCurrent_ChB_TON.Q THEN
+	btn_GetCurrent_ChB:=TRUE;
+	GetCurrent_ChB_TON.IN:=FALSE;
+END_IF
+
+//字节调换，转为电源规定的格式
+GetCurrent_ChBRegs_PSProtocal_LowByte[0]:=SHL((GetCurrent_ChBRegs_PSProtocal[0] AND 16#00FF),8);
+GetCurrent_ChBRegs_PSProtocal_HighByte[0]:=SHR((GetCurrent_ChBRegs_PSProtocal[0] AND 16#FF00),8);
+GetCurrent_ChBRegs[0]:=GetCurrent_ChBRegs_PSProtocal_LowByte[0] OR GetCurrent_ChBRegs_PSProtocal_HighByte[0];
+GetCurrent_ChBRegs_PSProtocal_LowByte[1]:=SHL((GetCurrent_ChBRegs_PSProtocal[1] AND 16#00FF),8);
+GetCurrent_ChBRegs_PSProtocal_HighByte[1]:=SHR((GetCurrent_ChBRegs_PSProtocal[1] AND 16#FF00),8);
+GetCurrent_ChBRegs[1]:=GetCurrent_ChBRegs_PSProtocal_LowByte[1] OR GetCurrent_ChBRegs_PSProtocal_HighByte[1];
+//IEEE转换，WORD 到 REAL
+ieee754_GetCurrent_ChB.data_word[0]:=GetCurrent_ChBRegs[0];
+ieee754_GetCurrent_ChB.data_word[1]:=GetCurrent_ChBRegs[1];
+GetCurrent_ChB:=DINT_TO_REAL(REAL_TO_DINT(ieee754_GetCurrent_ChB.data_float*10000))/10000;
+
+////功能块
+fb_GetCurrent_ChB(
+	sIPAddr:=IPAddr , 		//Server IP地址
+	nTCPPort:=TCPPort, 						//Modbus-Tcp端口号
+	nUnitID:=1 , 						//Modbus-Tcp从站号
+	nQuantity:=2 , 						//读取保持寄存器个数
+	nMBAddr:=GetCurrent_ChB_MBAddr , 					//读取保持寄存器Modbus起始地址
+	cbLength:= SIZEOF(GetCurrent_ChBRegs_PSProtocal), 		//存放保持寄存器变量的个数
+	pDestAddr:= ADR(GetCurrent_ChBRegs_PSProtocal), 		//存放保持寄存器变量指针起始地址
+	bExecute:= btn_GetCurrent_ChB, 		//执行
+	tTimeout:= T#1S, 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> , 
+	cbRead=> );]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_GetPSStatus" Id="{0c09ba4a-649a-4c3c-9719-6271fa197c24}" FolderPath="Get\">
+      <Implementation>
+        <ST><![CDATA[//获取版本信息
+GetPSStatus_RTRIG(CLK:=btn_GetPSStatus);
+IF GetPSStatus_RTRIG.Q THEN
+	btn_GetPSStatus:=FALSE;
+END_IF
+//每隔1s获取一次电源状态
+GetPSStatus_TON(PT:=T#0.2S);
+GetPSStatus_TON.IN:=TRUE;
+IF GetPSStatus_TON.Q THEN
+	btn_GetPSStatus:=TRUE;
+	GetPSStatus_TON.IN:=FALSE;
+END_IF
+//字节调换，转为电源规定的格式
+PSStatus_PSProtocal_LowByte[0]:=SHL((PSStatus_PSProtocal[0] AND 16#00FF),8);
+PSStatus_PSProtocal_HighByte[0]:=SHR((PSStatus_PSProtocal[0] AND 16#FF00),8);
+PSStatus[0]:=PSStatus_PSProtocal_LowByte[0] OR PSStatus_PSProtocal_HighByte[0];
+PSStatus_PSProtocal_LowByte[1]:=SHL((PSStatus_PSProtocal[1] AND 16#00FF),8);
+PSStatus_PSProtocal_HighByte[1]:=SHR((PSStatus_PSProtocal[1] AND 16#FF00),8);
+PSStatus[1]:=PSStatus_PSProtocal_LowByte[1] OR PSStatus_PSProtocal_HighByte[1];
+//
+PSStatus_List[0]:=(PSStatus[0] AND 16#0001) <> 0;//A供电
+PSStatus_List[1]:=(PSStatus[0] AND 16#0002) <> 0;
+PSStatus_List[2]:=(PSStatus[0] AND 16#0004) <> 0;
+PSStatus_List[3]:=(PSStatus[0] AND 16#0008) <> 0;//A急停
+PSStatus_List[4]:=(PSStatus[0] AND 16#0010) <> 0;
+PSStatus_List[5]:=(PSStatus[0] AND 16#0020) <> 0;
+PSStatus_List[6]:=(PSStatus[0] AND 16#0040) <> 0;//B供电
+PSStatus_List[7]:=(PSStatus[0] AND 16#0080) <> 0;
+PSStatus_List[8]:=(PSStatus[0] AND 16#0100) <> 0;
+PSStatus_List[9]:=(PSStatus[0] AND 16#0200) <> 0;//B急停
+PSStatus_List[10]:=(PSStatus[0] AND 16#0400) <> 0;
+PSStatus_List[11]:=(PSStatus[0] AND 16#0800) <> 0;
+PSStatus_List[12]:=(PSStatus[0] AND 16#1000) <> 0;//A故障
+PSStatus_List[13]:=(PSStatus[0] AND 16#2000) <> 0;//B故障
+PSStatus_List[14]:=(PSStatus[0] AND 16#4000) <> 0;//复位
+PSStatus_List[15]:=(PSStatus[0] AND 16#8000) <> 0;//本地Or远控
+PSStatus_List[16]:=(PSStatus[1] AND 16#0001) <> 0;
+PSStatus_List[17]:=(PSStatus[1] AND 16#0002) <> 0;
+PSStatus_List[18]:=(PSStatus[1] AND 16#0004) <> 0;
+PSStatus_List[19]:=(PSStatus[1] AND 16#0008) <> 0;
+PSStatus_List[20]:=(PSStatus[1] AND 16#0010) <> 0;
+PSStatus_List[21]:=(PSStatus[1] AND 16#0020) <> 0;
+PSStatus_List[22]:=(PSStatus[1] AND 16#0040) <> 0;
+PSStatus_List[23]:=(PSStatus[1] AND 16#0080) <> 0;
+PSStatus_List[24]:=(PSStatus[1] AND 16#0100) <> 0;
+PSStatus_List[25]:=(PSStatus[1] AND 16#0200) <> 0;
+PSStatus_List[26]:=(PSStatus[1] AND 16#0400) <> 0;
+PSStatus_List[27]:=(PSStatus[1] AND 16#0800) <> 0;
+PSStatus_List[28]:=(PSStatus[1] AND 16#1000) <> 0;
+PSStatus_List[29]:=(PSStatus[1] AND 16#2000) <> 0;
+PSStatus_List[30]:=(PSStatus[1] AND 16#4000) <> 0;
+PSStatus_List[31]:=(PSStatus[1] AND 16#8000) <> 0;
+
+st_Power_ChA:=PSStatus_List[0];
+st_EStop_ChA:=PSStatus_List[3];
+st_Fault_ChA:=PSStatus_List[12];
+st_Power_ChB:=PSStatus_List[6];
+st_EStop_ChB:=PSStatus_List[9];
+st_Fault_ChB:=PSStatus_List[13];
+st_Reset:=PSStatus_List[14];
+st_LocalOrRemote:=PSStatus_List[15];
+////功能块
+fb_GetPSStatus(
+	sIPAddr:=IPAddr , 		//Server IP地址
+	nTCPPort:=TCPPort, 						//Modbus-Tcp端口号
+	nUnitID:=1 , 						//Modbus-Tcp从站号
+	nQuantity:=2 , 						//读取保持寄存器个数
+	nMBAddr:=PSStatus_MBAddr , 					//读取保持寄存器Modbus起始地址
+	cbLength:= SIZEOF(PSStatus_PSProtocal), 		//存放保持寄存器变量的个数
+	pDestAddr:= ADR(PSStatus_PSProtocal), 		//存放保持寄存器变量指针起始地址
+	bExecute:= btn_GetPSStatus, 		//执行
+	tTimeout:= T#1S, 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> , 
+	cbRead=> );
+	]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_GetPSVersion" Id="{175483e1-344a-46d5-9991-9597c3198b1f}" FolderPath="Get\">
+      <Implementation>
+        <ST><![CDATA[//获取版本信息
+GetPSVersion_RTRIG(CLK:=btn_GetPSVersion);
+IF GetPSVersion_RTRIG.Q THEN
+	btn_GetPSVersion:=FALSE;
+END_IF
+//每隔1s获取一次版本信息
+GetPSVersion_TON(PT:=T#1S);
+GetPSVersion_TON.IN:=TRUE;
+IF GetPSVersion_TON.Q THEN
+	btn_GetPSVersion:=TRUE;
+	GetPSVersion_TON.IN:=FALSE;
+END_IF
+//字节调换，转为电源规定的格式
+PSVersion_PSProtocal_LowByte[0]:=SHL((PSVersion_PSProtocal[0] AND 16#00FF),8);
+PSVersion_PSProtocal_HighByte[0]:=SHR((PSVersion_PSProtocal[0] AND 16#FF00),8);
+PSVersion[0]:=PSVersion_PSProtocal_LowByte[0] OR PSVersion_PSProtocal_HighByte[0];
+PSVersion_PSProtocal_LowByte[1]:=SHL((PSVersion_PSProtocal[1] AND 16#00FF),8);
+PSVersion_PSProtocal_HighByte[1]:=SHR((PSVersion_PSProtocal[1] AND 16#FF00),8);
+PSVersion[1]:=PSVersion_PSProtocal_LowByte[1] OR PSVersion_PSProtocal_HighByte[1];
+////功能块
+fb_GetPSVersion(
+	sIPAddr:=IPAddr , 		//Server IP地址
+	nTCPPort:=TCPPort, 						//Modbus-Tcp端口号
+	nUnitID:=1 , 						//Modbus-Tcp从站号
+	nQuantity:=2 , 						//读取保持寄存器个数
+	nMBAddr:=PSVersion_MBAddr , 					//读取保持寄存器Modbus起始地址
+	cbLength:= SIZEOF(PSVersion_PSProtocal), 		//存放保持寄存器变量的个数
+	pDestAddr:= ADR(PSVersion_PSProtocal), 		//存放保持寄存器变量指针起始地址
+	bExecute:= btn_GetPSVersion, 		//执行
+	tTimeout:= T#1S, 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> , 
+	cbRead=> );]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_GetRampSpd_ChA" Id="{54fb8715-7d96-47b7-a64c-1dd604512c42}" FolderPath="Get\">
+      <Implementation>
+        <ST><![CDATA[//上升沿触发
+GetRampingSpd_ChA_RTRIG(CLK:=btn_GetRampingSpd_ChA);
+IF GetRampingSpd_ChA_RTRIG.Q THEN
+	btn_GetRampingSpd_ChA:=FALSE;
+END_IF
+//每隔固定时间获取一次
+GetRampingSpd_ChA_TON(PT:=T#0.2S);
+GetRampingSpd_ChA_TON.IN:=TRUE;
+IF GetRampingSpd_ChA_TON.Q THEN
+	btn_GetRampingSpd_ChA:=TRUE;
+	GetRampingSpd_ChA_TON.IN:=FALSE;
+END_IF
+
+//字节调换，转为电源规定的格式
+GetRampingSpd_ChARegs_PSProtocal_LowByte[0]:=SHL((GetRampingSpd_ChARegs_PSProtocal[0] AND 16#00FF),8);
+GetRampingSpd_ChARegs_PSProtocal_HighByte[0]:=SHR((GetRampingSpd_ChARegs_PSProtocal[0] AND 16#FF00),8);
+GetRampingSpd_ChARegs[0]:=GetRampingSpd_ChARegs_PSProtocal_LowByte[0] OR GetRampingSpd_ChARegs_PSProtocal_HighByte[0];
+GetRampingSpd_ChARegs_PSProtocal_LowByte[1]:=SHL((GetRampingSpd_ChARegs_PSProtocal[1] AND 16#00FF),8);
+GetRampingSpd_ChARegs_PSProtocal_HighByte[1]:=SHR((GetRampingSpd_ChARegs_PSProtocal[1] AND 16#FF00),8);
+GetRampingSpd_ChARegs[1]:=GetRampingSpd_ChARegs_PSProtocal_LowByte[1] OR GetRampingSpd_ChARegs_PSProtocal_HighByte[1];
+//IEEE转换，WORD 到 REAL
+ieee754_GetRampingSpd_ChA.data_word[0]:=GetRampingSpd_ChARegs[0];
+ieee754_GetRampingSpd_ChA.data_word[1]:=GetRampingSpd_ChARegs[1];
+GetRampingSpd_ChA:=DINT_TO_REAL(REAL_TO_DINT(ieee754_GetRampingSpd_ChA.data_float*10000))/10000;
+
+////功能块
+fb_GetRampingSpd_ChA(
+	sIPAddr:=IPAddr , 		//Server IP地址
+	nTCPPort:=TCPPort, 						//Modbus-Tcp端口号
+	nUnitID:=1 , 						//Modbus-Tcp从站号
+	nQuantity:=2 , 						//读取保持寄存器个数
+	nMBAddr:=GetRampingSpd_ChA_MBAddr , 					//读取保持寄存器Modbus起始地址
+	cbLength:= SIZEOF(GetRampingSpd_ChARegs_PSProtocal), 		//存放保持寄存器变量的个数
+	pDestAddr:= ADR(GetRampingSpd_ChARegs_PSProtocal), 		//存放保持寄存器变量指针起始地址
+	bExecute:= btn_GetRampingSpd_ChA, 		//执行
+	tTimeout:= T#1S, 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> , 
+	cbRead=> );]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_GetRampSpd_ChB" Id="{aaf56ab5-6687-4535-9860-b91911636e73}" FolderPath="Get\">
+      <Implementation>
+        <ST><![CDATA[//上升沿触发
+GetRampingSpd_ChB_RTRIG(CLK:=btn_GetRampingSpd_ChB);
+IF GetRampingSpd_ChB_RTRIG.Q THEN
+	btn_GetRampingSpd_ChB:=FALSE;
+END_IF
+//每隔固定时间获取一次
+GetRampingSpd_ChB_TON(PT:=T#0.2S);
+GetRampingSpd_ChB_TON.IN:=TRUE;
+IF GetRampingSpd_ChB_TON.Q THEN
+	btn_GetRampingSpd_ChB:=TRUE;
+	GetRampingSpd_ChB_TON.IN:=FALSE;
+END_IF
+
+//字节调换，转为电源规定的格式
+GetRampingSpd_ChBRegs_PSProtocal_LowByte[0]:=SHL((GetRampingSpd_ChBRegs_PSProtocal[0] AND 16#00FF),8);
+GetRampingSpd_ChBRegs_PSProtocal_HighByte[0]:=SHR((GetRampingSpd_ChBRegs_PSProtocal[0] AND 16#FF00),8);
+GetRampingSpd_ChBRegs[0]:=GetRampingSpd_ChBRegs_PSProtocal_LowByte[0] OR GetRampingSpd_ChBRegs_PSProtocal_HighByte[0];
+GetRampingSpd_ChBRegs_PSProtocal_LowByte[1]:=SHL((GetRampingSpd_ChBRegs_PSProtocal[1] AND 16#00FF),8);
+GetRampingSpd_ChBRegs_PSProtocal_HighByte[1]:=SHR((GetRampingSpd_ChBRegs_PSProtocal[1] AND 16#FF00),8);
+GetRampingSpd_ChBRegs[1]:=GetRampingSpd_ChBRegs_PSProtocal_LowByte[1] OR GetRampingSpd_ChBRegs_PSProtocal_HighByte[1];
+//IEEE转换，WORD 到 REAL
+ieee754_GetRampingSpd_ChB.data_word[0]:=GetRampingSpd_ChBRegs[0];
+ieee754_GetRampingSpd_ChB.data_word[1]:=GetRampingSpd_ChBRegs[1];
+GetRampingSpd_ChB:=DINT_TO_REAL(REAL_TO_DINT(ieee754_GetRampingSpd_ChB.data_float*10000))/10000;
+
+////功能块
+fb_GetRampingSpd_ChB(
+	sIPAddr:=IPAddr , 		//Server IP地址
+	nTCPPort:=TCPPort, 						//Modbus-Tcp端口号
+	nUnitID:=1 , 						//Modbus-Tcp从站号
+	nQuantity:=2 , 						//读取保持寄存器个数
+	nMBAddr:=GetRampingSpd_ChB_MBAddr , 					//读取保持寄存器Modbus起始地址
+	cbLength:= SIZEOF(GetRampingSpd_ChBRegs_PSProtocal), 		//存放保持寄存器变量的个数
+	pDestAddr:= ADR(GetRampingSpd_ChBRegs_PSProtocal), 		//存放保持寄存器变量指针起始地址
+	bExecute:= btn_GetRampingSpd_ChB, 		//执行
+	tTimeout:= T#1S, 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> , 
+	cbRead=> );]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_GetSetCurrent_ChA" Id="{64f4c7aa-faf0-49da-9b42-d21d5035cdfc}" FolderPath="Get\">
+      <Implementation>
+        <ST><![CDATA[
+
+GetSetCurrent_ChA_RTRIG(CLK:=btn_GetSetCurrent_ChA);
+IF GetSetCurrent_ChA_RTRIG.Q THEN
+	btn_GetSetCurrent_ChA:=FALSE;
+END_IF
+//每隔固定时间获取一次
+GetSetCurrent_ChA_TON(PT:=T#0.2S);
+GetSetCurrent_ChA_TON.IN:=TRUE;
+IF GetSetCurrent_ChA_TON.Q THEN
+	btn_GetSetCurrent_ChA:=TRUE;
+	GetSetCurrent_ChA_TON.IN:=FALSE;
+END_IF
+
+//字节调换，转为电源规定的格式
+GetSetCurrent_ChARegs_PSProtocal_LowByte[0]:=SHL((GetSetCurrent_ChARegs_PSProtocal[0] AND 16#00FF),8);
+GetSetCurrent_ChARegs_PSProtocal_HighByte[0]:=SHR((GetSetCurrent_ChARegs_PSProtocal[0] AND 16#FF00),8);
+GetSetCurrent_ChARegs[0]:=GetSetCurrent_ChARegs_PSProtocal_LowByte[0] OR GetSetCurrent_ChARegs_PSProtocal_HighByte[0];
+GetSetCurrent_ChARegs_PSProtocal_LowByte[1]:=SHL((GetSetCurrent_ChARegs_PSProtocal[1] AND 16#00FF),8);
+GetSetCurrent_ChARegs_PSProtocal_HighByte[1]:=SHR((GetSetCurrent_ChARegs_PSProtocal[1] AND 16#FF00),8);
+GetSetCurrent_ChARegs[1]:=GetSetCurrent_ChARegs_PSProtocal_LowByte[1] OR GetSetCurrent_ChARegs_PSProtocal_HighByte[1];
+//IEEE转换，WORD 到 REAL
+ieee754_GetSetCurrent_ChA.data_word[0]:=GetSetCurrent_ChARegs[0];
+ieee754_GetSetCurrent_ChA.data_word[1]:=GetSetCurrent_ChARegs[1];
+GetSetCurrent_ChA:=DINT_TO_REAL(REAL_TO_DINT(ieee754_GetSetCurrent_ChA.data_float*10000))/10000;
+
+////功能块
+fb_GetSetCurrent_ChA(
+	sIPAddr:=IPAddr , 		//Server IP地址
+	nTCPPort:=TCPPort, 						//Modbus-Tcp端口号
+	nUnitID:=1 , 						//Modbus-Tcp从站号
+	nQuantity:=2 , 						//读取保持寄存器个数
+	nMBAddr:=GetSetCurrent_ChA_MBAddr , 					//读取保持寄存器Modbus起始地址
+	cbLength:= SIZEOF(GetSetCurrent_ChARegs_PSProtocal), 		//存放保持寄存器变量的个数
+	pDestAddr:= ADR(GetSetCurrent_ChARegs_PSProtocal), 		//存放保持寄存器变量指针起始地址
+	bExecute:= btn_GetSetCurrent_ChA, 		//执行
+	tTimeout:= T#1S, 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> , 
+	cbRead=> );]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_GetSetCurrent_ChB" Id="{5291e7a1-2870-4285-a9ae-715591415cc5}" FolderPath="Get\">
+      <Implementation>
+        <ST><![CDATA[GetSetCurrent_ChB_RTRIG(CLK:=btn_GetSetCurrent_ChB);
+IF GetSetCurrent_ChB_RTRIG.Q THEN
+	btn_GetSetCurrent_ChB:=FALSE;
+END_IF
+//每隔固定时间获取一次
+GetSetCurrent_ChB_TON(PT:=T#0.2S);
+GetSetCurrent_ChB_TON.IN:=TRUE;
+IF GetSetCurrent_ChB_TON.Q THEN
+	btn_GetSetCurrent_ChB:=TRUE;
+	GetSetCurrent_ChB_TON.IN:=FALSE;
+END_IF
+
+//字节调换，转为电源规定的格式
+GetSetCurrent_ChBRegs_PSProtocal_LowByte[0]:=SHL((GetSetCurrent_ChBRegs_PSProtocal[0] AND 16#00FF),8);
+GetSetCurrent_ChBRegs_PSProtocal_HighByte[0]:=SHR((GetSetCurrent_ChBRegs_PSProtocal[0] AND 16#FF00),8);
+GetSetCurrent_ChBRegs[0]:=GetSetCurrent_ChBRegs_PSProtocal_LowByte[0] OR GetSetCurrent_ChBRegs_PSProtocal_HighByte[0];
+GetSetCurrent_ChBRegs_PSProtocal_LowByte[1]:=SHL((GetSetCurrent_ChBRegs_PSProtocal[1] AND 16#00FF),8);
+GetSetCurrent_ChBRegs_PSProtocal_HighByte[1]:=SHR((GetSetCurrent_ChBRegs_PSProtocal[1] AND 16#FF00),8);
+GetSetCurrent_ChBRegs[1]:=GetSetCurrent_ChBRegs_PSProtocal_LowByte[1] OR GetSetCurrent_ChBRegs_PSProtocal_HighByte[1];
+//IEEE转换，WORD 到 REAL
+ieee754_GetSetCurrent_ChB.data_word[0]:=GetSetCurrent_ChBRegs[0];
+ieee754_GetSetCurrent_ChB.data_word[1]:=GetSetCurrent_ChBRegs[1];
+GetSetCurrent_ChB:=DINT_TO_REAL(REAL_TO_DINT(ieee754_GetSetCurrent_ChB.data_float*10000))/10000;
+
+////功能块
+fb_GetSetCurrent_ChB(
+	sIPAddr:=IPAddr , 		//Server IP地址
+	nTCPPort:=TCPPort, 						//Modbus-Tcp端口号
+	nUnitID:=1 , 						//Modbus-Tcp从站号
+	nQuantity:=2 , 						//读取保持寄存器个数
+	nMBAddr:=GetSetCurrent_ChB_MBAddr , 					//读取保持寄存器Modbus起始地址
+	cbLength:= SIZEOF(GetSetCurrent_ChBRegs_PSProtocal), 		//存放保持寄存器变量的个数
+	pDestAddr:= ADR(GetSetCurrent_ChBRegs_PSProtocal), 		//存放保持寄存器变量指针起始地址
+	bExecute:= btn_GetSetCurrent_ChB, 		//执行
+	tTimeout:= T#1S, 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> , 
+	cbRead=> );]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_GetVoltage_ChA" Id="{0fab2a22-3f57-435b-8c06-4a1937e8e60a}" FolderPath="Get\">
+      <Implementation>
+        <ST><![CDATA[//上升沿触发
+GetVoltage_ChA_RTRIG(CLK:=btn_GetVoltage_ChA);
+IF GetVoltage_ChA_RTRIG.Q THEN
+	btn_GetVoltage_ChA:=FALSE;
+END_IF
+//每隔固定时间获取一次
+GetVoltage_ChA_TON(PT:=T#0.2S);
+GetVoltage_ChA_TON.IN:=TRUE;
+IF GetVoltage_ChA_TON.Q THEN
+	btn_GetVoltage_ChA:=TRUE;
+	GetVoltage_ChA_TON.IN:=FALSE;
+END_IF
+
+//字节调换，转为电源规定的格式
+GetVoltage_ChARegs_PSProtocal_LowByte[0]:=SHL((GetVoltage_ChARegs_PSProtocal[0] AND 16#00FF),8);
+GetVoltage_ChARegs_PSProtocal_HighByte[0]:=SHR((GetVoltage_ChARegs_PSProtocal[0] AND 16#FF00),8);
+GetVoltage_ChARegs[0]:=GetVoltage_ChARegs_PSProtocal_LowByte[0] OR GetVoltage_ChARegs_PSProtocal_HighByte[0];
+GetVoltage_ChARegs_PSProtocal_LowByte[1]:=SHL((GetVoltage_ChARegs_PSProtocal[1] AND 16#00FF),8);
+GetVoltage_ChARegs_PSProtocal_HighByte[1]:=SHR((GetVoltage_ChARegs_PSProtocal[1] AND 16#FF00),8);
+GetVoltage_ChARegs[1]:=GetVoltage_ChARegs_PSProtocal_LowByte[1] OR GetVoltage_ChARegs_PSProtocal_HighByte[1];
+//IEEE转换，WORD 到 REAL
+ieee754_GetVoltage_ChA.data_word[0]:=GetVoltage_ChARegs[0];
+ieee754_GetVoltage_ChA.data_word[1]:=GetVoltage_ChARegs[1];
+GetVoltage_ChA:=DINT_TO_REAL(REAL_TO_DINT(ieee754_GetVoltage_ChA.data_float*10000))/10000;
+
+
+////功能块
+fb_GetVoltage_ChA(
+	sIPAddr:=IPAddr , 		//Server IP地址
+	nTCPPort:=TCPPort, 						//Modbus-Tcp端口号
+	nUnitID:=1 , 						//Modbus-Tcp从站号
+	nQuantity:=2 , 						//读取保持寄存器个数
+	nMBAddr:=GetVoltage_ChA_MBAddr , 					//读取保持寄存器Modbus起始地址
+	cbLength:= SIZEOF(GetVoltage_ChARegs_PSProtocal), 		//存放保持寄存器变量的个数
+	pDestAddr:= ADR(GetVoltage_ChARegs_PSProtocal), 		//存放保持寄存器变量指针起始地址
+	bExecute:= btn_GetVoltage_ChA, 		//执行
+	tTimeout:= T#1S, 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> , 
+	cbRead=> );]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_GetVoltage_ChB" Id="{446b4afc-6e27-4c52-8847-fa83c9a5d43c}" FolderPath="Get\">
+      <Implementation>
+        <ST><![CDATA[//上升沿触发
+GetVoltage_ChB_RTRIG(CLK:=btn_GetVoltage_ChB);
+IF GetVoltage_ChB_RTRIG.Q THEN
+	btn_GetVoltage_ChB:=FALSE;
+END_IF
+//每隔固定时间获取一次
+GetVoltage_ChB_TON(PT:=T#0.2S);
+GetVoltage_ChB_TON.IN:=TRUE;
+IF GetVoltage_ChB_TON.Q THEN
+	btn_GetVoltage_ChB:=TRUE;
+	GetVoltage_ChB_TON.IN:=FALSE;
+END_IF
+
+//字节调换，转为电源规定的格式
+GetVoltage_ChBRegs_PSProtocal_LowByte[0]:=SHL((GetVoltage_ChBRegs_PSProtocal[0] AND 16#00FF),8);
+GetVoltage_ChBRegs_PSProtocal_HighByte[0]:=SHR((GetVoltage_ChBRegs_PSProtocal[0] AND 16#FF00),8);
+GetVoltage_ChBRegs[0]:=GetVoltage_ChBRegs_PSProtocal_LowByte[0] OR GetVoltage_ChBRegs_PSProtocal_HighByte[0];
+GetVoltage_ChBRegs_PSProtocal_LowByte[1]:=SHL((GetVoltage_ChBRegs_PSProtocal[1] AND 16#00FF),8);
+GetVoltage_ChBRegs_PSProtocal_HighByte[1]:=SHR((GetVoltage_ChBRegs_PSProtocal[1] AND 16#FF00),8);
+GetVoltage_ChBRegs[1]:=GetVoltage_ChBRegs_PSProtocal_LowByte[1] OR GetVoltage_ChBRegs_PSProtocal_HighByte[1];
+//IEEE转换，WORD 到 REAL
+ieee754_GetVoltage_ChB.data_word[0]:=GetVoltage_ChBRegs[0];
+ieee754_GetVoltage_ChB.data_word[1]:=GetVoltage_ChBRegs[1];
+GetVoltage_ChB:=DINT_TO_REAL(REAL_TO_DINT(ieee754_GetVoltage_ChB.data_float*10000))/10000;
+
+
+////功能块
+fb_GetVoltage_ChB(
+	sIPAddr:=IPAddr , 		//Server IP地址
+	nTCPPort:=TCPPort, 						//Modbus-Tcp端口号
+	nUnitID:=1 , 						//Modbus-Tcp从站号
+	nQuantity:=2 , 						//读取保持寄存器个数
+	nMBAddr:=GetVoltage_ChB_MBAddr , 					//读取保持寄存器Modbus起始地址
+	cbLength:= SIZEOF(GetVoltage_ChBRegs_PSProtocal), 		//存放保持寄存器变量的个数
+	pDestAddr:= ADR(GetVoltage_ChBRegs_PSProtocal), 		//存放保持寄存器变量指针起始地址
+	bExecute:= btn_GetVoltage_ChB, 		//执行
+	tTimeout:= T#1S, 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> , 
+	cbRead=> );]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_PowerOff_ChA" Id="{0a1cc717-b3d7-4662-8bdd-41f04688900e}" FolderPath="Set\">
+      <Implementation>
+        <ST><![CDATA[CASE PowerOff_ChA_State OF
+	0:
+		//如果电源已经上电，则转下一步
+		IF st_Power_ChA THEN
+			PowerOff_ChA_State:=1;
+		ELSE
+			PowerOff_ChA_State:=88;
+		END_IF
+	1:
+		IF btn_PowerOff_ChA THEN
+			PowerOff_ChA_TON.IN:=TRUE;//开始计时
+			IF PowerOff_ChA_TON.Q THEN
+				PowerOff_ChA_State:=2;
+			END_IF
+		END_IF
+	2:
+		//对寄存器置下降沿，恢复寄存器原始状态，方便下次操作
+		btn_PowerOff_ChA_ResetRegs:=TRUE;
+		PowerOff_ChA_TON.IN:=FALSE;
+		btn_PowerOff_ChA:=FALSE;
+		PowerOff_ChA_State:=88;
+	88:
+		btn_PowerOff_ChA_ResetRegs:=FALSE;
+		PowerOff_ChA_State:=0;
+END_CASE
+
+////功能块
+PowerOff_ChA_TON(PT:=T#1S);
+fb_PowerOff_ChA(
+	sIPAddr:= IPAddr, 
+	nTCPPort:= TCPPort, 
+	nUnitID:= 1, 
+	nQuantity:=1 , 
+	nMBAddr:=PowerOff_ChA_MBAddr , 
+	cbLength:= SIZEOF(PowerOff_ChARegs), 
+	pSrcAddr:= ADR(PowerOff_ChARegs), 
+	bExecute:= btn_PowerOff_ChA, 
+	tTimeout:= , 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> );
+fb_PowerOff_ChA_ResetReg(
+	sIPAddr:= IPAddr, 
+	nTCPPort:= TCPPort, 
+	nUnitID:= 1, 
+	nQuantity:=1 , 
+	nMBAddr:=PowerOff_ChA_MBAddr, 
+	cbLength:= SIZEOF(PowerOff_ChA_ResetRegs), 
+	pSrcAddr:= ADR(PowerOff_ChA_ResetRegs), 
+	bExecute:= btn_PowerOff_ChA_ResetRegs, 
+	tTimeout:= , 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> );]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_PowerOff_ChB" Id="{205034cd-a78e-4b5b-88bb-19b3eb1e9081}" FolderPath="Set\">
+      <Implementation>
+        <ST><![CDATA[CASE PowerOff_ChB_State OF
+	0:
+		//如果电源已经上电，则转下一步
+		IF st_Power_ChB THEN
+			PowerOff_ChB_State:=1;
+		ELSE
+			PowerOff_ChB_State:=88;
+		END_IF
+	1:
+		IF btn_PowerOff_ChB THEN
+			PowerOff_ChB_TON.IN:=TRUE;//开始计时
+			IF PowerOff_ChB_TON.Q THEN
+				PowerOff_ChB_State:=2;
+			END_IF
+		END_IF
+	2:
+		//对寄存器置下降沿，恢复寄存器原始状态，方便下次操作
+		btn_PowerOff_ChB_ResetRegs:=TRUE;
+		PowerOff_ChB_TON.IN:=FALSE;
+		btn_PowerOff_ChB:=FALSE;
+		PowerOff_ChB_State:=88;
+	88:
+		btn_PowerOff_ChB_ResetRegs:=FALSE;
+		PowerOff_ChB_State:=0;
+END_CASE
+
+////功能块
+PowerOff_ChB_TON(PT:=T#1S);
+fb_PowerOff_ChB(
+	sIPAddr:= IPAddr, 
+	nTCPPort:= TCPPort, 
+	nUnitID:= 1, 
+	nQuantity:=1 , 
+	nMBAddr:=PowerOff_ChB_MBAddr , 
+	cbLength:= SIZEOF(PowerOff_ChBRegs), 
+	pSrcAddr:= ADR(PowerOff_ChBRegs), 
+	bExecute:= btn_PowerOff_ChB, 
+	tTimeout:= , 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> );
+fb_PowerOff_ChB_ResetReg(
+	sIPAddr:= IPAddr, 
+	nTCPPort:= TCPPort, 
+	nUnitID:= 1, 
+	nQuantity:=1 , 
+	nMBAddr:=PowerOff_ChB_MBAddr, 
+	cbLength:= SIZEOF(PowerOff_ChB_ResetRegs), 
+	pSrcAddr:= ADR(PowerOff_ChB_ResetRegs), 
+	bExecute:= btn_PowerOff_ChB_ResetRegs, 
+	tTimeout:= , 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> );]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_PowerOn_ChA" Id="{65a16ddf-f44b-46d5-83f7-45f422b582ca}" FolderPath="Set\">
+      <Implementation>
+        <ST><![CDATA[CASE PowerOn_ChA_State OF
+	0:
+		//如果电源未上电，转下一步
+		IF NOT st_Power_ChA THEN
+			PowerOn_ChA_State:=1;
+		END_IF
+
+	1:
+		IF btn_PowerOn_ChA THEN		//PLC上电指令
+			//回读电源设定值，如果不为0，需要先置零
+			IF GetSetCurrent_ChA<>0 THEN
+				SetCurrent_ChA:=0;
+				btn_SetCurrent_ChA:=TRUE;
+			ELSE
+				PowerOn_ChA_TON2.IN:=TRUE;
+				IF PowerOn_ChA_TON2.Q THEN
+					PowerOn_ChA_State:=2;//清零后稍微延迟一下再进入下一步上电过程
+				END_IF
+			END_IF
+		END_IF
+	2:
+		btn_SetCurrent_ChA:=FALSE;
+		PowerOn_ChA_TON2.IN:=FALSE;
+		fb_PowerOn_ChA.bExecute:=TRUE;//功能块上电
+		PowerOn_ChA_TON.IN:=TRUE;//开始计时
+		IF PowerOn_ChA_TON.Q THEN
+				PowerOn_ChA_State:=3;
+		END_IF
+	3:
+		//对寄存器置下降沿，恢复寄存器原始状态，方便下次操作
+		fb_PowerOn_ChA.bExecute:=FALSE;
+		btn_PowerOn_ChA_ResetRegs:=TRUE;
+		PowerOn_ChA_TON.IN:=FALSE;
+		btn_PowerOn_ChA:=FALSE;
+		PowerOn_ChA_State:=88;
+	88:
+		btn_PowerOn_ChA_ResetRegs:=FALSE;
+		PowerOn_ChA_State:=0;
+END_CASE
+
+////功能块
+PowerOn_ChA_TON(PT:=T#1S);
+PowerOn_ChA_TON2(PT:=T#0.1S);
+fb_PowerOn_ChA(
+	sIPAddr:= IPAddr, 
+	nTCPPort:= TCPPort, 
+	nUnitID:= 1, 
+	nQuantity:=1 , 
+	nMBAddr:=PowerOn_ChA_MBAddr , 
+	cbLength:= SIZEOF(PowerOn_ChARegs), 
+	pSrcAddr:= ADR(PowerOn_ChARegs), 
+	bExecute:= , 
+	tTimeout:= , 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> );
+fb_PowerOn_ChA_ResetReg(
+	sIPAddr:= IPAddr, 
+	nTCPPort:= TCPPort, 
+	nUnitID:= 1, 
+	nQuantity:=1 , 
+	nMBAddr:=PowerOn_ChA_MBAddr , 
+	cbLength:= SIZEOF(PowerOn_ChA_ResetRegs), 
+	pSrcAddr:= ADR(PowerOn_ChA_ResetRegs), 
+	bExecute:= btn_PowerOn_ChA_ResetRegs, 
+	tTimeout:= , 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> );]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_PowerOn_ChB" Id="{92636d89-8995-4cbb-a3ad-4125b47f0601}" FolderPath="Set\">
+      <Implementation>
+        <ST><![CDATA[CASE PowerOn_ChB_State OF
+	0:
+		//如果电源未上电，转下一步
+		IF NOT st_Power_ChB THEN
+			PowerOn_ChB_State:=1;
+		END_IF
+
+	1:
+		IF btn_PowerOn_ChB THEN		//PLC上电指令
+			//回读电源设定值，如果不为0，需要先置零
+			IF GetSetCurrent_ChB<>0 THEN
+				SetCurrent_ChB:=0;
+				btn_SetCurrent_ChB:=TRUE;
+			ELSE
+				PowerOn_ChB_TON2.IN:=TRUE;
+				IF PowerOn_ChB_TON2.Q THEN
+					PowerOn_ChB_State:=2;//清零后稍微延迟一下再进入下一步上电过程
+				END_IF
+			END_IF
+		END_IF
+	2:
+		btn_SetCurrent_ChB:=FALSE;
+		PowerOn_ChB_TON2.IN:=FALSE;
+		fb_PowerOn_ChB.bExecute:=TRUE;//功能块上电
+		PowerOn_ChB_TON.IN:=TRUE;//开始计时
+		IF PowerOn_ChB_TON.Q THEN
+				PowerOn_ChB_State:=3;
+		END_IF
+	3:
+		//对寄存器置下降沿，恢复寄存器原始状态，方便下次操作
+		fb_PowerOn_ChB.bExecute:=FALSE;
+		btn_PowerOn_ChB_ResetRegs:=TRUE;
+		PowerOn_ChB_TON.IN:=FALSE;
+		btn_PowerOn_ChB:=FALSE;
+		PowerOn_ChB_State:=88;
+	88:
+		btn_PowerOn_ChB_ResetRegs:=FALSE;
+		PowerOn_ChB_State:=0;
+END_CASE
+
+////功能块
+PowerOn_ChB_TON(PT:=T#1S);
+PowerOn_ChB_TON2(PT:=T#0.1S);
+fb_PowerOn_ChB(
+	sIPAddr:= IPAddr, 
+	nTCPPort:= TCPPort, 
+	nUnitID:= 1, 
+	nQuantity:=1 , 
+	nMBAddr:=PowerOn_ChB_MBAddr , 
+	cbLength:= SIZEOF(PowerOn_ChBRegs), 
+	pSrcAddr:= ADR(PowerOn_ChBRegs), 
+	bExecute:= , 
+	tTimeout:= , 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> );
+fb_PowerOn_ChB_ResetReg(
+	sIPAddr:= IPAddr, 
+	nTCPPort:= TCPPort, 
+	nUnitID:= 1, 
+	nQuantity:=1 , 
+	nMBAddr:=PowerOn_ChB_MBAddr , 
+	cbLength:= SIZEOF(PowerOn_ChB_ResetRegs), 
+	pSrcAddr:= ADR(PowerOn_ChB_ResetRegs), 
+	bExecute:= btn_PowerOn_ChB_ResetRegs, 
+	tTimeout:= , 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> );]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_Reset_ChA" Id="{667b8ff9-0e3b-4200-884a-f4350dd13993}" FolderPath="Set\">
+      <Implementation>
+        <ST><![CDATA[CASE Reset_ChA_State OF
+	0:
+		IF btn_Reset_ChA THEN
+			Reset_ChA_State:=1;
+		END_IF
+	1:
+		fb_Reset_ChA.bExecute:=TRUE;//功能块上电
+		Reset_ChA_TON.IN:=TRUE;//开始计时
+		IF Reset_ChA_TON.Q THEN
+				Reset_ChA_State:=2;
+		END_IF
+	2:
+		//对寄存器置下降沿，恢复寄存器原始状态，方便下次操作
+		fb_Reset_ChA.bExecute:=FALSE;
+		btn_Reset_ChA_ResetRegs:=TRUE;
+		Reset_ChA_TON.IN:=FALSE;
+		btn_Reset_ChA:=FALSE;
+		Reset_ChA_State:=88;
+	88:
+		btn_Reset_ChA_ResetRegs:=FALSE;
+		Reset_ChA_State:=0;
+END_CASE
+
+////功能块
+Reset_ChA_TON(PT:=T#0.1S);
+fb_Reset_ChA(
+	sIPAddr:= IPAddr, 
+	nTCPPort:= TCPPort, 
+	nUnitID:= 1, 
+	nQuantity:=1 , 
+	nMBAddr:=Reset_ChA_MBAddr , 
+	cbLength:= SIZEOF(Reset_ChARegs), 
+	pSrcAddr:= ADR(Reset_ChARegs), 
+	bExecute:= , 
+	tTimeout:= , 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> );
+fb_Reset_ChA_ResetReg(
+	sIPAddr:= IPAddr, 
+	nTCPPort:= TCPPort, 
+	nUnitID:= 1, 
+	nQuantity:=1 , 
+	nMBAddr:=Reset_ChA_MBAddr , 
+	cbLength:= SIZEOF(Reset_ChA_ResetRegs), 
+	pSrcAddr:= ADR(Reset_ChA_ResetRegs), 
+	bExecute:= btn_Reset_ChA_ResetRegs, 
+	tTimeout:= , 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> );]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_Reset_ChB" Id="{dd66f211-40eb-40b0-8863-03c6c6c470ed}" FolderPath="Set\">
+      <Implementation>
+        <ST><![CDATA[CASE Reset_ChB_State OF
+	0:
+		IF btn_Reset_ChB THEN
+			Reset_ChB_State:=1;
+		END_IF
+	1:
+		fb_Reset_ChB.bExecute:=TRUE;//功能块上电
+		Reset_ChB_TON.IN:=TRUE;//开始计时
+		IF Reset_ChB_TON.Q THEN
+				Reset_ChB_State:=2;
+		END_IF
+	2:
+		//对寄存器置下降沿，恢复寄存器原始状态，方便下次操作
+		fb_Reset_ChB.bExecute:=FALSE;
+		btn_Reset_ChB_ResetRegs:=TRUE;
+		Reset_ChB_TON.IN:=FALSE;
+		btn_Reset_ChB:=FALSE;
+		Reset_ChB_State:=88;
+	88:
+		btn_Reset_ChB_ResetRegs:=FALSE;
+		Reset_ChB_State:=0;
+END_CASE
+
+////功能块
+Reset_ChB_TON(PT:=T#0.1S);
+fb_Reset_ChB(
+	sIPAddr:= IPAddr, 
+	nTCPPort:= TCPPort, 
+	nUnitID:= 1, 
+	nQuantity:=1 , 
+	nMBAddr:=Reset_ChB_MBAddr , 
+	cbLength:= SIZEOF(Reset_ChBRegs), 
+	pSrcAddr:= ADR(Reset_ChBRegs), 
+	bExecute:= , 
+	tTimeout:= , 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> );
+fb_Reset_ChB_ResetReg(
+	sIPAddr:= IPAddr, 
+	nTCPPort:= TCPPort, 
+	nUnitID:= 1, 
+	nQuantity:=1 , 
+	nMBAddr:=Reset_ChB_MBAddr , 
+	cbLength:= SIZEOF(Reset_ChB_ResetRegs), 
+	pSrcAddr:= ADR(Reset_ChB_ResetRegs), 
+	bExecute:= btn_Reset_ChB_ResetRegs, 
+	tTimeout:= , 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> );]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_SetCurrent_ChA" Id="{c2cfb9c2-01b3-43bc-ab38-e26d2ba16e5b}" FolderPath="Set\">
+      <Implementation>
+        <ST><![CDATA[//IEEE754转化,REAL到WORD
+ieee754_SetCurrent_ChA.data_float:=SetCurrent_ChA;
+SetCurrent_ChARegs[0]:=ieee754_SetCurrent_ChA.data_word[0];
+SetCurrent_ChARegs[1]:=ieee754_SetCurrent_ChA.data_word[1];
+//字节调换，转为电源规定的格式
+SetCurrent_ChARegs_LowByte[0]:=SHL((SetCurrent_ChARegs[0] AND 16#00FF),8);
+SetCurrent_ChARegs_HighByte[0]:=SHR((SetCurrent_ChARegs[0] AND 16#FF00),8);
+SetCurrent_ChARegs_PSProtocal[0]:=SetCurrent_ChARegs_LowByte[0] OR SetCurrent_ChARegs_HighByte[0];
+SetCurrent_ChARegs_LowByte[1]:=SHL((SetCurrent_ChARegs[1] AND 16#00FF),8);
+SetCurrent_ChARegs_HighByte[1]:=SHR((SetCurrent_ChARegs[1] AND 16#FF00),8);
+SetCurrent_ChARegs_PSProtocal[1]:=SetCurrent_ChARegs_LowByte[1] OR SetCurrent_ChARegs_HighByte[1];
+
+CASE SetCurrent_ChA_State OF
+	0:
+		//电源上电了才转下一步
+		IF  st_Power_ChA THEN
+			SetCurrent_ChA_State:=1;
+		END_IF
+	1:
+		IF btn_SetCurrent_ChA THEN		//设置电流
+			SetCurrent_ChA_TON.IN:=TRUE;//开始计时
+			IF SetCurrent_ChA_TON.Q THEN
+				SetCurrent_ChA_State:=88;
+			END_IF
+		END_IF
+	88:
+		//恢复变量状态
+		SetCurrent_ChA_TON.IN:=FALSE;
+		btn_SetCurrent_ChA:=FALSE;
+		SetCurrent_ChA_State:=0;
+END_CASE
+
+
+////功能块
+SetCurrent_ChA_TON(PT:=T#0.02S);
+fb_SetCurrent_ChA(
+	sIPAddr:= IPAddr, 
+	nTCPPort:= TCPPort, 
+	nUnitID:= 1, 
+	nQuantity:=2 , 
+	nMBAddr:=SetCurrent_ChA_MBAddr , 
+	cbLength:= SIZEOF(SetCurrent_ChARegs_PSProtocal), 
+	pSrcAddr:= ADR(SetCurrent_ChARegs_PSProtocal), 
+	bExecute:= btn_SetCurrent_ChA, 
+	tTimeout:= , 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> );]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_SetCurrent_ChB" Id="{06f392b4-dd2b-480c-a793-30e028df4e2a}" FolderPath="Set\">
+      <Implementation>
+        <ST><![CDATA[//IEEE754转化,REAL到WORD
+ieee754_SetCurrent_ChB.data_float:=SetCurrent_ChB;
+SetCurrent_ChBRegs[0]:=ieee754_SetCurrent_ChB.data_word[0];
+SetCurrent_ChBRegs[1]:=ieee754_SetCurrent_ChB.data_word[1];
+//字节调换，转为电源规定的格式
+SetCurrent_ChBRegs_LowByte[0]:=SHL((SetCurrent_ChBRegs[0] AND 16#00FF),8);
+SetCurrent_ChBRegs_HighByte[0]:=SHR((SetCurrent_ChBRegs[0] AND 16#FF00),8);
+SetCurrent_ChBRegs_PSProtocal[0]:=SetCurrent_ChBRegs_LowByte[0] OR SetCurrent_ChBRegs_HighByte[0];
+SetCurrent_ChBRegs_LowByte[1]:=SHL((SetCurrent_ChBRegs[1] AND 16#00FF),8);
+SetCurrent_ChBRegs_HighByte[1]:=SHR((SetCurrent_ChBRegs[1] AND 16#FF00),8);
+SetCurrent_ChBRegs_PSProtocal[1]:=SetCurrent_ChBRegs_LowByte[1] OR SetCurrent_ChBRegs_HighByte[1];
+
+CASE SetCurrent_ChB_State OF
+	0:
+		//电源上电了才转下一步
+		IF  st_Power_ChB THEN
+			SetCurrent_ChB_State:=1;
+		END_IF
+	1:
+		IF btn_SetCurrent_ChB THEN		//设置电流
+			SetCurrent_ChB_TON.IN:=TRUE;//开始计时
+			IF SetCurrent_ChB_TON.Q THEN
+				SetCurrent_ChB_State:=88;
+			END_IF
+		END_IF
+	88:
+		//恢复变量状态
+		SetCurrent_ChB_TON.IN:=FALSE;
+		btn_SetCurrent_ChB:=FALSE;
+		SetCurrent_ChB_State:=0;
+END_CASE
+
+
+////功能块
+SetCurrent_ChB_TON(PT:=T#1S);
+fb_SetCurrent_ChB(
+	sIPAddr:= IPAddr, 
+	nTCPPort:= TCPPort, 
+	nUnitID:= 1, 
+	nQuantity:=2 , 
+	nMBAddr:=SetCurrent_ChB_MBAddr , 
+	cbLength:= SIZEOF(SetCurrent_ChBRegs_PSProtocal), 
+	pSrcAddr:= ADR(SetCurrent_ChBRegs_PSProtocal), 
+	bExecute:= btn_SetCurrent_ChB, 
+	tTimeout:= , 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> );]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_SetRampingSpd_ChA" Id="{83db76b8-8971-482e-8bbb-d6d1d635d629}" FolderPath="Set\">
+      <Implementation>
+        <ST><![CDATA[//IEEE754转化,REAL到WORD
+ieee754_SetRampingSpd_ChA.data_float:=SetRampingSpd_ChA;
+SetRampingSpd_ChARegs[0]:=ieee754_SetRampingSpd_ChA.data_word[0];
+SetRampingSpd_ChARegs[1]:=ieee754_SetRampingSpd_ChA.data_word[1];
+//字节调换，转为电源规定的格式
+SetRampingSpd_ChARegs_LowByte[0]:=SHL((SetRampingSpd_ChARegs[0] AND 16#00FF),8);
+SetRampingSpd_ChARegs_HighByte[0]:=SHR((SetRampingSpd_ChARegs[0] AND 16#FF00),8);
+SetRampingSpd_ChARegs_PSProtocal[0]:=SetRampingSpd_ChARegs_LowByte[0] OR SetRampingSpd_ChARegs_HighByte[0];
+SetRampingSpd_ChARegs_LowByte[1]:=SHL((SetRampingSpd_ChARegs[1] AND 16#00FF),8);
+SetRampingSpd_ChARegs_HighByte[1]:=SHR((SetRampingSpd_ChARegs[1] AND 16#FF00),8);
+SetRampingSpd_ChARegs_PSProtocal[1]:=SetRampingSpd_ChARegs_LowByte[1] OR SetRampingSpd_ChARegs_HighByte[1];
+
+CASE SetRampingSpd_ChA_State OF
+	0:
+		//电源上电了才转下一步
+		IF  st_Power_ChA THEN
+			SetRampingSpd_ChA_State:=1;
+		END_IF
+	1:
+		IF btn_SetRampingSpd_ChA THEN		//设置电流
+			SetRampingSpd_ChA_TON.IN:=TRUE;//开始计时
+			IF SetRampingSpd_ChA_TON.Q THEN
+				SetRampingSpd_ChA_State:=88;
+			END_IF
+		END_IF
+	88:
+		//恢复变量状态
+		SetRampingSpd_ChA_TON.IN:=FALSE;
+		btn_SetRampingSpd_ChA:=FALSE;
+		SetRampingSpd_ChA_State:=0;
+END_CASE
+
+
+////功能块
+SetRampingSpd_ChA_TON(PT:=T#1S);
+fb_SetRampingSpd_ChA(
+	sIPAddr:= IPAddr, 
+	nTCPPort:= TCPPort, 
+	nUnitID:= 1, 
+	nQuantity:=2 , 
+	nMBAddr:=SetRampingSpd_ChA_MBAddr , 
+	cbLength:= SIZEOF(SetRampingSpd_ChARegs_PSProtocal), 
+	pSrcAddr:= ADR(SetRampingSpd_ChARegs_PSProtocal), 
+	bExecute:= btn_SetRampingSpd_ChA, 
+	tTimeout:= , 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> );]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_SetRampingSpd_ChB" Id="{df1c0856-e89f-4cf7-b9ca-013ab57c7104}" FolderPath="Set\">
+      <Implementation>
+        <ST><![CDATA[//IEEE754转化,REAL到WORD
+ieee754_SetRampingSpd_ChB.data_float:=SetRampingSpd_ChB;
+SetRampingSpd_ChBRegs[0]:=ieee754_SetRampingSpd_ChB.data_word[0];
+SetRampingSpd_ChBRegs[1]:=ieee754_SetRampingSpd_ChB.data_word[1];
+//字节调换，转为电源规定的格式
+SetRampingSpd_ChBRegs_LowByte[0]:=SHL((SetRampingSpd_ChBRegs[0] AND 16#00FF),8);
+SetRampingSpd_ChBRegs_HighByte[0]:=SHR((SetRampingSpd_ChBRegs[0] AND 16#FF00),8);
+SetRampingSpd_ChBRegs_PSProtocal[0]:=SetRampingSpd_ChBRegs_LowByte[0] OR SetRampingSpd_ChBRegs_HighByte[0];
+SetRampingSpd_ChBRegs_LowByte[1]:=SHL((SetRampingSpd_ChBRegs[1] AND 16#00FF),8);
+SetRampingSpd_ChBRegs_HighByte[1]:=SHR((SetRampingSpd_ChBRegs[1] AND 16#FF00),8);
+SetRampingSpd_ChBRegs_PSProtocal[1]:=SetRampingSpd_ChBRegs_LowByte[1] OR SetRampingSpd_ChBRegs_HighByte[1];
+
+CASE SetRampingSpd_ChB_State OF
+	0:
+		//电源上电了才转下一步
+		IF  st_Power_ChB THEN
+			SetRampingSpd_ChB_State:=1;
+		END_IF
+	1:
+		IF btn_SetRampingSpd_ChB THEN		//设置电流
+			SetRampingSpd_ChB_TON.IN:=TRUE;//开始计时
+			IF SetRampingSpd_ChB_TON.Q THEN
+				SetRampingSpd_ChB_State:=88;
+			END_IF
+		END_IF
+	88:
+		//恢复变量状态
+		SetRampingSpd_ChB_TON.IN:=FALSE;
+		btn_SetRampingSpd_ChB:=FALSE;
+		SetRampingSpd_ChB_State:=0;
+END_CASE
+
+
+////功能块
+SetRampingSpd_ChB_TON(PT:=T#1S);
+fb_SetRampingSpd_ChB(
+	sIPAddr:= IPAddr, 
+	nTCPPort:= TCPPort, 
+	nUnitID:= 1, 
+	nQuantity:=2 , 
+	nMBAddr:=SetRampingSpd_ChB_MBAddr , 
+	cbLength:= SIZEOF(SetRampingSpd_ChBRegs_PSProtocal), 
+	pSrcAddr:= ADR(SetRampingSpd_ChBRegs_PSProtocal), 
+	bExecute:= btn_SetRampingSpd_ChB, 
+	tTimeout:= , 
+	bBusy=> , 
+	bError=> , 
+	nErrId=> );]]></ST>
+      </Implementation>
+    </Action>
+    <LineIds Name="PS1">
+      <LineId Id="528" Count="0" />
+      <LineId Id="521" Count="1" />
+      <LineId Id="526" Count="0" />
+      <LineId Id="524" Count="1" />
+      <LineId Id="527" Count="0" />
+      <LineId Id="523" Count="0" />
+      <LineId Id="219" Count="0" />
+      <LineId Id="529" Count="0" />
+      <LineId Id="531" Count="0" />
+      <LineId Id="555" Count="0" />
+      <LineId Id="15" Count="0" />
+      <LineId Id="536" Count="0" />
+      <LineId Id="556" Count="2" />
+      <LineId Id="554" Count="0" />
+      <LineId Id="592" Count="0" />
+      <LineId Id="591" Count="0" />
+      <LineId Id="562" Count="0" />
+      <LineId Id="559" Count="2" />
+      <LineId Id="553" Count="0" />
+      <LineId Id="594" Count="0" />
+      <LineId Id="593" Count="0" />
+      <LineId Id="869" Count="5" />
+      <LineId Id="868" Count="0" />
+      <LineId Id="563" Count="3" />
+      <LineId Id="584" Count="1" />
+      <LineId Id="568" Count="0" />
+      <LineId Id="581" Count="0" />
+      <LineId Id="5" Count="0" />
+    </LineIds>
+    <LineIds Name="PS1.A_AutoMode_ChA">
+      <LineId Id="1" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="4" Count="3" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="70" Count="1" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="76" Count="5" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="8" Count="1" />
+      <LineId Id="12" Count="2" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="82" Count="2" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="85" Count="2" />
+      <LineId Id="91" Count="2" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="94" Count="1" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="96" Count="1" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="52" Count="0" />
+    </LineIds>
+    <LineIds Name="PS1.A_AutoMode_ChB">
+      <LineId Id="1" Count="0" />
+      <LineId Id="68" Count="0" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="4" Count="3" />
+      <LineId Id="60" Count="0" />
+      <LineId Id="73" Count="0" />
+      <LineId Id="70" Count="1" />
+      <LineId Id="74" Count="0" />
+      <LineId Id="76" Count="5" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="8" Count="1" />
+      <LineId Id="12" Count="2" />
+      <LineId Id="17" Count="0" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="82" Count="2" />
+      <LineId Id="90" Count="0" />
+      <LineId Id="85" Count="2" />
+      <LineId Id="91" Count="2" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="98" Count="0" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="94" Count="1" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="96" Count="1" />
+      <LineId Id="47" Count="0" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="52" Count="0" />
+    </LineIds>
+    <LineIds Name="PS1.A_GetCurrent_ChA">
+      <LineId Id="43" Count="0" />
+      <LineId Id="74" Count="9" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="85" Count="6" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="93" Count="1" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="60" Count="13" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="PS1.A_GetCurrent_ChB">
+      <LineId Id="43" Count="0" />
+      <LineId Id="74" Count="9" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="85" Count="6" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="93" Count="1" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="60" Count="13" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="PS1.A_GetPSStatus">
+      <LineId Id="12" Count="0" />
+      <LineId Id="4" Count="0" />
+      <LineId Id="9" Count="2" />
+      <LineId Id="13" Count="4" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="151" Count="5" />
+      <LineId Id="99" Count="0" />
+      <LineId Id="157" Count="0" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="101" Count="0" />
+      <LineId Id="103" Count="12" />
+      <LineId Id="135" Count="14" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="150" Count="0" />
+      <LineId Id="96" Count="0" />
+      <LineId Id="158" Count="1" />
+      <LineId Id="165" Count="1" />
+      <LineId Id="164" Count="0" />
+      <LineId Id="162" Count="0" />
+      <LineId Id="160" Count="0" />
+      <LineId Id="97" Count="0" />
+      <LineId Id="73" Count="12" />
+      <LineId Id="72" Count="0" />
+      <LineId Id="94" Count="0" />
+    </LineIds>
+    <LineIds Name="PS1.A_GetPSVersion">
+      <LineId Id="12" Count="0" />
+      <LineId Id="4" Count="0" />
+      <LineId Id="9" Count="2" />
+      <LineId Id="13" Count="4" />
+      <LineId Id="24" Count="0" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="96" Count="1" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="103" Count="0" />
+      <LineId Id="106" Count="1" />
+      <LineId Id="102" Count="0" />
+      <LineId Id="94" Count="0" />
+      <LineId Id="73" Count="12" />
+      <LineId Id="72" Count="0" />
+    </LineIds>
+    <LineIds Name="PS1.A_GetRampSpd_ChA">
+      <LineId Id="43" Count="0" />
+      <LineId Id="74" Count="9" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="85" Count="6" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="93" Count="1" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="60" Count="13" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="PS1.A_GetRampSpd_ChB">
+      <LineId Id="43" Count="0" />
+      <LineId Id="74" Count="9" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="85" Count="6" />
+      <LineId Id="16" Count="0" />
+      <LineId Id="95" Count="0" />
+      <LineId Id="93" Count="1" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="60" Count="13" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="PS1.A_GetSetCurrent_ChA">
+      <LineId Id="97" Count="39" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="PS1.A_GetSetCurrent_ChB">
+      <LineId Id="99" Count="37" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="PS1.A_GetVoltage_ChA">
+      <LineId Id="98" Count="39" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="PS1.A_GetVoltage_ChB">
+      <LineId Id="98" Count="39" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="PS1.A_PowerOff_ChA">
+      <LineId Id="14" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="74" Count="1" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="49" Count="3" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="56" Count="1" />
+      <LineId Id="80" Count="1" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="82" Count="1" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="29" Count="1" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="2" Count="11" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="59" Count="11" />
+      <LineId Id="58" Count="0" />
+    </LineIds>
+    <LineIds Name="PS1.A_PowerOff_ChB">
+      <LineId Id="14" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="74" Count="1" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="49" Count="3" />
+      <LineId Id="78" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="56" Count="1" />
+      <LineId Id="80" Count="1" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="82" Count="1" />
+      <LineId Id="79" Count="0" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="29" Count="1" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="2" Count="11" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="59" Count="11" />
+      <LineId Id="58" Count="0" />
+    </LineIds>
+    <LineIds Name="PS1.A_PowerOn_ChA">
+      <LineId Id="14" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="106" Count="4" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="123" Count="2" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="126" Count="0" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="113" Count="2" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="90" Count="1" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="94" Count="1" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="29" Count="1" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="122" Count="0" />
+      <LineId Id="2" Count="11" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="59" Count="11" />
+      <LineId Id="58" Count="0" />
+    </LineIds>
+    <LineIds Name="PS1.A_PowerOn_ChB">
+      <LineId Id="14" Count="0" />
+      <LineId Id="31" Count="0" />
+      <LineId Id="36" Count="0" />
+      <LineId Id="33" Count="0" />
+      <LineId Id="42" Count="0" />
+      <LineId Id="35" Count="0" />
+      <LineId Id="100" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="106" Count="4" />
+      <LineId Id="121" Count="0" />
+      <LineId Id="123" Count="2" />
+      <LineId Id="105" Count="0" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="126" Count="0" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="113" Count="2" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="90" Count="1" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="94" Count="1" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="29" Count="1" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="122" Count="0" />
+      <LineId Id="2" Count="11" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="59" Count="11" />
+      <LineId Id="58" Count="0" />
+    </LineIds>
+    <LineIds Name="PS1.A_Reset_ChA">
+      <LineId Id="14" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="113" Count="2" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="90" Count="1" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="94" Count="1" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="29" Count="1" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="2" Count="11" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="59" Count="11" />
+      <LineId Id="58" Count="0" />
+    </LineIds>
+    <LineIds Name="PS1.A_Reset_ChB">
+      <LineId Id="14" Count="0" />
+      <LineId Id="37" Count="0" />
+      <LineId Id="43" Count="0" />
+      <LineId Id="124" Count="0" />
+      <LineId Id="89" Count="0" />
+      <LineId Id="40" Count="0" />
+      <LineId Id="118" Count="0" />
+      <LineId Id="113" Count="2" />
+      <LineId Id="112" Count="0" />
+      <LineId Id="116" Count="0" />
+      <LineId Id="56" Count="0" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="57" Count="0" />
+      <LineId Id="90" Count="1" />
+      <LineId Id="88" Count="0" />
+      <LineId Id="92" Count="0" />
+      <LineId Id="94" Count="1" />
+      <LineId Id="32" Count="0" />
+      <LineId Id="29" Count="1" />
+      <LineId Id="48" Count="0" />
+      <LineId Id="2" Count="11" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="59" Count="11" />
+      <LineId Id="58" Count="0" />
+    </LineIds>
+    <LineIds Name="PS1.A_SetCurrent_ChA">
+      <LineId Id="50" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="72" Count="2" />
+      <LineId Id="78" Count="1" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="19" Count="2" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="23" Count="10" />
+      <LineId Id="35" Count="2" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="16" Count="1" />
+      <LineId Id="2" Count="13" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="PS1.A_SetCurrent_ChB">
+      <LineId Id="50" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="72" Count="2" />
+      <LineId Id="78" Count="1" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="19" Count="2" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="23" Count="10" />
+      <LineId Id="35" Count="2" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="16" Count="1" />
+      <LineId Id="2" Count="13" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="PS1.A_SetRampingSpd_ChA">
+      <LineId Id="50" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="72" Count="2" />
+      <LineId Id="78" Count="1" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="19" Count="2" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="23" Count="10" />
+      <LineId Id="35" Count="2" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="16" Count="1" />
+      <LineId Id="2" Count="13" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="PS1.A_SetRampingSpd_ChB">
+      <LineId Id="50" Count="0" />
+      <LineId Id="69" Count="0" />
+      <LineId Id="75" Count="0" />
+      <LineId Id="65" Count="0" />
+      <LineId Id="76" Count="0" />
+      <LineId Id="72" Count="2" />
+      <LineId Id="78" Count="1" />
+      <LineId Id="77" Count="0" />
+      <LineId Id="58" Count="0" />
+      <LineId Id="19" Count="2" />
+      <LineId Id="41" Count="0" />
+      <LineId Id="23" Count="10" />
+      <LineId Id="35" Count="2" />
+      <LineId Id="18" Count="0" />
+      <LineId Id="16" Count="1" />
+      <LineId Id="2" Count="13" />
+      <LineId Id="1" Count="0" />
+    </LineIds>
+  </POU>
+</TcPlcObject>

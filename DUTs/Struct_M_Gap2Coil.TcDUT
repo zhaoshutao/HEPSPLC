@@ -1,0 +1,11 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
+  <DUT Name="Struct_M_Gap2Coil" Id="{3c9406e3-b1cb-4279-b118-59f1825dcc1c}">
+    <Declaration><![CDATA[TYPE Struct_M_Gap2Coil :
+STRUCT
+	Gap:LREAL;
+	CoilCurrent:LREAL;
+END_STRUCT
+END_TYPE]]></Declaration>
+  </DUT>
+</TcPlcObject>
