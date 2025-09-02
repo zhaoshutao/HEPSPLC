@@ -4,6 +4,7 @@
     <Declaration><![CDATA[PROGRAM PS1
 VAR
 	CoilName:STRING:='';
+	FunctionEnable:BOOL;
 	AutoOrManualMode:BOOL;
 	AutoMode:BOOL;
 	ManualMode:BOOL:=FALSE;
@@ -81,7 +82,7 @@ VAR
 	//设定电流_ChA
 	fb_SetCurrent_ChA: FB_MBWriteRegs;		
 	SetCurrent_ChA_MBAddr:WORD:=16#540;//寄存器地址
-	SetCurrent_ChA:REAL;//PLC输入float型
+	SetCurrent_ChA:LREAL;//PLC输入float型
 	SetCurrent_ChARegs:ARRAY[0..1] OF WORD;//Unoin转换，float为WORD
 	SetCurrent_ChARegs_LowByte:ARRAY[0..1] OF WORD;//取低字节
 	SetCurrent_ChARegs_HighByte:ARRAY[0..1] OF WORD;//取高字节
@@ -187,7 +188,7 @@ VAR
 	//设定电流_ChB
 	fb_SetCurrent_ChB: FB_MBWriteRegs;		
 	SetCurrent_ChB_MBAddr:WORD:=16#570;//寄存器地址
-	SetCurrent_ChB:REAL;//PLC输入float型
+	SetCurrent_ChB:LREAL;//PLC输入float型
 	SetCurrent_ChBRegs:ARRAY[0..1] OF WORD;//Unoin转换，float为WORD
 	SetCurrent_ChBRegs_LowByte:ARRAY[0..1] OF WORD;//取低字节
 	SetCurrent_ChBRegs_HighByte:ARRAY[0..1] OF WORD;//取高字节
@@ -242,7 +243,7 @@ VAR
 	btn_GetRampingSpd_ChB:BOOL;
 	GetRampingSpd_ChB_RTRIG:R_TRIG;
 	GetRampingSpd_ChB_TON:TON;
-	GetRampingSpd_ChB:REAL;
+	GetRampingSpd_ChB:LREAL;
 	ieee754_GetRampingSpd_ChB:IEEE754_Convert;
 	//获取设定电流值_ChB
 	fb_GetSetCurrent_ChB: FB_MBReadRegs;			
@@ -349,7 +350,11 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[//自动or手动模式选择
+      <ST><![CDATA[IF NOT FunctionEnable THEN
+	RETURN;
+END_IF
+
+//自动or手动模式选择
 IF AutoOrManualMode THEN
 	AutoMode:=TRUE;
 	ManualMode:=FALSE;
@@ -434,7 +439,7 @@ CASE AM_ChA_State OF
 	1:
 		btn_PowerOn_ChA:=FALSE;
 		//目标电流已实时计算得出，开始设置电流
-		SetCurrent_ChA:=TargetCoilCurrent_ChA;
+		SetCurrent_ChA:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(TargetCoilCurrent_ChA))*10000))/10000;
 		btn_SetCurrent_ChA:=TRUE;
 		AutoMode_ChA_TON.IN:=TRUE;
 		IF ABS(SetCurrent_ChA-GetCurrent_ChA)<0.001 THEN
@@ -490,7 +495,7 @@ CASE AM_ChB_State OF
 	1:
 		btn_PowerOn_ChB:=FALSE;
 		//目标电流已实时计算得出，开始设置电流
-		SetCurrent_ChB:=TargetCoilCurrent_ChB;
+		SetCurrent_ChB:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(TargetCoilCurrent_ChB))*10000))/10000;
 		btn_SetCurrent_ChB:=TRUE;
 		AutoMode_ChB_TON.IN:=TRUE;
 		IF ABS(SetCurrent_ChB-GetCurrent_ChB)<0.001 THEN
@@ -834,7 +839,7 @@ GetSetCurrent_ChARegs[1]:=GetSetCurrent_ChARegs_PSProtocal_LowByte[1] OR GetSetC
 //IEEE转换，WORD 到 REAL
 ieee754_GetSetCurrent_ChA.data_word[0]:=GetSetCurrent_ChARegs[0];
 ieee754_GetSetCurrent_ChA.data_word[1]:=GetSetCurrent_ChARegs[1];
-GetSetCurrent_ChA:=DINT_TO_REAL(REAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetSetCurrent_ChA.data_float))*10000))/10000;
+GetSetCurrent_ChA:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetSetCurrent_ChA.data_float))*10000))/10000;
 
 ////功能块
 fb_GetSetCurrent_ChA(
@@ -877,7 +882,7 @@ GetSetCurrent_ChBRegs[1]:=GetSetCurrent_ChBRegs_PSProtocal_LowByte[1] OR GetSetC
 //IEEE转换，WORD 到 REAL
 ieee754_GetSetCurrent_ChB.data_word[0]:=GetSetCurrent_ChBRegs[0];
 ieee754_GetSetCurrent_ChB.data_word[1]:=GetSetCurrent_ChBRegs[1];
-GetSetCurrent_ChB:=DINT_TO_REAL(REAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetSetCurrent_ChB.data_float))*10000))/10000;
+GetSetCurrent_ChB:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetSetCurrent_ChB.data_float))*10000))/10000;
 
 ////功能块
 fb_GetSetCurrent_ChB(
@@ -921,7 +926,7 @@ GetVoltage_ChARegs[1]:=GetVoltage_ChARegs_PSProtocal_LowByte[1] OR GetVoltage_Ch
 //IEEE转换，WORD 到 REAL
 ieee754_GetVoltage_ChA.data_word[0]:=GetVoltage_ChARegs[0];
 ieee754_GetVoltage_ChA.data_word[1]:=GetVoltage_ChARegs[1];
-GetVoltage_ChA:=DINT_TO_REAL(REAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetVoltage_ChA.data_float))*10000))/10000;
+GetVoltage_ChA:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetVoltage_ChA.data_float))*10000))/10000;
 
 
 ////功能块
@@ -966,7 +971,7 @@ GetVoltage_ChBRegs[1]:=GetVoltage_ChBRegs_PSProtocal_LowByte[1] OR GetVoltage_Ch
 //IEEE转换，WORD 到 REAL
 ieee754_GetVoltage_ChB.data_word[0]:=GetVoltage_ChBRegs[0];
 ieee754_GetVoltage_ChB.data_word[1]:=GetVoltage_ChBRegs[1];
-GetVoltage_ChB:=DINT_TO_REAL(REAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetVoltage_ChB.data_float))*10000))/10000;
+GetVoltage_ChB:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetVoltage_ChB.data_float))*10000))/10000;
 
 
 ////功能块
@@ -1615,6 +1620,9 @@ fb_SetRampingSpd_ChB(
       </Implementation>
     </Action>
     <LineIds Name="PS1">
+      <LineId Id="1564" Count="0" />
+      <LineId Id="1566" Count="1" />
+      <LineId Id="1565" Count="0" />
       <LineId Id="528" Count="0" />
       <LineId Id="521" Count="1" />
       <LineId Id="526" Count="0" />
