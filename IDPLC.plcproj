@@ -126,10 +126,10 @@
     <Compile Include="POUs\CoilControl\PS1.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\CoilControl\PS2.TcPOU">
+    <Compile Include="POUs\CoilControl\PS3.TcPOU">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POUs\CoilControl\PS3.TcPOU">
+    <Compile Include="POUs\CoilControl\PS2.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="POUs\CommonFB\ExternFB\FB_LedShow.TcPOU">
