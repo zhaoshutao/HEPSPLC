@@ -350,7 +350,8 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[IF NOT FunctionEnable THEN
+      <ST><![CDATA[A_InitRecipeParameters();
+IF NOT FunctionEnable THEN
 	RETURN;
 END_IF
 //自动or手动模式选择
@@ -1619,6 +1620,7 @@ fb_SetRampingSpd_ChB(
       </Implementation>
     </Action>
     <LineIds Name="PS2">
+      <LineId Id="1914" Count="0" />
       <LineId Id="1565" Count="1" />
       <LineId Id="1564" Count="0" />
       <LineId Id="528" Count="0" />

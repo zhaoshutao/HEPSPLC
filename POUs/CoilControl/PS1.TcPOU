@@ -350,7 +350,8 @@ VAR
 END_VAR
 ]]></Declaration>
     <Implementation>
-      <ST><![CDATA[IF NOT FunctionEnable THEN
+      <ST><![CDATA[A_InitRecipeParameters();
+IF NOT FunctionEnable THEN
 	RETURN;
 END_IF
 
@@ -399,7 +400,6 @@ END_IF
 A_Reset_ChA();
 A_Reset_ChB();
 
-A_InitRecipeParameters();
 ]]></ST>
     </Implementation>
     <Folder Name="AutoMode" Id="{ae87d75d-2510-4a97-9ee2-bd8e723514c4}" />
@@ -1620,6 +1620,7 @@ fb_SetRampingSpd_ChB(
       </Implementation>
     </Action>
     <LineIds Name="PS1">
+      <LineId Id="1915" Count="0" />
       <LineId Id="1564" Count="0" />
       <LineId Id="1566" Count="1" />
       <LineId Id="1565" Count="0" />
@@ -1652,7 +1653,6 @@ fb_SetRampingSpd_ChB(
       <LineId Id="1205" Count="0" />
       <LineId Id="581" Count="0" />
       <LineId Id="1206" Count="0" />
-      <LineId Id="1216" Count="0" />
       <LineId Id="1215" Count="0" />
       <LineId Id="5" Count="0" />
     </LineIds>
