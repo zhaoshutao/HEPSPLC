@@ -112,11 +112,11 @@ VAR
 	btn_GetCurrent_ChA:BOOL;
 	GetCurrent_ChA_RTRIG:R_TRIG;
 	GetCurrent_ChA_TON:TON;
-	GetCurrent_ChA:REAL;
+	GetCurrent_ChA:LREAL;
 	ieee754_GetCurrent_ChA:IEEE754_Convert;
 	//获取当前电压值_ChA
 	fb_GetVoltage_ChA: FB_MBReadRegs;		
-	GetVoltage_ChA_MBAddr:WORD:=16#84;//寄存器地址
+	GetVoltage_ChA_MBAddr:WORD:=16#98;//寄存器地址
 	GetVoltage_ChARegs_PSProtocal:ARRAY[0..1] OF WORD;//从PS获取到的WORD
 	GetVoltage_ChARegs_PSProtocal_LowByte:ARRAY[0..1] OF WORD;//格式转换
 	GetVoltage_ChARegs_PSProtocal_HighByte:ARRAY[0..1] OF WORD;//格式转换
@@ -124,7 +124,7 @@ VAR
 	btn_GetVoltage_ChA:BOOL;
 	GetVoltage_ChA_RTRIG:R_TRIG;
 	GetVoltage_ChA_TON:TON;
-	GetVoltage_ChA:REAL;
+	GetVoltage_ChA:LREAL;
 	ieee754_GetVoltage_ChA:IEEE754_Convert;
 	//获取当前电流ramping速度_CHA
 	fb_GetRampingSpd_ChA: FB_MBReadRegs;		
@@ -136,7 +136,7 @@ VAR
 	btn_GetRampingSpd_ChA:BOOL;
 	GetRampingSpd_ChA_RTRIG:R_TRIG;
 	GetRampingSpd_ChA_TON:TON;
-	GetRampingSpd_ChA:REAL;
+	GetRampingSpd_ChA:LREAL;
 	ieee754_GetRampingSpd_ChA:IEEE754_Convert;
 	//获取设定电流值_ChA
 	fb_GetSetCurrent_ChA: FB_MBReadRegs;			
@@ -148,7 +148,7 @@ VAR
 	btn_GetSetCurrent_ChA:BOOL;
 	GetSetCurrent_ChA_RTRIG:R_TRIG;
 	GetSetCurrent_ChA_TON:TON;
-	GetSetCurrent_ChA:REAL;
+	GetSetCurrent_ChA:LREAL;
 	ieee754_GetSetCurrent_ChA:IEEE754_Convert;
 	//
 	//ChB
@@ -218,7 +218,7 @@ VAR
 	btn_GetCurrent_ChB:BOOL;
 	GetCurrent_ChB_RTRIG:R_TRIG;
 	GetCurrent_ChB_TON:TON;
-	GetCurrent_ChB:REAL;
+	GetCurrent_ChB:LREAL;
 	ieee754_GetCurrent_ChB:IEEE754_Convert;
 	//获取当前电压值_ChB
 	fb_GetVoltage_ChB: FB_MBReadRegs;		
@@ -230,7 +230,7 @@ VAR
 	btn_GetVoltage_ChB:BOOL;
 	GetVoltage_ChB_RTRIG:R_TRIG;
 	GetVoltage_ChB_TON:TON;
-	GetVoltage_ChB:REAL;
+	GetVoltage_ChB:LREAL;
 	ieee754_GetVoltage_ChB:IEEE754_Convert;
 	//获取当前电流ramping速度_CHB
 	fb_GetRampingSpd_ChB: FB_MBReadRegs;		
@@ -254,7 +254,7 @@ VAR
 	btn_GetSetCurrent_ChB:BOOL;
 	GetSetCurrent_ChB_RTRIG:R_TRIG;
 	GetSetCurrent_ChB_TON:TON;
-	GetSetCurrent_ChB:REAL;
+	GetSetCurrent_ChB:LREAL;
 	ieee754_GetSetCurrent_ChB:IEEE754_Convert;
 	//
 	//AutoMode(AM)
@@ -388,7 +388,7 @@ A_SetRampingSpd_ChB();
 //
 IF  AutoOrManualMode THEN
 	A_AutoMode_ChA();
-	//A_AutoMode_ChB();
+	A_AutoMode_ChB();
 END_IF
 
 A_Reset_ChA();
@@ -537,7 +537,7 @@ GetCurrent_ChARegs[1]:=GetCurrent_ChARegs_PSProtocal_LowByte[1] OR GetCurrent_Ch
 //IEEE转换，WORD 到 REAL
 ieee754_GetCurrent_ChA.data_word[0]:=GetCurrent_ChARegs[0];
 ieee754_GetCurrent_ChA.data_word[1]:=GetCurrent_ChARegs[1];
-GetCurrent_ChA:=DINT_TO_REAL(REAL_TO_DINT(ieee754_GetCurrent_ChA.data_float*10000))/10000;
+GetCurrent_ChA:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetCurrent_ChA.data_float))*10000))/10000;
 
 ////功能块
 fb_GetCurrent_ChA(
@@ -581,7 +581,7 @@ GetCurrent_ChBRegs[1]:=GetCurrent_ChBRegs_PSProtocal_LowByte[1] OR GetCurrent_Ch
 //IEEE转换，WORD 到 REAL
 ieee754_GetCurrent_ChB.data_word[0]:=GetCurrent_ChBRegs[0];
 ieee754_GetCurrent_ChB.data_word[1]:=GetCurrent_ChBRegs[1];
-GetCurrent_ChB:=DINT_TO_REAL(REAL_TO_DINT(ieee754_GetCurrent_ChB.data_float*10000))/10000;
+GetCurrent_ChB:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetCurrent_ChB.data_float))*10000))/10000;
 
 ////功能块
 fb_GetCurrent_ChB(
@@ -702,7 +702,7 @@ PSVersion_Word[0]:=PSVersion_PSProtocal_LowByte[0] OR PSVersion_PSProtocal_HighB
 PSVersion_PSProtocal_LowByte[1]:=SHL((PSVersion_PSProtocal[1] AND 16#00FF),8);
 PSVersion_PSProtocal_HighByte[1]:=SHR((PSVersion_PSProtocal[1] AND 16#FF00),8);
 PSVersion_Word[1]:=PSVersion_PSProtocal_LowByte[1] OR PSVersion_PSProtocal_HighByte[1];
-PSVersion:=CONCAT(WORD_TO_STRING(PSVersion[1]),WORD_TO_STRING(PSVersion[0]));
+PSVersion:=CONCAT(WORD_TO_STRING(PSVersion_Word[1]),WORD_TO_STRING(PSVersion_Word[0]));
 ////功能块
 fb_GetPSVersion(
 	sIPAddr:=IPAddr , 		//Server IP地址
@@ -745,7 +745,7 @@ GetRampingSpd_ChARegs[1]:=GetRampingSpd_ChARegs_PSProtocal_LowByte[1] OR GetRamp
 //IEEE转换，WORD 到 REAL
 ieee754_GetRampingSpd_ChA.data_word[0]:=GetRampingSpd_ChARegs[0];
 ieee754_GetRampingSpd_ChA.data_word[1]:=GetRampingSpd_ChARegs[1];
-GetRampingSpd_ChA:=DINT_TO_REAL(REAL_TO_DINT(ieee754_GetRampingSpd_ChA.data_float*10000))/10000;
+GetRampingSpd_ChA:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetRampingSpd_ChA.data_float))*10000))/10000;
 
 ////功能块
 fb_GetRampingSpd_ChA(
@@ -789,7 +789,7 @@ GetRampingSpd_ChBRegs[1]:=GetRampingSpd_ChBRegs_PSProtocal_LowByte[1] OR GetRamp
 //IEEE转换，WORD 到 REAL
 ieee754_GetRampingSpd_ChB.data_word[0]:=GetRampingSpd_ChBRegs[0];
 ieee754_GetRampingSpd_ChB.data_word[1]:=GetRampingSpd_ChBRegs[1];
-GetRampingSpd_ChB:=DINT_TO_REAL(REAL_TO_DINT(ieee754_GetRampingSpd_ChB.data_float*10000))/10000;
+GetRampingSpd_ChB:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetRampingSpd_ChB.data_float))*10000))/10000;
 
 ////功能块
 fb_GetRampingSpd_ChB(
@@ -834,7 +834,7 @@ GetSetCurrent_ChARegs[1]:=GetSetCurrent_ChARegs_PSProtocal_LowByte[1] OR GetSetC
 //IEEE转换，WORD 到 REAL
 ieee754_GetSetCurrent_ChA.data_word[0]:=GetSetCurrent_ChARegs[0];
 ieee754_GetSetCurrent_ChA.data_word[1]:=GetSetCurrent_ChARegs[1];
-GetSetCurrent_ChA:=DINT_TO_REAL(REAL_TO_DINT(ieee754_GetSetCurrent_ChA.data_float*10000))/10000;
+GetSetCurrent_ChA:=DINT_TO_REAL(REAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetSetCurrent_ChA.data_float))*10000))/10000;
 
 ////功能块
 fb_GetSetCurrent_ChA(
@@ -877,7 +877,7 @@ GetSetCurrent_ChBRegs[1]:=GetSetCurrent_ChBRegs_PSProtocal_LowByte[1] OR GetSetC
 //IEEE转换，WORD 到 REAL
 ieee754_GetSetCurrent_ChB.data_word[0]:=GetSetCurrent_ChBRegs[0];
 ieee754_GetSetCurrent_ChB.data_word[1]:=GetSetCurrent_ChBRegs[1];
-GetSetCurrent_ChB:=DINT_TO_REAL(REAL_TO_DINT(ieee754_GetSetCurrent_ChB.data_float*10000))/10000;
+GetSetCurrent_ChB:=DINT_TO_REAL(REAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetSetCurrent_ChB.data_float))*10000))/10000;
 
 ////功能块
 fb_GetSetCurrent_ChB(
@@ -921,7 +921,7 @@ GetVoltage_ChARegs[1]:=GetVoltage_ChARegs_PSProtocal_LowByte[1] OR GetVoltage_Ch
 //IEEE转换，WORD 到 REAL
 ieee754_GetVoltage_ChA.data_word[0]:=GetVoltage_ChARegs[0];
 ieee754_GetVoltage_ChA.data_word[1]:=GetVoltage_ChARegs[1];
-GetVoltage_ChA:=DINT_TO_REAL(REAL_TO_DINT(ieee754_GetVoltage_ChA.data_float*10000))/10000;
+GetVoltage_ChA:=DINT_TO_REAL(REAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetVoltage_ChA.data_float))*10000))/10000;
 
 
 ////功能块
@@ -966,7 +966,7 @@ GetVoltage_ChBRegs[1]:=GetVoltage_ChBRegs_PSProtocal_LowByte[1] OR GetVoltage_Ch
 //IEEE转换，WORD 到 REAL
 ieee754_GetVoltage_ChB.data_word[0]:=GetVoltage_ChBRegs[0];
 ieee754_GetVoltage_ChB.data_word[1]:=GetVoltage_ChBRegs[1];
-GetVoltage_ChB:=DINT_TO_REAL(REAL_TO_DINT(ieee754_GetVoltage_ChB.data_float*10000))/10000;
+GetVoltage_ChB:=DINT_TO_REAL(REAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetVoltage_ChB.data_float))*10000))/10000;
 
 
 ////功能块

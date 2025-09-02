@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <TcPlcObject Version="1.1.0.1" ProductVersion="3.1.4024.6">
-  <POU Name="PS2" Id="{cad729a9-7a37-4c98-b99d-56fded9b8992}" SpecialFunc="None">
+  <POU Name="PS2" Id="{c5a7a963-507e-4662-9c39-f0c013f0dba6}" SpecialFunc="None">
     <Declaration><![CDATA[PROGRAM PS2
 VAR
 	CoilName:STRING:='';
@@ -112,11 +112,11 @@ VAR
 	btn_GetCurrent_ChA:BOOL;
 	GetCurrent_ChA_RTRIG:R_TRIG;
 	GetCurrent_ChA_TON:TON;
-	GetCurrent_ChA:REAL;
+	GetCurrent_ChA:LREAL;
 	ieee754_GetCurrent_ChA:IEEE754_Convert;
 	//获取当前电压值_ChA
 	fb_GetVoltage_ChA: FB_MBReadRegs;		
-	GetVoltage_ChA_MBAddr:WORD:=16#84;//寄存器地址
+	GetVoltage_ChA_MBAddr:WORD:=16#98;//寄存器地址
 	GetVoltage_ChARegs_PSProtocal:ARRAY[0..1] OF WORD;//从PS获取到的WORD
 	GetVoltage_ChARegs_PSProtocal_LowByte:ARRAY[0..1] OF WORD;//格式转换
 	GetVoltage_ChARegs_PSProtocal_HighByte:ARRAY[0..1] OF WORD;//格式转换
@@ -124,7 +124,7 @@ VAR
 	btn_GetVoltage_ChA:BOOL;
 	GetVoltage_ChA_RTRIG:R_TRIG;
 	GetVoltage_ChA_TON:TON;
-	GetVoltage_ChA:REAL;
+	GetVoltage_ChA:LREAL;
 	ieee754_GetVoltage_ChA:IEEE754_Convert;
 	//获取当前电流ramping速度_CHA
 	fb_GetRampingSpd_ChA: FB_MBReadRegs;		
@@ -136,7 +136,7 @@ VAR
 	btn_GetRampingSpd_ChA:BOOL;
 	GetRampingSpd_ChA_RTRIG:R_TRIG;
 	GetRampingSpd_ChA_TON:TON;
-	GetRampingSpd_ChA:REAL;
+	GetRampingSpd_ChA:LREAL;
 	ieee754_GetRampingSpd_ChA:IEEE754_Convert;
 	//获取设定电流值_ChA
 	fb_GetSetCurrent_ChA: FB_MBReadRegs;			
@@ -148,7 +148,7 @@ VAR
 	btn_GetSetCurrent_ChA:BOOL;
 	GetSetCurrent_ChA_RTRIG:R_TRIG;
 	GetSetCurrent_ChA_TON:TON;
-	GetSetCurrent_ChA:REAL;
+	GetSetCurrent_ChA:LREAL;
 	ieee754_GetSetCurrent_ChA:IEEE754_Convert;
 	//
 	//ChB
@@ -218,7 +218,7 @@ VAR
 	btn_GetCurrent_ChB:BOOL;
 	GetCurrent_ChB_RTRIG:R_TRIG;
 	GetCurrent_ChB_TON:TON;
-	GetCurrent_ChB:REAL;
+	GetCurrent_ChB:LREAL;
 	ieee754_GetCurrent_ChB:IEEE754_Convert;
 	//获取当前电压值_ChB
 	fb_GetVoltage_ChB: FB_MBReadRegs;		
@@ -230,7 +230,7 @@ VAR
 	btn_GetVoltage_ChB:BOOL;
 	GetVoltage_ChB_RTRIG:R_TRIG;
 	GetVoltage_ChB_TON:TON;
-	GetVoltage_ChB:REAL;
+	GetVoltage_ChB:LREAL;
 	ieee754_GetVoltage_ChB:IEEE754_Convert;
 	//获取当前电流ramping速度_CHB
 	fb_GetRampingSpd_ChB: FB_MBReadRegs;		
@@ -254,7 +254,7 @@ VAR
 	btn_GetSetCurrent_ChB:BOOL;
 	GetSetCurrent_ChB_RTRIG:R_TRIG;
 	GetSetCurrent_ChB_TON:TON;
-	GetSetCurrent_ChB:REAL;
+	GetSetCurrent_ChB:LREAL;
 	ieee754_GetSetCurrent_ChB:IEEE754_Convert;
 	//
 	//AutoMode(AM)
@@ -388,7 +388,7 @@ A_SetRampingSpd_ChB();
 //
 IF  AutoOrManualMode THEN
 	A_AutoMode_ChA();
-	//A_AutoMode_ChB();
+	A_AutoMode_ChB();
 END_IF
 
 A_Reset_ChA();
@@ -397,10 +397,10 @@ A_Reset_ChB();
 A_InitRecipeParameters();
 ]]></ST>
     </Implementation>
-    <Folder Name="AutoMode" Id="{5da7478f-3930-4964-babe-4dcea0466a56}" />
-    <Folder Name="Get" Id="{aec226e7-28a1-4bfd-ac2b-a05858e97730}" />
-    <Folder Name="Set" Id="{318c3f5b-c841-49ef-b593-26dd9968e971}" />
-    <Action Name="A_AutoMode_ChA" Id="{0c82ac42-95eb-492c-bfa9-d5dd5674d812}" FolderPath="AutoMode\">
+    <Folder Name="AutoMode" Id="{b56a2d0b-8a99-4259-8b40-72a31ae3f302}" />
+    <Folder Name="Get" Id="{99303aa5-baf5-4e70-a5e8-cd9f2b17e05a}" />
+    <Folder Name="Set" Id="{b6a1ee2f-e1ca-42a0-af24-2a49d053fae7}" />
+    <Action Name="A_AutoMode_ChA" Id="{1489038f-64f7-4bf6-a702-33c6ffdff235}" FolderPath="AutoMode\">
       <Implementation>
         <ST><![CDATA[//
 //0、/法，根据当前gap计算对应的电流。如果gap=0，不计算，保持当前状态，等到不为0时，继续计算
@@ -456,7 +456,7 @@ END_CASE
 AutoMode_ChA_TON(PT:=T#0.1S);]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_AutoMode_ChB" Id="{dc4900f4-da02-4668-a596-9ed63075303c}" FolderPath="AutoMode\">
+    <Action Name="A_AutoMode_ChB" Id="{281f54a7-c04d-4e89-bc7f-6240de3b1996}" FolderPath="AutoMode\">
       <Implementation>
         <ST><![CDATA[//
 //0、/法，根据当前gap计算对应的电流。如果gap=0，不计算，保持当前状态，等到不为0时，继续计算
@@ -512,7 +512,7 @@ END_CASE
 AutoMode_ChB_TON(PT:=T#0.1S);]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_GetCurrent_ChA" Id="{73fa9476-f6d6-4af3-9d60-17f54f85fc2f}" FolderPath="Get\">
+    <Action Name="A_GetCurrent_ChA" Id="{7db1562a-b223-4f01-a85d-578991b7c313}" FolderPath="Get\">
       <Implementation>
         <ST><![CDATA[//上升沿触发
 GetCurrent_ChA_RTRIG(CLK:=btn_GetCurrent_ChA);
@@ -537,7 +537,7 @@ GetCurrent_ChARegs[1]:=GetCurrent_ChARegs_PSProtocal_LowByte[1] OR GetCurrent_Ch
 //IEEE转换，WORD 到 REAL
 ieee754_GetCurrent_ChA.data_word[0]:=GetCurrent_ChARegs[0];
 ieee754_GetCurrent_ChA.data_word[1]:=GetCurrent_ChARegs[1];
-GetCurrent_ChA:=DINT_TO_REAL(REAL_TO_DINT(ieee754_GetCurrent_ChA.data_float*10000))/10000;
+GetCurrent_ChA:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetCurrent_ChA.data_float))*10000))/10000;
 
 ////功能块
 fb_GetCurrent_ChA(
@@ -556,7 +556,7 @@ fb_GetCurrent_ChA(
 	cbRead=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_GetCurrent_ChB" Id="{74169795-955e-4d62-806f-4f89deacf518}" FolderPath="Get\">
+    <Action Name="A_GetCurrent_ChB" Id="{dfc97118-2704-4f58-8b23-d6e1ce82af9e}" FolderPath="Get\">
       <Implementation>
         <ST><![CDATA[//上升沿触发
 GetCurrent_ChB_RTRIG(CLK:=btn_GetCurrent_ChB);
@@ -581,7 +581,7 @@ GetCurrent_ChBRegs[1]:=GetCurrent_ChBRegs_PSProtocal_LowByte[1] OR GetCurrent_Ch
 //IEEE转换，WORD 到 REAL
 ieee754_GetCurrent_ChB.data_word[0]:=GetCurrent_ChBRegs[0];
 ieee754_GetCurrent_ChB.data_word[1]:=GetCurrent_ChBRegs[1];
-GetCurrent_ChB:=DINT_TO_REAL(REAL_TO_DINT(ieee754_GetCurrent_ChB.data_float*10000))/10000;
+GetCurrent_ChB:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetCurrent_ChB.data_float))*10000))/10000;
 
 ////功能块
 fb_GetCurrent_ChB(
@@ -600,7 +600,7 @@ fb_GetCurrent_ChB(
 	cbRead=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_GetPSStatus" Id="{8d90d55d-0d8a-4837-8ca6-e7cfa802c26f}" FolderPath="Get\">
+    <Action Name="A_GetPSStatus" Id="{4c006851-5080-4283-a184-1c9b776a6968}" FolderPath="Get\">
       <Implementation>
         <ST><![CDATA[//获取版本信息
 GetPSStatus_RTRIG(CLK:=btn_GetPSStatus);
@@ -681,7 +681,7 @@ fb_GetPSStatus(
 	]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_GetPSVersion" Id="{205a4a52-191f-4d1c-a6af-90df70b22837}" FolderPath="Get\">
+    <Action Name="A_GetPSVersion" Id="{a9c65791-becc-4200-ab33-4d3627685b6f}" FolderPath="Get\">
       <Implementation>
         <ST><![CDATA[//获取版本信息
 GetPSVersion_RTRIG(CLK:=btn_GetPSVersion);
@@ -702,7 +702,7 @@ PSVersion_Word[0]:=PSVersion_PSProtocal_LowByte[0] OR PSVersion_PSProtocal_HighB
 PSVersion_PSProtocal_LowByte[1]:=SHL((PSVersion_PSProtocal[1] AND 16#00FF),8);
 PSVersion_PSProtocal_HighByte[1]:=SHR((PSVersion_PSProtocal[1] AND 16#FF00),8);
 PSVersion_Word[1]:=PSVersion_PSProtocal_LowByte[1] OR PSVersion_PSProtocal_HighByte[1];
-PSVersion:=CONCAT(WORD_TO_STRING(PSVersion[1]),WORD_TO_STRING(PSVersion[0]));
+PSVersion:=CONCAT(WORD_TO_STRING(PSVersion_Word[1]),WORD_TO_STRING(PSVersion_Word[0]));
 ////功能块
 fb_GetPSVersion(
 	sIPAddr:=IPAddr , 		//Server IP地址
@@ -720,7 +720,7 @@ fb_GetPSVersion(
 	cbRead=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_GetRampSpd_ChA" Id="{4d4f7bd0-b1c1-4126-9f1c-d011bf787acd}" FolderPath="Get\">
+    <Action Name="A_GetRampSpd_ChA" Id="{0b43ed92-de85-49b5-8b0a-0711a6feba90}" FolderPath="Get\">
       <Implementation>
         <ST><![CDATA[//上升沿触发
 GetRampingSpd_ChA_RTRIG(CLK:=btn_GetRampingSpd_ChA);
@@ -745,7 +745,7 @@ GetRampingSpd_ChARegs[1]:=GetRampingSpd_ChARegs_PSProtocal_LowByte[1] OR GetRamp
 //IEEE转换，WORD 到 REAL
 ieee754_GetRampingSpd_ChA.data_word[0]:=GetRampingSpd_ChARegs[0];
 ieee754_GetRampingSpd_ChA.data_word[1]:=GetRampingSpd_ChARegs[1];
-GetRampingSpd_ChA:=DINT_TO_REAL(REAL_TO_DINT(ieee754_GetRampingSpd_ChA.data_float*10000))/10000;
+GetRampingSpd_ChA:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetRampingSpd_ChA.data_float))*10000))/10000;
 
 ////功能块
 fb_GetRampingSpd_ChA(
@@ -764,7 +764,7 @@ fb_GetRampingSpd_ChA(
 	cbRead=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_GetRampSpd_ChB" Id="{04054f1e-d02b-4221-a6ae-838b5da525c2}" FolderPath="Get\">
+    <Action Name="A_GetRampSpd_ChB" Id="{fbbba74c-49d8-47a0-a094-242dd20ca6f5}" FolderPath="Get\">
       <Implementation>
         <ST><![CDATA[//上升沿触发
 GetRampingSpd_ChB_RTRIG(CLK:=btn_GetRampingSpd_ChB);
@@ -789,7 +789,7 @@ GetRampingSpd_ChBRegs[1]:=GetRampingSpd_ChBRegs_PSProtocal_LowByte[1] OR GetRamp
 //IEEE转换，WORD 到 REAL
 ieee754_GetRampingSpd_ChB.data_word[0]:=GetRampingSpd_ChBRegs[0];
 ieee754_GetRampingSpd_ChB.data_word[1]:=GetRampingSpd_ChBRegs[1];
-GetRampingSpd_ChB:=DINT_TO_REAL(REAL_TO_DINT(ieee754_GetRampingSpd_ChB.data_float*10000))/10000;
+GetRampingSpd_ChB:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetRampingSpd_ChB.data_float))*10000))/10000;
 
 ////功能块
 fb_GetRampingSpd_ChB(
@@ -808,7 +808,7 @@ fb_GetRampingSpd_ChB(
 	cbRead=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_GetSetCurrent_ChA" Id="{954930b3-56a7-41c1-a31d-96166d9e3673}" FolderPath="Get\">
+    <Action Name="A_GetSetCurrent_ChA" Id="{8936ce6e-0e55-4654-9957-c0d52a3eb694}" FolderPath="Get\">
       <Implementation>
         <ST><![CDATA[
 
@@ -834,7 +834,7 @@ GetSetCurrent_ChARegs[1]:=GetSetCurrent_ChARegs_PSProtocal_LowByte[1] OR GetSetC
 //IEEE转换，WORD 到 REAL
 ieee754_GetSetCurrent_ChA.data_word[0]:=GetSetCurrent_ChARegs[0];
 ieee754_GetSetCurrent_ChA.data_word[1]:=GetSetCurrent_ChARegs[1];
-GetSetCurrent_ChA:=DINT_TO_REAL(REAL_TO_DINT(ieee754_GetSetCurrent_ChA.data_float*10000))/10000;
+GetSetCurrent_ChA:=DINT_TO_REAL(REAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetSetCurrent_ChA.data_float))*10000))/10000;
 
 ////功能块
 fb_GetSetCurrent_ChA(
@@ -853,7 +853,7 @@ fb_GetSetCurrent_ChA(
 	cbRead=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_GetSetCurrent_ChB" Id="{a8b6554d-100b-493f-a03a-a2bb1f31f612}" FolderPath="Get\">
+    <Action Name="A_GetSetCurrent_ChB" Id="{4963f9fe-615c-415f-83e7-9aeadb44d5e0}" FolderPath="Get\">
       <Implementation>
         <ST><![CDATA[GetSetCurrent_ChB_RTRIG(CLK:=btn_GetSetCurrent_ChB);
 IF GetSetCurrent_ChB_RTRIG.Q THEN
@@ -877,7 +877,7 @@ GetSetCurrent_ChBRegs[1]:=GetSetCurrent_ChBRegs_PSProtocal_LowByte[1] OR GetSetC
 //IEEE转换，WORD 到 REAL
 ieee754_GetSetCurrent_ChB.data_word[0]:=GetSetCurrent_ChBRegs[0];
 ieee754_GetSetCurrent_ChB.data_word[1]:=GetSetCurrent_ChBRegs[1];
-GetSetCurrent_ChB:=DINT_TO_REAL(REAL_TO_DINT(ieee754_GetSetCurrent_ChB.data_float*10000))/10000;
+GetSetCurrent_ChB:=DINT_TO_REAL(REAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetSetCurrent_ChB.data_float))*10000))/10000;
 
 ////功能块
 fb_GetSetCurrent_ChB(
@@ -896,7 +896,7 @@ fb_GetSetCurrent_ChB(
 	cbRead=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_GetVoltage_ChA" Id="{11b33db8-1905-49a4-af51-e344f7403f08}" FolderPath="Get\">
+    <Action Name="A_GetVoltage_ChA" Id="{cc7f6583-d927-44d8-b066-17f4a45623a6}" FolderPath="Get\">
       <Implementation>
         <ST><![CDATA[//上升沿触发
 GetVoltage_ChA_RTRIG(CLK:=btn_GetVoltage_ChA);
@@ -921,7 +921,7 @@ GetVoltage_ChARegs[1]:=GetVoltage_ChARegs_PSProtocal_LowByte[1] OR GetVoltage_Ch
 //IEEE转换，WORD 到 REAL
 ieee754_GetVoltage_ChA.data_word[0]:=GetVoltage_ChARegs[0];
 ieee754_GetVoltage_ChA.data_word[1]:=GetVoltage_ChARegs[1];
-GetVoltage_ChA:=DINT_TO_REAL(REAL_TO_DINT(ieee754_GetVoltage_ChA.data_float*10000))/10000;
+GetVoltage_ChA:=DINT_TO_REAL(REAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetVoltage_ChA.data_float))*10000))/10000;
 
 
 ////功能块
@@ -941,7 +941,7 @@ fb_GetVoltage_ChA(
 	cbRead=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_GetVoltage_ChB" Id="{20201a25-8f95-4b3e-90a5-878f91986f50}" FolderPath="Get\">
+    <Action Name="A_GetVoltage_ChB" Id="{38a42752-35e8-4017-a5eb-97561504044f}" FolderPath="Get\">
       <Implementation>
         <ST><![CDATA[//上升沿触发
 GetVoltage_ChB_RTRIG(CLK:=btn_GetVoltage_ChB);
@@ -966,7 +966,7 @@ GetVoltage_ChBRegs[1]:=GetVoltage_ChBRegs_PSProtocal_LowByte[1] OR GetVoltage_Ch
 //IEEE转换，WORD 到 REAL
 ieee754_GetVoltage_ChB.data_word[0]:=GetVoltage_ChBRegs[0];
 ieee754_GetVoltage_ChB.data_word[1]:=GetVoltage_ChBRegs[1];
-GetVoltage_ChB:=DINT_TO_REAL(REAL_TO_DINT(ieee754_GetVoltage_ChB.data_float*10000))/10000;
+GetVoltage_ChB:=DINT_TO_REAL(REAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetVoltage_ChB.data_float))*10000))/10000;
 
 
 ////功能块
@@ -986,7 +986,7 @@ fb_GetVoltage_ChB(
 	cbRead=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_InitRecipeParameters" Id="{0876f8fa-a3be-4a3c-bd2e-a43358001d51}">
+    <Action Name="A_InitRecipeParameters" Id="{1516c29b-e81b-4f9b-8a24-1210af26e153}">
       <Implementation>
         <ST><![CDATA[CASE state_loadParameters OF
 	0:
@@ -1034,7 +1034,7 @@ END_CASE
 ]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_PowerOff_ChA" Id="{ecc6e8c0-4160-45d3-93c8-aa6ad473bcaa}" FolderPath="Set\">
+    <Action Name="A_PowerOff_ChA" Id="{c6e421a1-2555-4610-934a-9d60f9202cca}" FolderPath="Set\">
       <Implementation>
         <ST><![CDATA[CASE PowerOff_ChA_State OF
 	0:
@@ -1092,7 +1092,7 @@ fb_PowerOff_ChA_ResetReg(
 	nErrId=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_PowerOff_ChB" Id="{b378967a-3209-4ce2-b73a-66959c143540}" FolderPath="Set\">
+    <Action Name="A_PowerOff_ChB" Id="{150fa1ea-5281-4d8b-a162-d953c5e72955}" FolderPath="Set\">
       <Implementation>
         <ST><![CDATA[CASE PowerOff_ChB_State OF
 	0:
@@ -1150,7 +1150,7 @@ fb_PowerOff_ChB_ResetReg(
 	nErrId=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_PowerOn_ChA" Id="{f8ccf2f7-8521-404c-bc6e-4d5a4e16e524}" FolderPath="Set\">
+    <Action Name="A_PowerOn_ChA" Id="{7e6f6a24-ec6c-4062-ba5d-dd263f028e0f}" FolderPath="Set\">
       <Implementation>
         <ST><![CDATA[CASE PowerOn_ChA_State OF
 	0:
@@ -1223,7 +1223,7 @@ fb_PowerOn_ChA_ResetReg(
 	nErrId=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_PowerOn_ChB" Id="{d0345d71-f09b-4c53-8975-56a2085341e8}" FolderPath="Set\">
+    <Action Name="A_PowerOn_ChB" Id="{d18ff2a2-eb6a-49db-95ef-4a3616bbd81b}" FolderPath="Set\">
       <Implementation>
         <ST><![CDATA[CASE PowerOn_ChB_State OF
 	0:
@@ -1296,7 +1296,7 @@ fb_PowerOn_ChB_ResetReg(
 	nErrId=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_Reset_ChA" Id="{8f8582ac-7ef5-48e4-8a5d-f6e8c6c4a8db}" FolderPath="Set\">
+    <Action Name="A_Reset_ChA" Id="{1d943574-b7ac-4d9b-94d5-6e6e83b32e7f}" FolderPath="Set\">
       <Implementation>
         <ST><![CDATA[CASE Reset_ChA_State OF
 	0:
@@ -1351,7 +1351,7 @@ fb_Reset_ChA_ResetReg(
 	nErrId=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_Reset_ChB" Id="{04e0cb7c-8334-4e14-8ddc-aaa5c53f1006}" FolderPath="Set\">
+    <Action Name="A_Reset_ChB" Id="{a2a4d01b-db5f-4cdc-be71-928fd3dc432f}" FolderPath="Set\">
       <Implementation>
         <ST><![CDATA[CASE Reset_ChB_State OF
 	0:
@@ -1406,7 +1406,7 @@ fb_Reset_ChB_ResetReg(
 	nErrId=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_SetCurrent_ChA" Id="{992daac6-1bcd-4b44-82e1-d012e0157f1f}" FolderPath="Set\">
+    <Action Name="A_SetCurrent_ChA" Id="{cfa3a39c-71dc-48c9-97c4-97119cb92ad9}" FolderPath="Set\">
       <Implementation>
         <ST><![CDATA[//IEEE754转化,REAL到WORD
 ieee754_SetCurrent_ChA.data_float:=SetCurrent_ChA;
@@ -1458,7 +1458,7 @@ fb_SetCurrent_ChA(
 	nErrId=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_SetCurrent_ChB" Id="{b3b4743c-bb29-4bbe-8fa8-ba5caf6e27a0}" FolderPath="Set\">
+    <Action Name="A_SetCurrent_ChB" Id="{5f2e6c5d-faa6-4d53-ba32-d26563b70fbb}" FolderPath="Set\">
       <Implementation>
         <ST><![CDATA[//IEEE754转化,REAL到WORD
 ieee754_SetCurrent_ChB.data_float:=SetCurrent_ChB;
@@ -1510,7 +1510,7 @@ fb_SetCurrent_ChB(
 	nErrId=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_SetRampingSpd_ChA" Id="{52937ce6-602d-490e-a8ac-60c571e74064}" FolderPath="Set\">
+    <Action Name="A_SetRampingSpd_ChA" Id="{41a22a6a-39c2-4a56-baa3-66c52e336c67}" FolderPath="Set\">
       <Implementation>
         <ST><![CDATA[//IEEE754转化,REAL到WORD
 ieee754_SetRampingSpd_ChA.data_float:=SetRampingSpd_ChA;
@@ -1562,7 +1562,7 @@ fb_SetRampingSpd_ChA(
 	nErrId=> );]]></ST>
       </Implementation>
     </Action>
-    <Action Name="A_SetRampingSpd_ChB" Id="{ed80512c-ebaa-4ad4-8a1a-471148c77f45}" FolderPath="Set\">
+    <Action Name="A_SetRampingSpd_ChB" Id="{2c8367c2-77a8-43b8-8b9e-d3aca3177e7f}" FolderPath="Set\">
       <Implementation>
         <ST><![CDATA[//IEEE754转化,REAL到WORD
 ieee754_SetRampingSpd_ChB.data_float:=SetRampingSpd_ChB;
