@@ -120,6 +120,7 @@ VAR
 	TaperAndGapSafetyfactor: LREAL:=1;
 	TaperAndGapSafetyScale:LREAL:=0.41;//IAU=0.409,IVU=0.32,CPMU=0.328,IAMW=0.42
 	TaperAndGapSafetyMinGapMargin:LREAL:=0.4;
+	IDTaperAndBLTaperScale:LREAL:=0.548;//HU 
 	//
 	//Global Chain protection-MPS
 	Global_ChainProtection_MPS_StorageRingReady:BOOL;
@@ -876,7 +877,7 @@ IF USE_SingleAxis_Compensation THEN
 		UserTaperPositionNew:=0;
 		//UserTaperPositionDisplay:=0;
 	END_IF
-	UserRightGapPositionNew:=UserGapPositionNew+UserTaperPositionNew*TaperAndGapSafetyScale;
+	UserRightGapPositionNew:=UserGapPositionNew+UserTaperPositionNew*IDTaperAndBLTaperScale;
 	//左轴目标位置解算
 	FOR	i:= 1 TO 17 DO
 			IF UserGapPositionNew/2<M_Compensation[i+1].Encoder AND UserGapPositionNew/2>=M_Compensation[i].Encoder THEN
@@ -949,8 +950,8 @@ IF USE_SingleAxis_Compensation THEN
 			END_IF
 	END_FOR
 	IF TaperOrNot OR (Global_ChainProtection_MPS_Triggered OR Global_ChainProtection_EPS_Triggered)  THEN//安全联锁触发时，需要UserTaperPositionDisplay作为A_MonitoringAllAxis的保护
-		UserTaperPositionDisplay:=(DINT_TO_LREAL(LREAL_TO_DINT((UserRightGapPositionDisplay-UserGapPositionDisplay)*100000))/100000)/TaperAndGapSafetyScale;
-		UserTaperVelocityDisplay:=(DINT_TO_LREAL(LREAL_TO_DINT((Velo_RightTopLin+Velo_RightBottomLin)/2*100000))/100000)/TaperAndGapSafetyScale;
+		UserTaperPositionDisplay:=(DINT_TO_LREAL(LREAL_TO_DINT((UserRightGapPositionDisplay-UserGapPositionDisplay)*100000))/100000)/IDTaperAndBLTaperScale;
+		UserTaperVelocityDisplay:=(DINT_TO_LREAL(LREAL_TO_DINT((Velo_RightTopLin+Velo_RightBottomLin)/2*100000))/100000)/IDTaperAndBLTaperScale;
 	END_IF
 
 	
@@ -1028,13 +1029,13 @@ CASE moni_State OF
 		(*Right*)
 		Diff_UserRightVelo_actual:=ABS(Velo_RightTopLin-Velo_RightBottomLin);
 		//阈值
-		Threshold_UserTopPos_PLC:=Threshold_UserTopPos+ABS(UserTaperPositionDisplay*TaperAndGapSafetyScale);//Top位置误差=gap运动细微误差+目标taper位置
+		Threshold_UserTopPos_PLC:=Threshold_UserTopPos+ABS(UserTaperPositionDisplay*IDTaperAndBLTaperScale);//Top位置误差=gap运动细微误差+目标taper位置
 		Threshold_UserTopVelo_PLC:=Threshold_UserTopVelo+ABS(UserGapVelocityDisplay);//Top速度误差=gap运动细微误差+gap目标速度。因为可能出现一个轴运动完了，另一个轴还在运动的情况
-		Threshold_UserBottomPos_PLC:=Threshold_UserBottomPos+ABS(UserTaperPositionDisplay*TaperAndGapSafetyScale);//Bottom同上
+		Threshold_UserBottomPos_PLC:=Threshold_UserBottomPos+ABS(UserTaperPositionDisplay*IDTaperAndBLTaperScale);//Bottom同上
 		Threshold_UserBottomVelo_PLC:=Threshold_UserBottomVelo+ABS(UserGapVelocityDisplay);//Bottom同上
-		Threshold_UserLeftPos_PLC:=Threshold_UserLeftPos+ABS(UserTaperPositionDisplay*TaperAndGapSafetyScale);
+		Threshold_UserLeftPos_PLC:=Threshold_UserLeftPos+ABS(UserTaperPositionDisplay*IDTaperAndBLTaperScale);
 		Threshold_UserLeftVelo_PLC:=Threshold_UserLeftVelo+ABS(UserGapVelocityDisplay);
-		Threshold_UserRightPos_PLC:=Threshold_UserRightPos+ABS(UserTaperPositionDisplay*TaperAndGapSafetyScale);
+		Threshold_UserRightPos_PLC:=Threshold_UserRightPos+ABS(UserTaperPositionDisplay*IDTaperAndBLTaperScale);
 		Threshold_UserRightVelo_PLC:=Threshold_UserRightVelo+ABS(UserGapVelocityDisplay);
 		//此处计算一下上轴和下轴分别的taper，根据光栅直接计算
 		
