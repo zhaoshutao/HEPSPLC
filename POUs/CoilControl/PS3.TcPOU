@@ -417,13 +417,13 @@ A_InitRecipeParameters();
 //
 //如果当前磁间隙低于最小阈值或者大于最大阈值，则目标电流等于当前电流，也即不设置
 IF UserMode.UserGapPositionDisplay<min_UserLEProtectionGapPosition OR UserMode.UserGapPositionDisplay>max_UserLEProtectionGapPosition THEN
-	TargetCoilCurrent_ChA:=GetCurrent_ChA;
+	TargetCoilCurrent_ChA:=LREAL_TO_REAL(GetCurrent_ChA);
 ELSE
 	//插补法计算gap对应电流值
 	FOR	i_ChA:= 1 TO 30 DO
 		IF UserMode.UserGapPositionDisplay <M_Compensation_Gap2Coil_ChA[i_ChA+1].Gap AND UserMode.UserGapPositionDisplay>=M_Compensation_Gap2Coil_ChA[i_ChA].Gap THEN
-				TargetCoilCurrent_ChA:=(((UserMode.UserGapPositionDisplay-M_Compensation_Gap2Coil_ChA[i_ChA].Gap)*(M_Compensation_Gap2Coil_ChA[i_ChA+1].CoilCurrent-M_Compensation_Gap2Coil_ChA[i_ChA].CoilCurrent))
-						/(M_Compensation_Gap2Coil_ChA[i_ChA+1].Gap-M_Compensation_Gap2Coil_ChA[i_ChA].Gap))+M_Compensation_Gap2Coil_ChA[i_ChA].CoilCurrent;
+				TargetCoilCurrent_ChA:=LREAL_TO_REAL((((UserMode.UserGapPositionDisplay-M_Compensation_Gap2Coil_ChA[i_ChA].Gap)*(M_Compensation_Gap2Coil_ChA[i_ChA+1].CoilCurrent-M_Compensation_Gap2Coil_ChA[i_ChA].CoilCurrent))
+						/(M_Compensation_Gap2Coil_ChA[i_ChA+1].Gap-M_Compensation_Gap2Coil_ChA[i_ChA].Gap))+M_Compensation_Gap2Coil_ChA[i_ChA].CoilCurrent);
 		END_IF
 	END_FOR
 END_IF
@@ -439,7 +439,11 @@ CASE AM_ChA_State OF
 	1:
 		btn_PowerOn_ChA:=FALSE;
 		//目标电流已实时计算得出，开始设置电流
-		SetCurrent_ChA:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(TargetCoilCurrent_ChA))*10000))/10000;
+		IF TargetCoilCurrent_ChA >=0 THEN
+			SetCurrent_ChA:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(TargetCoilCurrent_ChA))*10000))/10000;
+		ELSE
+			SetCurrent_ChA:=0 - DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(TargetCoilCurrent_ChA))*10000))/10000;
+		END_IF
 		btn_SetCurrent_ChA:=TRUE;
 		AutoMode_ChA_TON.IN:=TRUE;
 		IF ABS(SetCurrent_ChA-GetCurrent_ChA)<0.001 THEN
@@ -473,13 +477,13 @@ AutoMode_ChA_TON(PT:=T#0.1S);]]></ST>
 //
 //如果当前磁间隙低于最小阈值或者大于最大阈值，则目标电流等于当前电流，也即不设置
 IF UserMode.UserGapPositionDisplay<min_UserLEProtectionGapPosition OR UserMode.UserGapPositionDisplay>max_UserLEProtectionGapPosition THEN
-	TargetCoilCurrent_ChB:=GetCurrent_ChB;
+	TargetCoilCurrent_ChB:=LREAL_TO_REAL(GetCurrent_ChB);
 ELSE
 	//插补法计算gap对应电流值
 	FOR	i_ChB:= 1 TO 30 DO
 		IF UserMode.UserGapPositionDisplay <M_Compensation_Gap2Coil_ChB[i_ChB+1].Gap AND UserMode.UserGapPositionDisplay>=M_Compensation_Gap2Coil_ChB[i_ChB].Gap THEN
-				TargetCoilCurrent_ChB:=(((UserMode.UserGapPositionDisplay-M_Compensation_Gap2Coil_ChB[i_ChB].Gap)*(M_Compensation_Gap2Coil_ChB[i_ChB+1].CoilCurrent-M_Compensation_Gap2Coil_ChB[i_ChB].CoilCurrent))
-						/(M_Compensation_Gap2Coil_ChB[i_ChB+1].Gap-M_Compensation_Gap2Coil_ChB[i_ChB].Gap))+M_Compensation_Gap2Coil_ChB[i_ChB].CoilCurrent;
+				TargetCoilCurrent_ChB:=LREAL_TO_REAL((((UserMode.UserGapPositionDisplay-M_Compensation_Gap2Coil_ChB[i_ChB].Gap)*(M_Compensation_Gap2Coil_ChB[i_ChB+1].CoilCurrent-M_Compensation_Gap2Coil_ChB[i_ChB].CoilCurrent))
+						/(M_Compensation_Gap2Coil_ChB[i_ChB+1].Gap-M_Compensation_Gap2Coil_ChB[i_ChB].Gap))+M_Compensation_Gap2Coil_ChB[i_ChB].CoilCurrent);
 		END_IF
 	END_FOR
 END_IF
@@ -495,7 +499,11 @@ CASE AM_ChB_State OF
 	1:
 		btn_PowerOn_ChB:=FALSE;
 		//目标电流已实时计算得出，开始设置电流
-		SetCurrent_ChB:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(TargetCoilCurrent_ChB))*10000))/10000;
+		IF TargetCoilCurrent_ChB >= 0 THEN
+			SetCurrent_ChB:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(TargetCoilCurrent_ChB))*10000))/10000;
+		ELSE
+			SetCurrent_ChB:=0 - DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(TargetCoilCurrent_ChB))*10000))/10000;	
+		END_IF	
 		btn_SetCurrent_ChB:=TRUE;
 		AutoMode_ChB_TON.IN:=TRUE;
 		IF ABS(SetCurrent_ChB-GetCurrent_ChB)<0.001 THEN
@@ -542,7 +550,11 @@ GetCurrent_ChARegs[1]:=GetCurrent_ChARegs_PSProtocal_LowByte[1] OR GetCurrent_Ch
 //IEEE转换，WORD 到 REAL
 ieee754_GetCurrent_ChA.data_word[0]:=GetCurrent_ChARegs[0];
 ieee754_GetCurrent_ChA.data_word[1]:=GetCurrent_ChARegs[1];
-GetCurrent_ChA:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetCurrent_ChA.data_float))*10000))/10000;
+IF ieee754_GetCurrent_ChA.data_float >= 0 THEN
+	GetCurrent_ChA:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetCurrent_ChA.data_float))*10000))/10000;
+ELSE
+	GetCurrent_ChA:=0 - DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetCurrent_ChA.data_float))*10000))/10000;
+END_IF
 
 ////功能块
 fb_GetCurrent_ChA(
@@ -586,7 +598,11 @@ GetCurrent_ChBRegs[1]:=GetCurrent_ChBRegs_PSProtocal_LowByte[1] OR GetCurrent_Ch
 //IEEE转换，WORD 到 REAL
 ieee754_GetCurrent_ChB.data_word[0]:=GetCurrent_ChBRegs[0];
 ieee754_GetCurrent_ChB.data_word[1]:=GetCurrent_ChBRegs[1];
-GetCurrent_ChB:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetCurrent_ChB.data_float))*10000))/10000;
+IF ieee754_GetCurrent_ChB.data_float >= 0 THEN
+	GetCurrent_ChB:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetCurrent_ChB.data_float))*10000))/10000;
+ELSE
+	GetCurrent_ChB:=0 - DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetCurrent_ChB.data_float))*10000))/10000;
+END_IF
 
 ////功能块
 fb_GetCurrent_ChB(
@@ -750,7 +766,11 @@ GetRampingSpd_ChARegs[1]:=GetRampingSpd_ChARegs_PSProtocal_LowByte[1] OR GetRamp
 //IEEE转换，WORD 到 REAL
 ieee754_GetRampingSpd_ChA.data_word[0]:=GetRampingSpd_ChARegs[0];
 ieee754_GetRampingSpd_ChA.data_word[1]:=GetRampingSpd_ChARegs[1];
-GetRampingSpd_ChA:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetRampingSpd_ChA.data_float))*10000))/10000;
+IF ieee754_GetRampingSpd_ChA.data_float >= 0 THEN
+	GetRampingSpd_ChA:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetRampingSpd_ChA.data_float))*10000))/10000;
+ELSE
+	GetRampingSpd_ChA:=0 - DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetRampingSpd_ChA.data_float))*10000))/10000;		
+END_IF
 
 ////功能块
 fb_GetRampingSpd_ChA(
@@ -794,7 +814,11 @@ GetRampingSpd_ChBRegs[1]:=GetRampingSpd_ChBRegs_PSProtocal_LowByte[1] OR GetRamp
 //IEEE转换，WORD 到 REAL
 ieee754_GetRampingSpd_ChB.data_word[0]:=GetRampingSpd_ChBRegs[0];
 ieee754_GetRampingSpd_ChB.data_word[1]:=GetRampingSpd_ChBRegs[1];
-GetRampingSpd_ChB:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetRampingSpd_ChB.data_float))*10000))/10000;
+IF ieee754_GetRampingSpd_ChB.data_float >= 0 THEN
+	GetRampingSpd_ChB:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetRampingSpd_ChB.data_float))*10000))/10000;
+ELSE
+	GetRampingSpd_ChB:=0 - DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetRampingSpd_ChB.data_float))*10000))/10000;
+END_IF
 
 ////功能块
 fb_GetRampingSpd_ChB(
@@ -839,7 +863,11 @@ GetSetCurrent_ChARegs[1]:=GetSetCurrent_ChARegs_PSProtocal_LowByte[1] OR GetSetC
 //IEEE转换，WORD 到 REAL
 ieee754_GetSetCurrent_ChA.data_word[0]:=GetSetCurrent_ChARegs[0];
 ieee754_GetSetCurrent_ChA.data_word[1]:=GetSetCurrent_ChARegs[1];
-GetSetCurrent_ChA:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetSetCurrent_ChA.data_float))*10000))/10000;
+IF ieee754_GetSetCurrent_ChA.data_float >= 0 THEN
+	GetSetCurrent_ChA:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetSetCurrent_ChA.data_float))*10000))/10000;
+ELSE
+	GetSetCurrent_ChA:=0 - DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetSetCurrent_ChA.data_float))*10000))/10000;
+END_IF
 
 ////功能块
 fb_GetSetCurrent_ChA(
@@ -882,7 +910,11 @@ GetSetCurrent_ChBRegs[1]:=GetSetCurrent_ChBRegs_PSProtocal_LowByte[1] OR GetSetC
 //IEEE转换，WORD 到 REAL
 ieee754_GetSetCurrent_ChB.data_word[0]:=GetSetCurrent_ChBRegs[0];
 ieee754_GetSetCurrent_ChB.data_word[1]:=GetSetCurrent_ChBRegs[1];
-GetSetCurrent_ChB:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetSetCurrent_ChB.data_float))*10000))/10000;
+IF ieee754_GetSetCurrent_ChB.data_float >= 0 THEN
+	GetSetCurrent_ChB:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetSetCurrent_ChB.data_float))*10000))/10000;
+ELSE
+	GetSetCurrent_ChB:=0 - DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetSetCurrent_ChB.data_float))*10000))/10000;
+END_IF
 
 ////功能块
 fb_GetSetCurrent_ChB(
@@ -926,7 +958,11 @@ GetVoltage_ChARegs[1]:=GetVoltage_ChARegs_PSProtocal_LowByte[1] OR GetVoltage_Ch
 //IEEE转换，WORD 到 REAL
 ieee754_GetVoltage_ChA.data_word[0]:=GetVoltage_ChARegs[0];
 ieee754_GetVoltage_ChA.data_word[1]:=GetVoltage_ChARegs[1];
-GetVoltage_ChA:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetVoltage_ChA.data_float))*10000))/10000;
+IF ieee754_GetVoltage_ChA.data_float >=0 THEN
+	GetVoltage_ChA:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetVoltage_ChA.data_float))*10000))/10000;
+ELSE
+	GetVoltage_ChA:=0 - DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetVoltage_ChA.data_float))*10000))/10000;	
+END_IF
 
 
 ////功能块
@@ -971,7 +1007,11 @@ GetVoltage_ChBRegs[1]:=GetVoltage_ChBRegs_PSProtocal_LowByte[1] OR GetVoltage_Ch
 //IEEE转换，WORD 到 REAL
 ieee754_GetVoltage_ChB.data_word[0]:=GetVoltage_ChBRegs[0];
 ieee754_GetVoltage_ChB.data_word[1]:=GetVoltage_ChBRegs[1];
-GetVoltage_ChB:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetVoltage_ChB.data_float))*10000))/10000;
+IF ieee754_GetVoltage_ChB.data_float >= 0 THEN
+	GetVoltage_ChB:=DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetVoltage_ChB.data_float))*10000))/10000;
+ELSE
+	GetVoltage_ChB:=0 - DINT_TO_LREAL(LREAL_TO_DINT(REAL_TO_LREAL(ABS(ieee754_GetVoltage_ChB.data_float))*10000))/10000;
+END_IF
 
 
 ////功能块
@@ -1414,7 +1454,7 @@ fb_Reset_ChB_ResetReg(
     <Action Name="A_SetCurrent_ChA" Id="{a3e19b36-f9c9-472a-af8a-2745c939140a}" FolderPath="Set\">
       <Implementation>
         <ST><![CDATA[//IEEE754转化,REAL到WORD
-ieee754_SetCurrent_ChA.data_float:=SetCurrent_ChA;
+ieee754_SetCurrent_ChA.data_float:=LREAL_TO_REAL(SetCurrent_ChA);
 SetCurrent_ChARegs[0]:=ieee754_SetCurrent_ChA.data_word[0];
 SetCurrent_ChARegs[1]:=ieee754_SetCurrent_ChA.data_word[1];
 //字节调换，转为电源规定的格式
@@ -1466,7 +1506,7 @@ fb_SetCurrent_ChA(
     <Action Name="A_SetCurrent_ChB" Id="{9fd8f7d5-92fe-47f8-9bee-5d8739dc1fa1}" FolderPath="Set\">
       <Implementation>
         <ST><![CDATA[//IEEE754转化,REAL到WORD
-ieee754_SetCurrent_ChB.data_float:=SetCurrent_ChB;
+ieee754_SetCurrent_ChB.data_float:=LREAL_TO_REAL(SetCurrent_ChB);
 SetCurrent_ChBRegs[0]:=ieee754_SetCurrent_ChB.data_word[0];
 SetCurrent_ChBRegs[1]:=ieee754_SetCurrent_ChB.data_word[1];
 //字节调换，转为电源规定的格式
@@ -1676,7 +1716,9 @@ fb_SetRampingSpd_ChB(
       <LineId Id="11" Count="0" />
       <LineId Id="18" Count="0" />
       <LineId Id="99" Count="0" />
-      <LineId Id="82" Count="2" />
+      <LineId Id="101" Count="4" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="84" Count="0" />
       <LineId Id="90" Count="0" />
       <LineId Id="85" Count="2" />
       <LineId Id="91" Count="2" />
@@ -1710,7 +1752,9 @@ fb_SetRampingSpd_ChB(
       <LineId Id="11" Count="0" />
       <LineId Id="18" Count="0" />
       <LineId Id="99" Count="0" />
-      <LineId Id="82" Count="2" />
+      <LineId Id="101" Count="4" />
+      <LineId Id="82" Count="0" />
+      <LineId Id="84" Count="0" />
       <LineId Id="90" Count="0" />
       <LineId Id="85" Count="2" />
       <LineId Id="91" Count="2" />
@@ -1731,8 +1775,9 @@ fb_SetRampingSpd_ChB(
       <LineId Id="85" Count="6" />
       <LineId Id="16" Count="0" />
       <LineId Id="95" Count="0" />
-      <LineId Id="93" Count="1" />
-      <LineId Id="92" Count="0" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="96" Count="4" />
+      <LineId Id="94" Count="0" />
       <LineId Id="2" Count="0" />
       <LineId Id="60" Count="13" />
       <LineId Id="1" Count="0" />
@@ -1744,8 +1789,9 @@ fb_SetRampingSpd_ChB(
       <LineId Id="85" Count="6" />
       <LineId Id="16" Count="0" />
       <LineId Id="95" Count="0" />
-      <LineId Id="93" Count="1" />
-      <LineId Id="92" Count="0" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="96" Count="4" />
+      <LineId Id="94" Count="0" />
       <LineId Id="2" Count="0" />
       <LineId Id="60" Count="13" />
       <LineId Id="1" Count="0" />
@@ -1802,8 +1848,9 @@ fb_SetRampingSpd_ChB(
       <LineId Id="85" Count="6" />
       <LineId Id="16" Count="0" />
       <LineId Id="95" Count="0" />
-      <LineId Id="93" Count="1" />
-      <LineId Id="92" Count="0" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="96" Count="4" />
+      <LineId Id="94" Count="0" />
       <LineId Id="2" Count="0" />
       <LineId Id="60" Count="13" />
       <LineId Id="1" Count="0" />
@@ -1815,26 +1862,39 @@ fb_SetRampingSpd_ChB(
       <LineId Id="85" Count="6" />
       <LineId Id="16" Count="0" />
       <LineId Id="95" Count="0" />
-      <LineId Id="93" Count="1" />
-      <LineId Id="92" Count="0" />
+      <LineId Id="93" Count="0" />
+      <LineId Id="96" Count="4" />
+      <LineId Id="94" Count="0" />
       <LineId Id="2" Count="0" />
       <LineId Id="60" Count="13" />
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="PS3.A_GetSetCurrent_ChA">
-      <LineId Id="97" Count="39" />
+      <LineId Id="97" Count="22" />
+      <LineId Id="137" Count="4" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="122" Count="14" />
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="PS3.A_GetSetCurrent_ChB">
-      <LineId Id="99" Count="37" />
+      <LineId Id="99" Count="20" />
+      <LineId Id="137" Count="4" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="122" Count="14" />
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="PS3.A_GetVoltage_ChA">
-      <LineId Id="98" Count="39" />
+      <LineId Id="98" Count="21" />
+      <LineId Id="138" Count="4" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="122" Count="15" />
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="PS3.A_GetVoltage_ChB">
-      <LineId Id="98" Count="39" />
+      <LineId Id="98" Count="21" />
+      <LineId Id="138" Count="4" />
+      <LineId Id="120" Count="0" />
+      <LineId Id="122" Count="15" />
       <LineId Id="1" Count="0" />
     </LineIds>
     <LineIds Name="PS3.A_InitRecipeParameters">
