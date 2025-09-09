@@ -210,6 +210,10 @@ VAR
 	OneKeyToMaxGap_TON_Stop2Move_InTaperMode:TON;
 	OneKeyToMaxGap_TON_Power2Move:TON;
 	OneKeyToMaxGap_Done:BOOL;
+	FTrig_ReachLSa: F_TRIG;
+	Unreach_LS_Fara: BOOL;
+	Unreach_LS_Neara: BOOL;
+	btn_UserGapStopa: BOOL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -950,8 +954,8 @@ IF USE_SingleAxis_Compensation THEN
 			END_IF
 	END_FOR
 	IF TaperOrNot OR (Global_ChainProtection_MPS_Triggered OR Global_ChainProtection_EPS_Triggered)  THEN//安全联锁触发时，需要UserTaperPositionDisplay作为A_MonitoringAllAxis的保护
-		UserTaperPositionDisplay:=(DINT_TO_LREAL(LREAL_TO_DINT((UserRightGapPositionDisplay-UserGapPositionDisplay)*100000))/100000)/IDTaperAndBLTaperScale;
-		UserTaperVelocityDisplay:=(DINT_TO_LREAL(LREAL_TO_DINT((Velo_RightTopLin+Velo_RightBottomLin)/2*100000))/100000)/IDTaperAndBLTaperScale;
+		UserTaperPositionDisplay:=DINT_TO_LREAL(LREAL_TO_DINT((UserRightGapPositionDisplay-UserGapPositionDisplay)/IDTaperAndBLTaperScale*100000))/100000;
+		UserTaperVelocityDisplay:=DINT_TO_LREAL(LREAL_TO_DINT((Velo_RightTopLin+Velo_RightBottomLin)/IDTaperAndBLTaperScale/2*100000))/100000;
 	END_IF
 
 	
