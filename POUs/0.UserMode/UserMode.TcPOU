@@ -5,11 +5,11 @@
 VAR
 (*GapMode*)
 	UserGapPositionNew:LREAL:=20;//target
-	UserGapVelocityNew:LREAL:=1;//target
+	UserGapVelocityNew:LREAL:=0.02;//target
 	UserGapPositionDisplay:LREAL;//current
 	UserGapVelocityDisplay:LREAL;//current
 	UserTaperPositionNew:LREAL:=0;//target
-	UserTaperVelocityNew:LREAL:=0.1;//target
+	UserTaperVelocityNew:LREAL:=0.02;//target
 	UserTaperPositionDisplay:LREAL;//current
 	UserTaperPositionActual:LREAL;//current
 	//UserTaperPositionDisplay_FromRightTop:LREAL;
