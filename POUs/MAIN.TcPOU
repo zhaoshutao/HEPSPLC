@@ -331,8 +331,7 @@ VAR
 	RestartDriver_Triggered:BOOL;
 	RestartDriver_State:DINT;
 	RestartDriver_Done:BOOL;
-	
-		//LEHeartBeatMonitor
+
 	FirstScan:BOOL;
 	DeadZone : LREAL := 0; 
 	AlarmTime : TIME := T#10S;
@@ -360,6 +359,34 @@ VAR
     StableTime_RightBottomLin : TIME; 
     Delta_RightBottomLin : LREAL; 
 	Alarm_RightBottomLin:BOOL;
+			//LEHeartBeatMonitor
+	FirstScan:BOOL;
+	DeadZone : LREAL := 0; 
+	AlarmTime : TIME := T#10S;
+	
+    Pos_LeftInLin_Last : LREAL; 
+    StableTimer_LeftInLin : TON; 
+    StableTime_LeftInLin : TIME; 
+    Delta_LeftInLin : LREAL; 
+	Alarm_LeftInLin:BOOL;
+	
+	Pos_RightInLin_Last : LREAL; 
+    StableTimer_RightInLin : TON; 
+    StableTime_RightInLin : TIME; 
+    Delta_RightInLin : LREAL; 
+	Alarm_RightInLin:BOOL;
+		
+    Pos_LeftOutLin_Last : LREAL; 
+    StableTimer_LeftOutLin : TON; 
+    StableTime_LeftOutLin : TIME; 
+    Delta_LeftOutLin : LREAL; 
+	Alarm_LeftOutLin:BOOL;
+	
+	Pos_RightOutLin_Last : LREAL; 
+    StableTimer_RightOutLin : TON; 
+    StableTime_RightOutLin : TIME; 
+    Delta_RightOutLin : LREAL; 
+	Alarm_RightOutLin:BOOL;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[(*加载Ricipe参数*)
@@ -6736,12 +6763,12 @@ ELSIF TemperatureSensors_1>=RoomTemperatureThreshold AND TemperatureSensors_2>=R
 	AND TemperatureSensors_4>=RoomTemperatureThreshold AND TemperatureSensors_5>=RoomTemperatureThreshold AND TemperatureSensors_6>=RoomTemperatureThreshold THEN	
 	temperatureStatus:=1;//常温
 	InCryogenicOrNot:=FALSE;
-ELSIF TemperatureSensors_1<=CryogenicTemperatureThreshold AND TemperatureSensors_1>77
-	AND TemperatureSensors_2<=CryogenicTemperatureThreshold  AND TemperatureSensors_2>77
-	AND TemperatureSensors_3<=CryogenicTemperatureThreshold  AND TemperatureSensors_3>77
-	AND TemperatureSensors_4<=CryogenicTemperatureThreshold   AND TemperatureSensors_4>77
-	AND TemperatureSensors_5<=CryogenicTemperatureThreshold  AND TemperatureSensors_5>77
-	AND TemperatureSensors_6<=CryogenicTemperatureThreshold   AND TemperatureSensors_6>77 THEN	
+ELSIF TemperatureSensors_1<=CryogenicTemperatureThreshold AND TemperatureSensors_1>70
+	AND TemperatureSensors_2<=CryogenicTemperatureThreshold  AND TemperatureSensors_2>70
+	AND TemperatureSensors_3<=CryogenicTemperatureThreshold  AND TemperatureSensors_3>70
+	AND TemperatureSensors_4<=CryogenicTemperatureThreshold   AND TemperatureSensors_4>70
+	AND TemperatureSensors_5<=CryogenicTemperatureThreshold  AND TemperatureSensors_5>70
+	AND TemperatureSensors_6<=CryogenicTemperatureThreshold   AND TemperatureSensors_6>70 THEN	
 	temperatureStatus:=2;//低温
 	InCryogenicOrNot:=TRUE;
 ELSE
