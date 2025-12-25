@@ -359,34 +359,6 @@ VAR
     StableTime_RightBottomLin : TIME; 
     Delta_RightBottomLin : LREAL; 
 	Alarm_RightBottomLin:BOOL;
-			//LEHeartBeatMonitor
-	FirstScan:BOOL;
-	DeadZone : LREAL := 0; 
-	AlarmTime : TIME := T#10S;
-	
-    Pos_LeftInLin_Last : LREAL; 
-    StableTimer_LeftInLin : TON; 
-    StableTime_LeftInLin : TIME; 
-    Delta_LeftInLin : LREAL; 
-	Alarm_LeftInLin:BOOL;
-	
-	Pos_RightInLin_Last : LREAL; 
-    StableTimer_RightInLin : TON; 
-    StableTime_RightInLin : TIME; 
-    Delta_RightInLin : LREAL; 
-	Alarm_RightInLin:BOOL;
-		
-    Pos_LeftOutLin_Last : LREAL; 
-    StableTimer_LeftOutLin : TON; 
-    StableTime_LeftOutLin : TIME; 
-    Delta_LeftOutLin : LREAL; 
-	Alarm_LeftOutLin:BOOL;
-	
-	Pos_RightOutLin_Last : LREAL; 
-    StableTimer_RightOutLin : TON; 
-    StableTime_RightOutLin : TIME; 
-    Delta_RightOutLin : LREAL; 
-	Alarm_RightOutLin:BOOL;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[(*加载Ricipe参数*)
