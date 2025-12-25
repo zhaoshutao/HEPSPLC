@@ -4,11 +4,11 @@
     <Declaration><![CDATA[PROGRAM SingleCarrierMode
 VAR
 	TopPositionNew:LREAL:=100;
-	TopVelocityNew:LREAL:=1;
+	TopVelocityNew:LREAL:=0.02;
 	btn_TopMove:BOOL;
 	btn_TopStop:BOOL;
 	BottomPositionNew:LREAL:=100;
-	BottomVelocityNew:LREAL:=1;
+	BottomVelocityNew:LREAL:=0.02;
 	btn_BottomMove:BOOL;
 	btn_BottomStop:BOOL;
 	(*Var*)

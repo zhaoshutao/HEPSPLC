@@ -12,19 +12,19 @@ VAR
 	ton_t: TON;
 (*Key Command*)
 	LeftTopLinPositionNew:LREAL;
-	LeftTopLinVelocityNew:LREAL:=1;
+	LeftTopLinVelocityNew:LREAL:=0.02;
 	btn_LeftTopLinMove:BOOL;
 	btn_LeftTopLinStop:BOOL;
 	RightTopLinPositionNew:LREAL;
-	RightTopLinVelocityNew:LREAL:=1;
+	RightTopLinVelocityNew:LREAL:=0.02;
 	btn_RightTopLinMove:BOOL;
 	btn_RightTopLinStop:BOOL;
 	LeftBottomLinPositionNew:LREAL;
-	LeftBottomLinVelocityNew:LREAL:=1;
+	LeftBottomLinVelocityNew:LREAL:=0.02;
 	btn_LeftBottomLinMove:BOOL;
 	btn_LeftBottomLinStop:BOOL;
 	RightBottomLinPositionNew:LREAL;
-	RightBottomLinVelocityNew:LREAL:=1;
+	RightBottomLinVelocityNew:LREAL:=0.02;
 	btn_RightBottomLinMove:BOOL;
 	btn_RightBottomLinStop:BOOL;
 (*LeftTopLin*)
