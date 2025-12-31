@@ -202,6 +202,11 @@ VAR_GLOBAL
 	Pos_RightTopLin:LREAL;
 	Pos_LeftBottomLin:LREAL;
 	Pos_RightBottomLin:LREAL;
+(*axis Position-motor*)
+	Pos_LeftTopMotor: LREAL;
+	Pos_RightTopMotor:LREAL;
+	Pos_LeftBottomMotor:LREAL;
+	Pos_RightBottomMotor:LREAL;
 (*********)
 	LB_TestRecord:LREAL;
 	RB_TestRecord:LREAL;
@@ -210,6 +215,16 @@ VAR_GLOBAL
 	Velo_RightTopLin:LREAL;
 	Velo_LeftBottomLin:LREAL;
 	Velo_RightBottomLin:LREAL;
+(*axis Velocity-motor*)
+	Velo_LeftTopMotor: LREAL;
+	Velo_RightTopMotor:LREAL;
+	Velo_LeftBottomMotor:LREAL;
+	Velo_RightBottomMotor:LREAL;
+(*axis Torque-motor*)
+	Torque_LeftTopMotor: LREAL;
+	Torque_RightTopMotor:LREAL;
+	Torque_LeftBottomMotor:LREAL;
+	Torque_RightBottomMotor:LREAL;
 (*Lag Distance*)
 	PosDiff_LeftTopLin_actual: LREAL;
 	PosDiff_RightTopLin_actual:LREAL;
