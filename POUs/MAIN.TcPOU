@@ -329,9 +329,9 @@ VAR
 	//	LEHeartBeatMonitorFunction
 	//
 	LEHeartBeatMonitorFunctionOn: BOOL;
-	FirstScan:BOOL;
-	DeadZone : LREAL := 0; 
-	AlarmTime : TIME := T#0.1S;
+	LEHeartBeatFirstScan:BOOL;
+	LEHeartBeatDeadZone : LREAL := 0; 
+	LEHeartBeatAlarmTime : TIME := T#0.1S;
 	
     //Pos_LeftTopLin_Last : LREAL; 
 	Velo_LeftTopLin_Last : LREAL; 
@@ -408,7 +408,19 @@ VAR
 	Pos_LeftBottomMotor_DINT AT %I*: DINT;
 	Velo_RightBottomMotor_DINT AT %I*: DINT;
 	Pos_RightBottomMotor_DINT AT %I*: DINT;
-
+	
+	(*setAxisPosition*)
+	SetMotorAxisPosState: INT;
+	FB_Set_MotorAxisPosition:FB_SetMotorAxisPosition;
+	fb_ton4_2: TON;
+	fb_ton5_2: TON;
+	fb_ton6_2: TON;
+	SetMotorAxisPositionDone: BOOL;
+	
+	btn_SetMotorAxisPosition: BOOL;
+	MonitorMotorAndLEFunctionOn:BOOL:=TRUE;
+	THNE: BOOL;
+	tt: BOOL;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[(*加载Ricipe参数*)
@@ -525,7 +537,29 @@ END_IF
 IF LEHeartBeatMonitorFunctionOn THEN
 	A_LEHeartBeatMonitor();
 END_IF
-]]></ST>
+(************SetMotorAxisPosition*********************)
+//IDControl 1s after
+fb_ton5_2.IN:=IDControlReady;
+fb_ton5_2.PT:=T#1S;
+fb_ton5_2();
+IF fb_ton5_2.Q THEN
+	btn_SetMotorAxisPosition:=TRUE;
+END_IF
+IF  USELinearEncoder AND btn_SetMotorAxisPosition THEN
+	IF NOT SetMotorAxisPositionDone THEN
+		FB_Set_MotorAxisPosition.ValueSet_LeftTop:=Pos_LeftTopLin;
+		FB_Set_MotorAxisPosition.ValueSet_RightTop:=Pos_RightTopLin;
+		FB_Set_MotorAxisPosition.ValueSet_LeftBottom:=Pos_LeftBottomLin;
+		FB_Set_MotorAxisPosition.ValueSet_RightBottom:=Pos_RightBottomLin;
+		A_SetMotorAxisPosition();
+	END_IF
+END_IF
+(*A_MonitorMotorAndLE*)
+IF MonitorMotorAndLEFunctionOn AND SetMotorAxisPositionDone THEN
+	A_MonitorMotorAndLE();
+END_IF
+(*A_CheckMaxVelocity*)
+A_CheckMaxVelocity();]]></ST>
     </Implementation>
     <Folder Name="Axis" Id="{1f5db9b2-f074-43bd-a7a5-f28b002c6ac6}" />
     <Folder Name="Check" Id="{79c48f21-8e44-4159-8773-87594d6e7620}" />
@@ -851,6 +885,76 @@ IF Pos_RightBottomLin <min_UserLEProtectionGapPosition/2 THEN
 	LED_Error:=TRUE;
 END_IF
 ]]></ST>
+      </Implementation>
+    </Action>
+    <Action Name="A_CheckMaxVelocity" Id="{b95fb694-2a75-4423-bee6-d704fd7332fe}" FolderPath="Check\">
+      <Implementation>
+        <ST><![CDATA[IF NOT USELinearEncoder OR NOT PositionBiasDone OR NOT IDControlReady THEN
+	RETURN;
+END_IF
+IF NOT st_Power THEN
+	RETURN;
+END_IF
+//Monitoring Motor and LE Position/Velocity
+MaxVelocityGlobalVelocity:=MAX(UserMode.Cryogenic_ChainProtection_MoveVelocity,max_UserGapVelocityNew,
+	max_UserTaperVelocityNew,UserMode.max_SS_StepVelocity,UserMode.Global_ChainProtection_MPS_MoveVelocity
+	,UserMode.Global_ChainProtection_EPS_MoveVelocity);
+IF 	ABS(Velo_LeftTopLin) > MaxVelocityGlobalVelocity*1.1/2 THEN
+	ErrorID:=7001;
+	Error:=TRUE;
+	ErrorDescription:='ABS(Velo_LeftTopLin) > MaxVelocityGlobalVelocity*1.1/2';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF 	ABS(Velo_LeftTopMotor) > MaxVelocityGlobalVelocity*1.1/2 THEN
+	ErrorID:=7002;
+	Error:=TRUE;
+	ErrorDescription:='ABS(Velo_LeftTopMotor) > MaxVelocityGlobalVelocity*1.1/2';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF 	ABS(Velo_RightTopLin) > MaxVelocityGlobalVelocity*1.1/2 THEN
+	ErrorID:=7003;
+	Error:=TRUE;
+	ErrorDescription:='ABS(Velo_RightTopLin) > MaxVelocityGlobalVelocity*1.1/2';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF 	ABS(Velo_RightTopMotor) > MaxVelocityGlobalVelocity*1.1/2 THEN
+	ErrorID:=7004;
+	Error:=TRUE;
+	ErrorDescription:='ABS(Velo_RightTopMotor) > MaxVelocityGlobalVelocity*1.1/2';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF 	ABS(Velo_LeftBottomLin) > MaxVelocityGlobalVelocity*1.1/2 THEN
+	ErrorID:=7005;
+	Error:=TRUE;
+	ErrorDescription:='ABS(Velo_LeftBottomLin) > MaxVelocityGlobalVelocity*1.1/2';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF 	ABS(Velo_LeftBottomMotor) > MaxVelocityGlobalVelocity*1.1/2 THEN
+	ErrorID:=7006;
+	Error:=TRUE;
+	ErrorDescription:='ABS(Velo_LeftBottomMotor) > MaxVelocityGlobalVelocity*1.1/2';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF 	ABS(Velo_RightBottomLin) > MaxVelocityGlobalVelocity*1.1/2 THEN
+	ErrorID:=7007;
+	Error:=TRUE;
+	ErrorDescription:='ABS(Velo_RightBottomLin) > MaxVelocityGlobalVelocity*1.1/2';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF 	ABS(Velo_RightBottomMotor) > MaxVelocityGlobalVelocity*1.1/2 THEN
+	ErrorID:=7008;
+	Error:=TRUE;
+	ErrorDescription:='ABS(Velo_RighBottomMotor) > MaxVelocityGlobalVelocity*1.1/2';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF]]></ST>
       </Implementation>
     </Action>
     <Action Name="A_CryogenicCompensationMonitoring" Id="{196f46d5-b4be-43fe-a564-735eda66c49f}" FolderPath="Temperature\">
@@ -7794,75 +7898,98 @@ temperature_averageh:=DINT_TO_LREAL(LREAL_TO_DINT((TemperatureSensors_h1+Tempera
     </Action>
     <Action Name="A_InitAxisParameters" Id="{a92c2dd6-12b0-4a71-a4bc-d7afbc965cb4}" FolderPath="Axis\">
       <Implementation>
-        <ST><![CDATA[(*ÖáÎ»ÖÃ¡¢ËÙ¶È¡¢PosDiff*)
-
+        <ST><![CDATA[(*LinearEncoder Pos Velo Lagdistance status get*)
+	//Position
 	Pos_LeftTopLin:=DINT_TO_LREAL(LREAL_TO_DINT(LeftTopLin.NcToPlc.ActPos*100000))/100000;
 	Pos_RightTopLin:=DINT_TO_LREAL(LREAL_TO_DINT(RightTopLin.NcToPlc.ActPos*100000))/100000;
 	Pos_LeftBottomLin:=DINT_TO_LREAL(LREAL_TO_DINT(LeftBottomLin.NcToPlc.ActPos*100000))/100000;
 	Pos_RightBottomLin:=DINT_TO_LREAL(LREAL_TO_DINT(RightBottomLin.NcToPlc.ActPos*100000))/100000;
-
-	
-	LB_TestRecord:=Pos_LeftBottomLin-5;
-	RB_TestRecord:=Pos_RightBottomLin-5;
+	//Moving status
 	moveStatusLeftTop:=LeftTopLin.Status.Moving;
 	moveStatusRightTop:=RightTopLin.Status.Moving;
 	moveStatusLeftBottom:=LeftBottomLin.Status.Moving;
 	moveStatusRightBottom:=RightBottomLin.Status.Moving;
 	moveStatusAllAxis:=moveStatusLeftTop AND moveStatusRightTop AND moveStatusLeftBottom AND moveStatusRightBottom;
 	moveStatusAnyAxis:=moveStatusLeftTop OR moveStatusRightTop OR moveStatusLeftBottom OR moveStatusRightBottom;
-
+	//Velocity
 	Velo_LeftTopLin:=DINT_TO_LREAL(LREAL_TO_DINT(LeftTopLin.NcToPlc.ActVelo*100000))/100000;
 	Velo_RightTopLin:=DINT_TO_LREAL(LREAL_TO_DINT(RightTopLin.NcToPlc.ActVelo*100000))/100000;
 	Velo_LeftBottomLin:=DINT_TO_LREAL(LREAL_TO_DINT(LeftBottomLin.NcToPlc.ActVelo*100000))/100000;
 	Velo_RightBottomLin:=DINT_TO_LREAL(LREAL_TO_DINT(RightBottomLin.NcToPlc.ActVelo*100000))/100000;
-
+	//LagDistance
 	PosDiff_LeftTopLin_actual:=DINT_TO_LREAL(LREAL_TO_DINT(LeftTopLin.NcToPlc.PosDiff*100000))/100000;
 	PosDiff_RightTopLin_actual:=DINT_TO_LREAL(LREAL_TO_DINT(RightTopLin.NcToPlc.PosDiff*100000))/100000;
 	PosDiff_LeftBottomLin_actual:=DINT_TO_LREAL(LREAL_TO_DINT(LeftBottomLin.NcToPlc.PosDiff*100000))/100000;
 	PosDiff_RightBottomLin_actual:=DINT_TO_LREAL(LREAL_TO_DINT(RightBottomLin.NcToPlc.PosDiff*100000))/100000;
-
-	//feedback1 motor 
-	A_GetScaleFactor();
-	ScaleFactor_LeftTopLin:=fbMC_ReadParameter_ScaleFactor_LeftTopLin.Value*1048576;	
-	ScaleFactor_RightTopLin:=fbMC_ReadParameter_ScaleFactor_RightTopLin.Value*1048576;
-	ScaleFactor_LeftBottomLin:=fbMC_ReadParameter_ScaleFactor_LeftBottomLin.Value*1048576;
-	ScaleFactor_RightBottomLin:=fbMC_ReadParameter_ScaleFactor_RightBottomLin.Value*1048576;
-	IF GearDenominatorConfigured_LeftTop<>0 THEN
-		Velo_LeftTopMotor:=DINT_TO_LREAL(Velo_LeftTopMotor_DINT)*ScaleFactor_LeftTopLin
-			*GearNumeratorConfigured_LeftTop/GearDenominatorConfigured_LeftTop/1048576;
-		Pos_LeftTopMotor:=DINT_TO_LREAL(Pos_LeftTopMotor_DINT)*ScaleFactor_LeftTopLin
-			*GearNumeratorConfigured_LeftTop/GearDenominatorConfigured_LeftTop/1048576;
-	END_IF
-	IF GearDenominatorConfigured_RightTop<>0 THEN
-		Velo_RightTopMotor:=DINT_TO_LREAL(Velo_RightTopMotor_DINT)*ScaleFactor_RightTopLin
-			*GearNumeratorConfigured_RightTop/GearDenominatorConfigured_RightTop/1048576;
-		Pos_RightTopMotor:=DINT_TO_LREAL(Pos_RightTopMotor_DINT)*ScaleFactor_RightTopLin
-			*GearNumeratorConfigured_RightTop/GearDenominatorConfigured_RightTop/1048576;
-	END_IF
-	IF GearDenominatorConfigured_LeftBottom<>0 THEN
-		Velo_LeftBottomMotor:=DINT_TO_LREAL(Velo_LeftBottomMotor_DINT)*ScaleFactor_LeftBottomLin
-			*GearNumeratorConfigured_LeftBottom/GearDenominatorConfigured_LeftBottom/1048576;
-		Pos_LeftBottomMotor:=DINT_TO_LREAL(Pos_LeftBottomMotor_DINT)*ScaleFactor_LeftBottomLin
-			*GearNumeratorConfigured_LeftBottom/GearDenominatorConfigured_LeftBottom/1048576;
-	END_IF
-	IF GearDenominatorConfigured_RightBottom<>0 THEN
-		Velo_RightBottomMotor:=DINT_TO_LREAL(Velo_RightBottomMotor_DINT)*ScaleFactor_RightBottomLin
-			*GearNumeratorConfigured_RightBottom/GearDenominatorConfigured_RightBottom/1048576;
-		Pos_RightBottomMotor:=DINT_TO_LREAL(Pos_RightBottomMotor_DINT)*ScaleFactor_RightBottomLin
-			*GearNumeratorConfigured_RightBottom/GearDenominatorConfigured_RightBottom/1048576;
-	END_IF
 	//Torque
-	Torque_LeftTopMotor:=LeftTopLin.NcToPlc.ActTorque;
-	Torque_RightTopMotor:=RightTopLin.NcToPlc.ActTorque;
-	Torque_LeftBottomMotor:=LeftBottomLin.NcToPlc.ActTorque;
-	Torque_RightBottomMotor:=RightBottomLin.NcToPlc.ActTorque;
-	//read
+	Torque_LeftTopLin:=LeftTopLin.NcToPlc.ActTorque;
+	Torque_RightTopLin:=RightTopLin.NcToPlc.ActTorque;
+	Torque_LeftBottomLin:=LeftBottomLin.NcToPlc.ActTorque;
+	Torque_RightBottomLin:=RightBottomLin.NcToPlc.ActTorque;
+
 	LeftTopLin.ReadStatus();
 	RightTopLin.ReadStatus();
 	LeftBottomLin.ReadStatus();
 	RightBottomLin.ReadStatus();
 	
-	//feedback2 LE value when no LE
+	(*Motor Pos Velo Lagdistance status get*)
+	//Position
+	Pos_LeftTopMotor:=DINT_TO_LREAL(LREAL_TO_DINT(LeftTopMotor.NcToPlc.ActPos*100000))/100000;
+	Pos_RightTopMotor:=DINT_TO_LREAL(LREAL_TO_DINT(RightTopMotor.NcToPlc.ActPos*100000))/100000;
+	Pos_LeftBottomMotor:=DINT_TO_LREAL(LREAL_TO_DINT(LeftBottomMotor.NcToPlc.ActPos*100000))/100000;
+	Pos_RightBottomMotor:=DINT_TO_LREAL(LREAL_TO_DINT(RightBottomMotor.NcToPlc.ActPos*100000))/100000;
+	//Moving status
+	moveStatusLeftTopMotor:=LeftTopMotor.Status.Moving;
+	moveStatusRightTopMotor:=RightTopMotor.Status.Moving;
+	moveStatusLeftBottomMotor:=LeftBottomMotor.Status.Moving;
+	moveStatusRightBottomMotor:=RightBottomMotor.Status.Moving;
+	moveStatusAllAxisMotor:=moveStatusLeftTopMotor AND moveStatusRightTopMotor AND moveStatusLeftBottomMotor AND moveStatusRightBottomMotor;
+	moveStatusAnyAxisMotor:=moveStatusLeftTopMotor OR moveStatusRightTopMotor OR moveStatusLeftBottomMotor OR moveStatusRightBottomMotor;
+	//Velocity
+	Velo_LeftTopMotor:=DINT_TO_LREAL(LREAL_TO_DINT(LeftTopMotor.NcToPlc.ActVelo*100000))/100000;
+	Velo_RightTopMotor:=DINT_TO_LREAL(LREAL_TO_DINT(RightTopMotor.NcToPlc.ActVelo*100000))/100000;
+	Velo_LeftBottomMotor:=DINT_TO_LREAL(LREAL_TO_DINT(LeftBottomMotor.NcToPlc.ActVelo*100000))/100000;
+	Velo_RightBottomMotor:=DINT_TO_LREAL(LREAL_TO_DINT(RightBottomMotor.NcToPlc.ActVelo*100000))/100000;
+	//LagDistance
+	PosDiff_LeftTopMotor_actual:=DINT_TO_LREAL(LREAL_TO_DINT(LeftTopMotor.NcToPlc.PosDiff*100000))/100000;
+	PosDiff_RightTopMotor_actual:=DINT_TO_LREAL(LREAL_TO_DINT(RightTopMotor.NcToPlc.PosDiff*100000))/100000;
+	PosDiff_LeftBottomMotor_actual:=DINT_TO_LREAL(LREAL_TO_DINT(LeftBottomMotor.NcToPlc.PosDiff*100000))/100000;
+	PosDiff_RightBottomMotor_actual:=DINT_TO_LREAL(LREAL_TO_DINT(RightBottomMotor.NcToPlc.PosDiff*100000))/100000;
+	//Torque
+	Torque_LeftTopMotor:=LeftTopMotor.NcToPlc.ActTorque;
+	Torque_RightTopMotor:=RightTopMotor.NcToPlc.ActTorque;
+	Torque_LeftBottomMotor:=LeftBottomMotor.NcToPlc.ActTorque;
+	Torque_RightBottomMotor:=RightBottomMotor.NcToPlc.ActTorque;
+
+	LeftTopMotor.ReadStatus();
+	RightTopMotor.ReadStatus();
+	LeftBottomMotor.ReadStatus();
+	RightBottomMotor.ReadStatus();
+	//
+	//get Delta
+	//
+	//Delta Pos
+	DeltaPos_LeftTop:=Pos_LeftTopLin - Pos_LeftTopMotor;
+	DeltaPos_RightTop:=Pos_RightTopLin - Pos_RightTopMotor;
+	DeltaPos_LeftBottom:=Pos_LeftBottomLin - Pos_LeftBottomMotor;
+	DeltaPos_RightBottom:=Pos_RightBottomLin - Pos_RightBottomMotor;
+	//Delta Velocity	
+	DeltaVelo_LeftTop:=Velo_LeftTopLin - Velo_LeftTopMotor;
+	DeltaVelo_RightTop:=Velo_RightTopLin - Velo_RightTopMotor;
+	DeltaVelo_LeftBottom:=Velo_LeftBottomLin - Velo_LeftBottomMotor;
+	DeltaVelo_RightBottom:=Velo_RightBottomLin - Velo_RightBottomMotor;
+	//Delta lagDistance
+	DeltaPosDiff_LeftTop_actual:=PosDiff_LeftTopLin_actual - PosDiff_LeftTopMotor_actual;
+	DeltaPosDiff_RightTop_actual:=PosDiff_RightTopLin_actual - PosDiff_RightTopMotor_actual;
+	DeltaPosDiff_LeftBottom_actual:=PosDiff_LeftBottomLin_actual - PosDiff_LeftBottomMotor_actual;
+	DeltaPosDiff_RightBottom_actual:=PosDiff_RightBottomLin_actual - PosDiff_RightBottomMotor_actual;	
+	//Delta Torque
+	DeltaTorque_LeftTop:=Torque_LeftTopLin - Torque_LeftTopMotor;
+	DeltaTorque_RightTop:=Torque_RightTopLin - Torque_RightTopMotor;
+	DeltaTorque_LeftBottom:=Torque_LeftBottomLin -Torque_LeftBottomMotor;
+	DeltaTorque_RightBottom:=Torque_RightBottomLin - Torque_RightBottomMotor;
+	
+	(*//feedback2 LE value when no LE*)
 	IF NOT USELinearEncoder THEN
 		Pos_LeftTop_2:=DINT_TO_LREAL(LREAL_TO_DINT((LeftTop_2.NcToPlc.ActPos+PositionBias_LeftTop)*100000))/100000;
 		Pos_RightTop_2:=DINT_TO_LREAL(LREAL_TO_DINT((RightTop_2.NcToPlc.ActPos+PositionBias_RightTop)*100000))/100000;
@@ -7992,12 +8119,12 @@ IF NOT USELinearEncoder THEN
 END_IF
 
 // 初始化
-IF FirstScan THEN
+IF LEHeartBeatFirstScan THEN
     Velo_LeftTopLin_Last := LeftTopLin.NcToPlc.ActVelo;
     Velo_RightTopLin_Last := RightTopLin.NcToPlc.ActVelo;
     Velo_LeftBottomLin_Last := LeftBottomLin.NcToPlc.ActVelo;
     Velo_RightBottomLin_Last := RightBottomLin.NcToPlc.ActVelo;
-    FirstScan := FALSE;
+    LEHeartBeatFirstScan := FALSE;
 END_IF;
 
 // 计算光栅前后速度差，速度差比位置差更敏感
@@ -8006,9 +8133,9 @@ DeltaVelo_RightTopLin := ABS(RightTopLin.NcToPlc.ActVelo - Velo_RightTopLin_Last
 DeltaVelo_LeftBottomLin := ABS(LeftBottomLin.NcToPlc.ActVelo - Velo_LeftBottomLin_Last);
 DeltaVelo_RightBottomLin := ABS(RightBottomLin.NcToPlc.ActVelo - Velo_RightBottomLin_Last);
 //LeftTop monitor
-IF DeltaVelo_LeftTopLin > DeadZone THEN
+IF DeltaVelo_LeftTopLin > LEHeartBeatDeadZone THEN
     // 有变动，光栅正常，计数器归零，更新位置,重置所有状态
-    StableTimer_LeftTopLin(IN := FALSE, PT := AlarmTime);
+    StableTimer_LeftTopLin(IN := FALSE, PT := LEHeartBeatAlarmTime);
     Alarm_LeftTopLin := FALSE;
     Velo_LeftTopLin_Last := LeftTopLin.NcToPlc.ActVelo;  // 
     StableTime_LeftTopLin := T#0S;
@@ -8019,7 +8146,7 @@ ELSE
     //一点变动没有了，光栅异常，开始计时
     StableTimer_LeftTopLin(
         IN := TRUE,
-        PT := AlarmTime,
+        PT := LEHeartBeatAlarmTime,
         ET => StableTime_LeftTopLin
     );
 	//记录电机初始位置，后后续对比做准备
@@ -8059,9 +8186,9 @@ ELSE
 	END_IF
 END_IF
 //RightTop monitor
-IF DeltaVelo_RightTopLin > DeadZone THEN
+IF DeltaVelo_RightTopLin > LEHeartBeatDeadZone THEN
     // 有变动，光栅正常，计数器归零，更新位置,重置所有状态
-    StableTimer_RightTopLin(IN := FALSE, PT := AlarmTime);
+    StableTimer_RightTopLin(IN := FALSE, PT := LEHeartBeatAlarmTime);
     Alarm_RightTopLin := FALSE;
     Velo_RightTopLin_Last := RightTopLin.NcToPlc.ActVelo;  // 
     StableTime_RightTopLin := T#0S;
@@ -8072,7 +8199,7 @@ ELSE
     //一点变动没有了，光栅异常，开始计时
     StableTimer_RightTopLin(
         IN := TRUE,
-        PT := AlarmTime,
+        PT :=LEHeartBeatAlarmTime,
         ET => StableTime_RightTopLin
     );
 	//记录电机初始位置，后后续对比做准备
@@ -8112,9 +8239,9 @@ ELSE
 	END_IF
 END_IF
 //LeftBottom monitor
-IF DeltaVelo_LeftBottomLin > DeadZone THEN
+IF DeltaVelo_LeftBottomLin > LEHeartBeatDeadZone THEN
     // 有变动，光栅正常，计数器归零，更新位置,重置所有状态
-    StableTimer_LeftBottomLin(IN := FALSE, PT := AlarmTime);
+    StableTimer_LeftBottomLin(IN := FALSE, PT := LEHeartBeatAlarmTime);
     Alarm_LeftBottomLin := FALSE;
     Velo_LeftBottomLin_Last := LeftBottomLin.NcToPlc.ActVelo;  // 
     StableTime_LeftBottomLin := T#0S;
@@ -8125,7 +8252,7 @@ ELSE
     //一点变动没有了，光栅异常，开始计时
     StableTimer_LeftBottomLin(
         IN := TRUE,
-        PT := AlarmTime,
+        PT := LEHeartBeatAlarmTime,
         ET => StableTime_LeftBottomLin
     );
 	//记录电机初始位置，后后续对比做准备
@@ -8165,9 +8292,9 @@ ELSE
 	END_IF
 END_IF
 //RightBottom monitor
-IF DeltaVelo_RightBottomLin > DeadZone THEN
+IF DeltaVelo_RightBottomLin > LEHeartBeatDeadZone THEN
     // 有变动，光栅正常，计数器归零，更新位置,重置所有状态
-    StableTimer_RightBottomLin(IN := FALSE, PT := AlarmTime);
+    StableTimer_RightBottomLin(IN := FALSE, PT := LEHeartBeatAlarmTime);
     Alarm_RightBottomLin := FALSE;
     Velo_RightBottomLin_Last := RightBottomLin.NcToPlc.ActVelo;  // 
     StableTime_RightBottomLin := T#0S;
@@ -8178,7 +8305,7 @@ ELSE
     //一点变动没有了，光栅异常，开始计时
     StableTimer_RightBottomLin(
         IN := TRUE,
-        PT := AlarmTime,
+        PT := LEHeartBeatAlarmTime,
         ET => StableTime_RightBottomLin
     );
 	//记录电机初始位置，后后续对比做准备
@@ -8262,6 +8389,146 @@ NT_StartProcess_Load(
 ]]></ST>
       </Implementation>
     </Action>
+    <Action Name="A_MonitorMotorAndLE" Id="{8906040e-6c25-4137-b340-4fb081d521ce}" FolderPath="Axis\">
+      <Implementation>
+        <ST><![CDATA[//Monitoring Motor and LE Position/Velocity
+IF 	ABS(DeltaPos_LeftTop) > ThresholdDeltaPos_LeftTop THEN
+	ErrorID:=6001;
+	Error:=TRUE;
+	ErrorDescription:='ABS(DeltaPos_LeftTop) > ThresholdDeltaPos_LeftTop';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF ABS(DeltaPos_RightTop) > ThresholdDeltaPos_RightTop THEN
+	ErrorID:=6002;
+	Error:=TRUE;
+	ErrorDescription:='ABS(DeltaPos_RightTop) > ThresholdDeltaPos_RightTop';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF ABS(DeltaPos_LeftBottom) > ThresholdDeltaPos_LeftBottom THEN
+	ErrorID:=6003;
+	Error:=TRUE;
+	ErrorDescription:='ABS(DeltaPos_LeftBottom) > ThresholdDeltaPos_LeftBottom';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF ABS(DeltaPos_RightBottom) > ThresholdDeltaPos_RightBottom THEN
+	ErrorID:=6004;
+	Error:=TRUE;
+	ErrorDescription:='ABS(DeltaPos_RightBottom) > ThresholdDeltaPos_RightBottom';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+
+IF ABS(DeltaVelo_LeftTop) > ThresholdDeltaVelo_LeftTop THEN
+	ErrorID:=6005;
+	Error:=TRUE;
+	ErrorDescription:='ABS(DeltaVelo_LeftTop) > ThresholdDeltaVelo_LeftTop';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF ABS(DeltaVelo_RightTop) > ThresholdDeltaVelo_RightTop THEN
+	ErrorID:=6006;
+	Error:=TRUE;
+	ErrorDescription:='ABS(DeltaVelo_RightTop) > ThresholdDeltaVelo_RightTop';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF ABS(DeltaVelo_LeftBottom) > ThresholdDeltaVelo_LeftBottom THEN
+	ErrorID:=6007;
+	Error:=TRUE;
+	ErrorDescription:='ABS(DeltaVelo_LeftBottom) > ThresholdDeltaVelo_LeftBottom';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+IF ABS(DeltaVelo_RightBottom) > ThresholdDeltaVelo_RightBottom THEN
+	ErrorID:=6008;
+	Error:=TRUE;
+	ErrorDescription:='ABS(DeltaVelo_RightBottom) > ThresholdDeltaVelo_RightBottom';
+	FB_PlcEmergencyStop();
+	LED_Error:=TRUE;
+END_IF
+//
+//IF NotMoving ,Threshold is less
+//
+IF NOT moveStatusLeftTop THEN
+		IF 	ABS(DeltaPos_LeftTop) > ThresholdDeltaPos_LeftTop/3 THEN
+		ErrorID:=6009;
+		Error:=TRUE;
+		ErrorDescription:='ABS(DeltaPos_LeftTop) > ThresholdDeltaPos_LeftTop/3';
+		FB_PlcEmergencyStop();
+		LED_Error:=TRUE;
+	END_IF
+END_IF
+IF NOT moveStatusRightTop THEN
+	IF ABS(DeltaPos_RightTop) > ThresholdDeltaPos_RightTop/3 THEN
+		ErrorID:=6010;
+		Error:=TRUE;
+		ErrorDescription:='ABS(DeltaPos_RightTop) > ThresholdDeltaPos_RightTop/3';
+		FB_PlcEmergencyStop();
+		LED_Error:=TRUE;
+	END_IF
+END_IF
+IF NOT moveStatusLeftBottom THEN
+	IF ABS(DeltaPos_LeftBottom) > ThresholdDeltaPos_LeftBottom/3 THEN
+		ErrorID:=6011;
+		Error:=TRUE;
+		ErrorDescription:='ABS(DeltaPos_LeftBottom) > ThresholdDeltaPos_LeftBottom/3';
+		FB_PlcEmergencyStop();
+		LED_Error:=TRUE;
+	END_IF
+END_IF
+IF NOT moveStatusRightBottom THEN
+	IF ABS(DeltaPos_RightBottom) > ThresholdDeltaPos_RightBottom/3 THEN
+		ErrorID:=6012;
+		Error:=TRUE;
+		ErrorDescription:='ABS(DeltaPos_RightBottom) > ThresholdDeltaPos_RightBottom';
+		FB_PlcEmergencyStop();
+		LED_Error:=TRUE;
+	END_IF
+END_IF
+
+//
+IF NOT moveStatusLeftTop THEN
+	IF ABS(DeltaVelo_LeftTop) > ThresholdDeltaVelo_LeftTop/3 THEN
+		ErrorID:=6013;
+		Error:=TRUE;
+		ErrorDescription:='ABS(DeltaVelo_LeftTop) > ThresholdDeltaVelo_LeftTop/3';
+		FB_PlcEmergencyStop();
+		LED_Error:=TRUE;
+	END_IF
+END_IF
+IF NOT moveStatusRightTop THEN
+	IF ABS(DeltaVelo_RightTop) > ThresholdDeltaVelo_RightTop/3 THEN
+		ErrorID:=6014;
+		Error:=TRUE;
+		ErrorDescription:='ABS(DeltaVelo_RightTop) > ThresholdDeltaVelo_RightTop/3';
+		FB_PlcEmergencyStop();
+		LED_Error:=TRUE;
+	END_IF
+END_IF
+IF NOT moveStatusLeftBottom THEN
+	IF ABS(DeltaVelo_LeftBottom) > ThresholdDeltaVelo_LeftBottom/3 THEN
+		ErrorID:=6015;
+		Error:=TRUE;
+		ErrorDescription:='ABS(DeltaVelo_LeftBottom) > ThresholdDeltaVelo_LeftBottom/3';
+		FB_PlcEmergencyStop();
+		LED_Error:=TRUE;
+	END_IF
+END_IF
+IF NOT moveStatusRightBottom THEN
+	IF ABS(DeltaVelo_RightBottom) > ThresholdDeltaVelo_RightBottom/3 THEN
+		ErrorID:=6016;
+		Error:=TRUE;
+		ErrorDescription:='ABS(DeltaVelo_RightBottom) > ThresholdDeltaVelo_RightBottom/3';
+		FB_PlcEmergencyStop();
+		LED_Error:=TRUE;
+	END_IF
+END_IF
+]]></ST>
+      </Implementation>
+    </Action>
     <Action Name="A_PosDiffDetectiion" Id="{e857c546-d367-4f19-9434-ed29c144eb6f}" FolderPath="Axis\">
       <Implementation>
         <ST><![CDATA[IF ABS(PosDiff_LeftTopLin_actual)>PosDiff_LeftTopLin THEN
@@ -8306,6 +8573,8 @@ ELSIF ABS(PosDiff_LeftBottomLin_actual-PosDiff_RightBottomLin_actual)>0.05 THEN
 	FB_PlcEmergencyStop();
 	LED_Error:=TRUE;
 END_IF
+
+
 ]]></ST>
       </Implementation>
     </Action>
@@ -9596,6 +9865,45 @@ END_CASE]]></ST>
         </NWL>
       </Implementation>
     </Action>
+    <Action Name="A_SetMotorAxisPosition" Id="{1f7b7b3c-5e38-4a99-82a4-a1df4bf05d0c}" FolderPath="Axis\">
+      <Implementation>
+        <ST><![CDATA[fb_ton4_2(PT:=T#0.5S);
+CASE SetMotorAxisPosState OF
+	0:	(*FB_Set_AxisPosition*)
+		FB_Set_MotorAxisPosition(Execute:=TRUE);
+		fb_ton4_2.IN:=TRUE;
+		SetMotorAxisPosState:=1;
+	1:	(*wait*)
+		FB_Set_MotorAxisPosition();
+		IF NOT FB_Set_MotorAxisPosition.Done THEN		
+			IF NOT fb_ton4_2.Q THEN
+				SetMotorAxisPosState:=1;
+			ELSE
+				SetMotorAxisPosState:=99;
+			END_IF
+		ELSE
+			SetMotorAxisPosState:=88;
+		END_IF
+	88:
+		SetMotorAxisPosState:=0;
+		SetMotorAxisPositionDone:=TRUE;
+		Error:=FALSE;
+		ErrorID:=0;
+		FB_Set_MotorAxisPosition.Execute:=FALSE;
+		fb_ton4_2.IN:=FALSE;
+	99:
+		SetMotorAxisPosState:=99;
+		SetMotorAxisPositionDone:=FALSE;
+		Error:=TRUE;
+		FB_Set_MotorAxisPosition.Execute:=FALSE;
+		fb_ton4.IN:=FALSE;
+		LED_Error:=TRUE;
+		ErrorID:=401;
+		ErrorDescription:='SetMotorAxisPosition fail';
+END_CASE
+]]></ST>
+      </Implementation>
+    </Action>
     <LineIds Name="MAIN">
       <LineId Id="2277" Count="1" />
       <LineId Id="2785" Count="2" />
@@ -9632,7 +9940,20 @@ END_CASE]]></ST>
       <LineId Id="4383" Count="1" />
       <LineId Id="4749" Count="0" />
       <LineId Id="5188" Count="3" />
-      <LineId Id="3047" Count="0" />
+      <LineId Id="5603" Count="0" />
+      <LineId Id="5621" Count="0" />
+      <LineId Id="5626" Count="0" />
+      <LineId Id="5631" Count="1" />
+      <LineId Id="5624" Count="0" />
+      <LineId Id="5634" Count="1" />
+      <LineId Id="5604" Count="7" />
+      <LineId Id="5602" Count="0" />
+      <LineId Id="5641" Count="0" />
+      <LineId Id="5637" Count="0" />
+      <LineId Id="5636" Count="0" />
+      <LineId Id="5638" Count="0" />
+      <LineId Id="5642" Count="0" />
+      <LineId Id="5644" Count="0" />
     </LineIds>
     <LineIds Name="MAIN.A_CheckHardwareEmergencyStopStatus">
       <LineId Id="2" Count="0" />
@@ -9695,6 +10016,21 @@ END_CASE]]></ST>
       <LineId Id="106" Count="32" />
       <LineId Id="143" Count="59" />
       <LineId Id="104" Count="0" />
+    </LineIds>
+    <LineIds Name="MAIN.A_CheckMaxVelocity">
+      <LineId Id="62" Count="1" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="66" Count="2" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="9" Count="2" />
+      <LineId Id="3" Count="5" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="13" Count="5" />
+      <LineId Id="12" Count="0" />
+      <LineId Id="20" Count="12" />
+      <LineId Id="19" Count="0" />
+      <LineId Id="34" Count="26" />
+      <LineId Id="33" Count="0" />
     </LineIds>
     <LineIds Name="MAIN.A_CryogenicCompensationMonitoring">
       <LineId Id="2" Count="35" />
@@ -9806,16 +10142,31 @@ END_CASE]]></ST>
     <LineIds Name="MAIN.A_InitAxisParameters">
       <LineId Id="0" Count="2" />
       <LineId Id="35" Count="0" />
-      <LineId Id="4" Count="1" />
-      <LineId Id="36" Count="0" />
-      <LineId Id="6" Count="7" />
+      <LineId Id="4" Count="2" />
+      <LineId Id="9" Count="4" />
       <LineId Id="37" Count="0" />
-      <LineId Id="14" Count="10" />
-      <LineId Id="61" Count="29" />
-      <LineId Id="95" Count="4" />
+      <LineId Id="14" Count="9" />
+      <LineId Id="113" Count="3" />
+      <LineId Id="24" Count="0" />
       <LineId Id="91" Count="3" />
       <LineId Id="28" Count="0" />
+      <LineId Id="117" Count="0" />
+      <LineId Id="120" Count="31" />
+      <LineId Id="118" Count="1" />
+      <LineId Id="216" Count="1" />
+      <LineId Id="226" Count="0" />
+      <LineId Id="218" Count="2" />
       <LineId Id="39" Count="0" />
+      <LineId Id="222" Count="0" />
+      <LineId Id="225" Count="0" />
+      <LineId Id="223" Count="1" />
+      <LineId Id="221" Count="0" />
+      <LineId Id="228" Count="3" />
+      <LineId Id="227" Count="0" />
+      <LineId Id="234" Count="0" />
+      <LineId Id="238" Count="2" />
+      <LineId Id="232" Count="0" />
+      <LineId Id="241" Count="0" />
       <LineId Id="48" Count="0" />
       <LineId Id="56" Count="0" />
       <LineId Id="40" Count="1" />
@@ -9923,6 +10274,53 @@ END_CASE]]></ST>
       <LineId Id="37" Count="10" />
       <LineId Id="1" Count="0" />
     </LineIds>
+    <LineIds Name="MAIN.A_MonitorMotorAndLE">
+      <LineId Id="1" Count="0" />
+      <LineId Id="3" Count="0" />
+      <LineId Id="14" Count="3" />
+      <LineId Id="12" Count="1" />
+      <LineId Id="18" Count="5" />
+      <LineId Id="5" Count="0" />
+      <LineId Id="24" Count="5" />
+      <LineId Id="6" Count="0" />
+      <LineId Id="30" Count="5" />
+      <LineId Id="7" Count="1" />
+      <LineId Id="36" Count="5" />
+      <LineId Id="9" Count="0" />
+      <LineId Id="42" Count="5" />
+      <LineId Id="10" Count="0" />
+      <LineId Id="48" Count="5" />
+      <LineId Id="11" Count="0" />
+      <LineId Id="54" Count="5" />
+      <LineId Id="2" Count="0" />
+      <LineId Id="119" Count="0" />
+      <LineId Id="61" Count="0" />
+      <LineId Id="120" Count="1" />
+      <LineId Id="124" Count="5" />
+      <LineId Id="122" Count="1" />
+      <LineId Id="69" Count="7" />
+      <LineId Id="130" Count="1" />
+      <LineId Id="77" Count="6" />
+      <LineId Id="132" Count="0" />
+      <LineId Id="137" Count="0" />
+      <LineId Id="84" Count="7" />
+      <LineId Id="139" Count="0" />
+      <LineId Id="138" Count="0" />
+      <LineId Id="140" Count="0" />
+      <LineId Id="92" Count="6" />
+      <LineId Id="133" Count="0" />
+      <LineId Id="141" Count="0" />
+      <LineId Id="99" Count="6" />
+      <LineId Id="134" Count="0" />
+      <LineId Id="142" Count="0" />
+      <LineId Id="106" Count="6" />
+      <LineId Id="135" Count="0" />
+      <LineId Id="143" Count="0" />
+      <LineId Id="113" Count="5" />
+      <LineId Id="62" Count="0" />
+      <LineId Id="136" Count="0" />
+      <LineId Id="60" Count="0" />
+    </LineIds>
     <LineIds Name="MAIN.A_PosDiffDetectiion">
       <LineId Id="0" Count="2" />
       <LineId Id="36" Count="0" />
@@ -9949,6 +10347,7 @@ END_CASE]]></ST>
       <LineId Id="32" Count="0" />
       <LineId Id="34" Count="1" />
       <LineId Id="23" Count="0" />
+      <LineId Id="47" Count="1" />
       <LineId Id="21" Count="0" />
     </LineIds>
     <LineIds Name="MAIN.A_RestartDrivers">
@@ -10030,6 +10429,12 @@ END_CASE]]></ST>
       <LineId Id="94" Count="2" />
       <LineId Id="84" Count="0" />
       <LineId Id="3" Count="0" />
+    </LineIds>
+    <LineIds Name="MAIN.A_SetMotorAxisPosition">
+      <LineId Id="0" Count="11" />
+      <LineId Id="13" Count="18" />
+      <LineId Id="35" Count="1" />
+      <LineId Id="32" Count="1" />
     </LineIds>
   </POU>
 </TcPlcObject>

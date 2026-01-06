@@ -102,6 +102,9 @@
     <Compile Include="PlcTask.TcTTO">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="POU11.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="POUs\0.UserMode\F_GetSysTime.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -151,6 +154,9 @@
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="POUs\CommonFB\MainFB\FB_SetAxisPosition.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\CommonFB\MainFB\FB_SetMotorAxisPosition.TcPOU">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="POUs\CommonFB\MainFB\FB_Stop.TcPOU">
