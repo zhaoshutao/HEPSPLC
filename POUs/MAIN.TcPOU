@@ -8449,6 +8449,8 @@ IF ABS(DeltaVelo_RightBottom) > ThresholdDeltaVelo_RightBottom THEN
 	FB_PlcEmergencyStop();
 	LED_Error:=TRUE;
 END_IF
+
+(*
 //
 //IF NotMoving ,Threshold is less
 //
@@ -8526,7 +8528,7 @@ IF NOT moveStatusRightBottom THEN
 		LED_Error:=TRUE;
 	END_IF
 END_IF
-]]></ST>
+*)]]></ST>
       </Implementation>
     </Action>
     <Action Name="A_PosDiffDetectiion" Id="{e857c546-d367-4f19-9434-ed29c144eb6f}" FolderPath="Axis\">
@@ -10293,6 +10295,8 @@ END_CASE
       <LineId Id="11" Count="0" />
       <LineId Id="54" Count="5" />
       <LineId Id="2" Count="0" />
+      <LineId Id="145" Count="0" />
+      <LineId Id="144" Count="0" />
       <LineId Id="119" Count="0" />
       <LineId Id="61" Count="0" />
       <LineId Id="120" Count="1" />
