@@ -419,8 +419,6 @@ VAR
 	
 	btn_SetMotorAxisPosition: BOOL;
 	MonitorMotorAndLEFunctionOn:BOOL:=TRUE;
-	THNE: BOOL;
-	tt: BOOL;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[(*加载Ricipe参数*)
@@ -564,6 +562,7 @@ A_CheckMaxVelocity();]]></ST>
     <Folder Name="Axis" Id="{1f5db9b2-f074-43bd-a7a5-f28b002c6ac6}" />
     <Folder Name="Check" Id="{79c48f21-8e44-4159-8773-87594d6e7620}" />
     <Folder Name="Driver" Id="{06d9eaf4-b0e1-444b-9d9d-89e6e18ffc32}" />
+    <Folder Name="Led" Id="{f113927b-2573-40d4-bc99-982a98fb62c0}" />
     <Folder Name="LinearEncoder" Id="{4f24c8b2-fa71-4a79-b365-8e83326d2610}" />
     <Folder Name="Recipe" Id="{c556f121-0220-445e-afd2-6e585e1080be}" />
     <Folder Name="Safe" Id="{8d52a6a5-8a59-474d-a357-67246f4286de}" />
@@ -8104,6 +8103,20 @@ NT_StartProcess_Kill(
 ]]></ST>
       </Implementation>
     </Action>
+    <Action Name="A_LED" Id="{30979a0c-5f42-430d-9452-54e72fe68e7e}" FolderPath="Led\">
+      <Implementation>
+        <ST><![CDATA[IF moveStatusAnyAxis THEN
+	led_Run:=TRUE;
+ELSE
+	led_Run:=FALSE;
+END_IF
+IF Error THEN
+	led_Error:=TRUE;
+ELSE
+	led_Error:=FALSE;
+END_IF]]></ST>
+      </Implementation>
+    </Action>
     <Action Name="A_LEHeartBeatMonitor" Id="{c15e81d3-3944-4229-9ecc-53c2921ba7f3}" FolderPath="Check\">
       <Implementation>
         <ST><![CDATA[//monitor only while power on and not simulation or not use LE
@@ -8279,8 +8292,8 @@ ELSE
 			//电机速度监测
 			IF Velo_LeftBottomMotor > Threshold_LeftBottomMotorVelo THEN
 				Alarm_LeftBottomMotorVelo:=TRUE;
-				ErrorID:=5002;
-				ErrorDescription:='5002';
+				ErrorID:=5006;
+				ErrorDescription:='5006';
 				Error:=TRUE;
 				FB_PlcEmergencyStop();
 				LED_Error:=TRUE;
@@ -8321,8 +8334,8 @@ ELSE
 			MotorPosChange_RightBottom:=ABS( Pos_RightBottomMotor-Pos_RightBottomMotor_Initial);
 			IF MotorPosChange_RightBottom > Threshold_RightBottomMotorPos THEN
 				Alarm_RightBottomMotorPos:=TRUE;
-				ErrorID:=5006;
-				ErrorDescription:='5006';
+				ErrorID:=5007;
+				ErrorDescription:='5007';
 				Error:=TRUE;
 				FB_PlcEmergencyStop();
 				LED_Error:=TRUE;
@@ -8332,8 +8345,8 @@ ELSE
 			//电机速度监测
 			IF Velo_RightBottomMotor > Threshold_RightBottomMotorVelo THEN
 				Alarm_RightBottomMotorVelo:=TRUE;
-				ErrorID:=5002;
-				ErrorDescription:='5002';
+				ErrorID:=5008;
+				ErrorDescription:='5008';
 				Error:=TRUE;
 				FB_PlcEmergencyStop();
 				LED_Error:=TRUE;
@@ -10219,6 +10232,14 @@ END_CASE
       <LineId Id="50" Count="0" />
       <LineId Id="37" Count="10" />
       <LineId Id="1" Count="0" />
+    </LineIds>
+    <LineIds Name="MAIN.A_LED">
+      <LineId Id="1" Count="1" />
+      <LineId Id="4" Count="0" />
+      <LineId Id="6" Count="0" />
+      <LineId Id="3" Count="0" />
+      <LineId Id="8" Count="3" />
+      <LineId Id="7" Count="0" />
     </LineIds>
     <LineIds Name="MAIN.A_LEHeartBeatMonitor">
       <LineId Id="2" Count="3" />
