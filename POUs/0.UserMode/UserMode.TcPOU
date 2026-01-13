@@ -11,6 +11,7 @@ VAR
 	UserTaperPositionNew:LREAL:=0;//target
 	UserTaperVelocityNew:LREAL:=0.02;//target
 	UserTaperPositionDisplay:LREAL;//current
+	UserTaperPositionDisplayBLSide:LREAL;//current BeamLine
 	UserTaperPositionActual:LREAL;//current
 	//UserTaperPositionDisplay_FromRightTop:LREAL;
 	//UserTaperPositionDisplay_FromRightBottom:LREAL;
@@ -121,6 +122,7 @@ VAR
 	TaperAndGapSafetyScale:LREAL:=0.41;//IAU=0.409,IVU=0.32,CPMU=0.328,IAMW=0.42
 	TaperAndGapSafetyMinGapMargin:LREAL:=0.4;
 	IDTaperAndBLTaperScale:LREAL:=0.548;//HU 
+	HEPSIDTaperAndBLTaperScale:LREAL:=0.55;
 	//
 	//Global Chain protection-MPS
 	Global_ChainProtection_MPS_StorageRingReady:BOOL;
@@ -214,6 +216,15 @@ VAR
 	Unreach_LS_Fara: BOOL;
 	Unreach_LS_Neara: BOOL;
 	btn_UserGapStopa: BOOL;
+	
+	//OneKeyToMTaperZero
+	btn_OneKeyToTaperZero:BOOL;
+	OneKeyToTaperZero_RTRIG:R_TRIG;
+	OneKeyToTaperZero_TON:TON;
+	OneKeyToTaperZero_Triggered:BOOL;
+	OneKeyToTaperZero_State:DINT;
+	OneKeyToTaperZero_Done:BOOL;
+	CurrentTaperInit: LREAL;
 END_VAR
 ]]></Declaration>
     <Implementation>
@@ -277,7 +288,10 @@ A_GlobalChainProtection_EPS();
 A_CryogenicChainProtection();
 
 (*A_OneKeyToMaxGap*)
-A_OneKeyToMaxGap();]]></ST>
+A_OneKeyToMaxGap();
+
+(*A_OneKeyToTaperZero*)
+A_OneKeyToTaperZero();]]></ST>
     </Implementation>
     <Action Name="A_CheckCoupleStatus" Id="{ec531655-4226-4156-a0f2-db7d67f06866}">
       <Implementation>
@@ -957,7 +971,8 @@ IF USE_SingleAxis_Compensation THEN
 		UserTaperPositionDisplay:=DINT_TO_LREAL(LREAL_TO_DINT((UserRightGapPositionDisplay-UserGapPositionDisplay)/IDTaperAndBLTaperScale*100000))/100000;
 		UserTaperVelocityDisplay:=DINT_TO_LREAL(LREAL_TO_DINT((Velo_RightTopLin+Velo_RightBottomLin)/IDTaperAndBLTaperScale/2*100000))/100000;
 	END_IF
-
+	
+	UserTaperPositionDisplayBLSide:=DINT_TO_LREAL(LREAL_TO_DINT((UserTaperPositionDisplay/HEPSIDTaperAndBLTaperScale*100000)))/100000;
 	
 	(*速度可以不用解算，直接用即可*)
 	LeftTopLinVelocityDisplay:=Velo_LeftTopLin;
@@ -1045,7 +1060,7 @@ CASE moni_State OF
 		
 		
 		//比较
-		IF Diff_UserTopPos_actual >Threshold_UserTopPos_PLC OR Diff_UserTopPos_actual > max_UserTaperPositionNew/2 THEN//IAU、IAW、CPMU 1.6,IAMW:1.8
+		IF Diff_UserTopPos_actual >Threshold_UserTopPos_PLC OR Diff_UserTopPos_actual > max_UserTaperPositionNew*1.1/2 THEN//IAU、IAW、CPMU 1.6,IAMW:1.8
 				Error:=TRUE;
 				ErrorID:=601;
 				ErrorDescription:='Diff_UserTopPos_actual >Threshold_UserTopPos_PLC';
@@ -1056,7 +1071,7 @@ CASE moni_State OF
 				ErrorDescription:='Diff_UserTopVelo_actual>Threshold_UserTopVelo_PLC';
 				moni_State:=-100;
 		(*Bottom*)
-		ELSIF Diff_UserBottomPos_actual>Threshold_UserBottomPos_PLC OR Diff_UserBottomPos_actual > max_UserTaperPositionNew/2 THEN//IAU、IAW、CPMU 1.6,IAMW:1.8
+		ELSIF Diff_UserBottomPos_actual>Threshold_UserBottomPos_PLC OR Diff_UserBottomPos_actual > max_UserTaperPositionNew*1.1/2 THEN//IAU、IAW、CPMU 1.6,IAMW:1.8
 				Error:=TRUE;
 				ErrorID:=603;
 				ErrorDescription:='Diff_UserBottomPos_actual>Threshold_UserBottomPos_PLC';
@@ -1202,6 +1217,74 @@ END_IF
 ]]></ST>
       </Implementation>
     </Action>
+    <Action Name="A_OneKeyToTaperZero" Id="{adaffbb5-af85-410b-b60e-03d094e0c42c}">
+      <Implementation>
+        <ST><![CDATA[//0.上升沿触发
+//1.判断当前taper功能是否开启，没有则RETURN
+//2.taper=0，目标gap=当前gap,调用btn_GapMove，运动完成
+//3.taperOrNot关闭
+
+//0.上升沿触发
+OneKeyToTaperZero_RTRIG(CLK:=btn_OneKeyToTaperZero);
+IF OneKeyToTaperZero_RTRIG.Q THEN
+	OneKeyToTaperZero_Triggered:=TRUE;
+	OneKeyToTaperZero_Done:=FALSE;
+END_IF
+IF UserTaperVelocityNew<>0 THEN
+	OneKeyToTaperZero_TON(PT:=INT_TO_TIME(LREAL_TO_INT((CurrentTaperInit+HysteresisError*5)/UserTaperVelocityNew))*1000);
+END_IF
+IF OneKeyToTaperZero_Triggered THEN
+	CASE OneKeyToTaperZero_State OF
+		0://1.判断当前taper功能是否开启，没有则RETURN
+			IF TaperOrNot THEN
+				OneKeyToTaperZero_State:=1;
+			END_IF
+		1://2.taper=0，目标gap=当前gap,调用btn_GapMove
+			UserGapPositionNew:=UserGapPositionDisplay;
+			UserTaperPositionNew:=0;
+			btn_UserGapMove:=TRUE;
+			OneKeyToTaperZero_State:=2;
+			IF UserTaperPositionDisplay<=Threshold_TaperChangeFlag THEN//本来当前taper就基本是0,直接关闭taper功能即可
+				OneKeyToTaperZero_State:=3;
+			END_IF
+			CurrentTaperInit:=UserTaperPositionDisplay;
+		2://Move
+			OneKeyToTaperZero_TON.IN:=TRUE;
+			IF NOT OneKeyToTaperZero_TON.Q THEN
+				IF n_state=88 THEN//运动完成
+					OneKeyToTaperZero_State:=3;
+				END_IF
+			ELSE//时间到，还没有运动完，报错
+				OneKeyToTaperZero_TON.IN:=FALSE;
+				OneKeyToTaperZero_State:=-100;
+			END_IF
+		3://taper功能关闭
+			TaperOrNot:=FALSE;
+			OneKeyToTaperZero_State:=88;
+		88://到位
+			OneKeyToTaperZero_Done:=TRUE;	
+			Error:=FALSE;
+			ErrorID:=0;
+			ErrorDescription:='';
+			btn_OneKeyToTaperZero:=FALSE;
+			OneKeyToTaperZero_Triggered:=FALSE;
+			OneKeyToTaperZero_State:=0;
+			OneKeyToTaperZero_TON.IN:=FALSE;
+				
+		-100:
+			OneKeyToTaperZero_Done:=FALSE;
+			Error:=TRUE;
+			ErrorID:=1705;
+			ErrorDescription:='OneKeyToTaperZero Fail';
+			btn_OneKeyToTaperZero:=FALSE;
+			OneKeyToTaperZero_Triggered:=FALSE;
+			OneKeyToTaperZero_State:=0;
+			OneKeyToTaperZero_TON.IN:=FALSE;
+	END_CASE
+END_IF
+]]></ST>
+      </Implementation>
+    </Action>
     <Action Name="A_PowerOff" Id="{e3ff8ae4-6e0c-4bb4-9a62-00e47841163f}">
       <Implementation>
         <ST><![CDATA[CASE d_state OF
@@ -1312,6 +1395,19 @@ IF NOT (Global_ChainProtection_MPS_Triggered OR Global_ChainProtection_EPS_Trigg
 			Error:=TRUE;
 			ErrorId:=809;
 			ErrorDescription:='Please Move Taper to zero first before move gap';
+			RETURN;
+		END_IF
+	END_IF
+END_IF
+(*若GAP将有变化,检测taper功能开关有没有关，要是没有关，提示先关闭*)
+IF NOT (Global_ChainProtection_MPS_Triggered OR Global_ChainProtection_EPS_Triggered) THEN//在触发联锁保护后，taper保护关闭
+	IF ABS(UserGapPositionNew-UserGapPositionDisplay)>Threshold_GapChangeFlag AND btn_UserGapMove THEN
+		IF TaperOrNot THEN
+			btn_UserGapStop:=TRUE;
+			btn_UserGapMove:=FALSE;
+			Error:=TRUE;
+			ErrorId:=812;
+			ErrorDescription:='Please turn off taper function before move gap';
 			RETURN;
 		END_IF
 	END_IF
@@ -1803,6 +1899,9 @@ END_IF
       <LineId Id="1328" Count="0" />
       <LineId Id="2042" Count="1" />
       <LineId Id="2041" Count="0" />
+      <LineId Id="2270" Count="0" />
+      <LineId Id="2269" Count="0" />
+      <LineId Id="2271" Count="0" />
     </LineIds>
     <LineIds Name="UserMode.A_CheckCoupleStatus">
       <LineId Id="2" Count="9" />
@@ -1935,6 +2034,7 @@ END_IF
       <LineId Id="315" Count="0" />
       <LineId Id="326" Count="0" />
       <LineId Id="317" Count="0" />
+      <LineId Id="389" Count="0" />
       <LineId Id="387" Count="1" />
       <LineId Id="319" Count="3" />
       <LineId Id="318" Count="0" />
@@ -2017,6 +2117,46 @@ END_IF
       <LineId Id="1" Count="0" />
       <LineId Id="606" Count="0" />
     </LineIds>
+    <LineIds Name="UserMode.A_OneKeyToTaperZero">
+      <LineId Id="499" Count="3" />
+      <LineId Id="659" Count="0" />
+      <LineId Id="658" Count="0" />
+      <LineId Id="508" Count="2" />
+      <LineId Id="605" Count="0" />
+      <LineId Id="511" Count="0" />
+      <LineId Id="721" Count="0" />
+      <LineId Id="720" Count="0" />
+      <LineId Id="722" Count="0" />
+      <LineId Id="512" Count="2" />
+      <LineId Id="657" Count="0" />
+      <LineId Id="660" Count="2" />
+      <LineId Id="666" Count="1" />
+      <LineId Id="664" Count="0" />
+      <LineId Id="668" Count="0" />
+      <LineId Id="716" Count="3" />
+      <LineId Id="669" Count="0" />
+      <LineId Id="675" Count="0" />
+      <LineId Id="701" Count="0" />
+      <LineId Id="704" Count="1" />
+      <LineId Id="702" Count="0" />
+      <LineId Id="706" Count="2" />
+      <LineId Id="703" Count="0" />
+      <LineId Id="709" Count="2" />
+      <LineId Id="580" Count="1" />
+      <LineId Id="583" Count="2" />
+      <LineId Id="593" Count="0" />
+      <LineId Id="600" Count="0" />
+      <LineId Id="602" Count="0" />
+      <LineId Id="712" Count="0" />
+      <LineId Id="601" Count="0" />
+      <LineId Id="586" Count="4" />
+      <LineId Id="603" Count="1" />
+      <LineId Id="594" Count="0" />
+      <LineId Id="713" Count="0" />
+      <LineId Id="591" Count="0" />
+      <LineId Id="1" Count="0" />
+      <LineId Id="606" Count="0" />
+    </LineIds>
     <LineIds Name="UserMode.A_PowerOff">
       <LineId Id="0" Count="27" />
       <LineId Id="38" Count="0" />
@@ -2040,6 +2180,8 @@ END_IF
       <LineId Id="326" Count="1" />
       <LineId Id="325" Count="0" />
       <LineId Id="377" Count="0" />
+      <LineId Id="650" Count="11" />
+      <LineId Id="649" Count="0" />
       <LineId Id="333" Count="0" />
       <LineId Id="378" Count="0" />
       <LineId Id="646" Count="0" />
