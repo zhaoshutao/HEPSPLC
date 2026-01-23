@@ -419,6 +419,9 @@ VAR
 	
 	btn_SetMotorAxisPosition: BOOL;
 	MonitorMotorAndLEFunctionOn:BOOL:=TRUE;
+	
+	{attribute:'TcAnalytics'}
+	X:REAL;
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[(*加载Ricipe参数*)
@@ -7921,10 +7924,10 @@ temperature_averageh:=DINT_TO_LREAL(LREAL_TO_DINT((TemperatureSensors_h1+Tempera
 	PosDiff_LeftBottomLin_actual:=DINT_TO_LREAL(LREAL_TO_DINT(LeftBottomLin.NcToPlc.PosDiff*100000))/100000;
 	PosDiff_RightBottomLin_actual:=DINT_TO_LREAL(LREAL_TO_DINT(RightBottomLin.NcToPlc.PosDiff*100000))/100000;
 	//Torque
-	Torque_LeftTopLin:=LeftTopLin.NcToPlc.ActTorque;
-	Torque_RightTopLin:=RightTopLin.NcToPlc.ActTorque;
-	Torque_LeftBottomLin:=LeftBottomLin.NcToPlc.ActTorque;
-	Torque_RightBottomLin:=RightBottomLin.NcToPlc.ActTorque;
+	Torque_LeftTopLin:=DINT_TO_LREAL(LREAL_TO_DINT(LeftTopLin.NcToPlc.ActTorque*100000))/100000;
+	Torque_RightTopLin:=DINT_TO_LREAL(LREAL_TO_DINT(RightTopLin.NcToPlc.ActTorque*100000))/100000;
+	Torque_LeftBottomLin:=DINT_TO_LREAL(LREAL_TO_DINT(LeftBottomLin.NcToPlc.ActTorque*100000))/100000;
+	Torque_RightBottomLin:=DINT_TO_LREAL(LREAL_TO_DINT(RightBottomLin.NcToPlc.ActTorque*100000))/100000;
 
 	LeftTopLin.ReadStatus();
 	RightTopLin.ReadStatus();
@@ -7955,10 +7958,10 @@ temperature_averageh:=DINT_TO_LREAL(LREAL_TO_DINT((TemperatureSensors_h1+Tempera
 	PosDiff_LeftBottomMotor_actual:=DINT_TO_LREAL(LREAL_TO_DINT(LeftBottomMotor.NcToPlc.PosDiff*100000))/100000;
 	PosDiff_RightBottomMotor_actual:=DINT_TO_LREAL(LREAL_TO_DINT(RightBottomMotor.NcToPlc.PosDiff*100000))/100000;
 	//Torque
-	Torque_LeftTopMotor:=LeftTopMotor.NcToPlc.ActTorque;
-	Torque_RightTopMotor:=RightTopMotor.NcToPlc.ActTorque;
-	Torque_LeftBottomMotor:=LeftBottomMotor.NcToPlc.ActTorque;
-	Torque_RightBottomMotor:=RightBottomMotor.NcToPlc.ActTorque;
+	Torque_LeftTopMotor:=DINT_TO_LREAL(LREAL_TO_DINT(LeftTopMotor.NcToPlc.ActTorque*100000))/100000;
+	Torque_RightTopMotor:=DINT_TO_LREAL(LREAL_TO_DINT(RightTopMotor.NcToPlc.ActTorque*100000))/100000;
+	Torque_LeftBottomMotor:=DINT_TO_LREAL(LREAL_TO_DINT(LeftBottomMotor.NcToPlc.ActTorque*100000))/100000;
+	Torque_RightBottomMotor:=DINT_TO_LREAL(LREAL_TO_DINT(RightBottomMotor.NcToPlc.ActTorque*100000))/100000;
 
 	LeftTopMotor.ReadStatus();
 	RightTopMotor.ReadStatus();
@@ -7968,25 +7971,25 @@ temperature_averageh:=DINT_TO_LREAL(LREAL_TO_DINT((TemperatureSensors_h1+Tempera
 	//get Delta
 	//
 	//Delta Pos
-	DeltaPos_LeftTop:=Pos_LeftTopLin - Pos_LeftTopMotor;
-	DeltaPos_RightTop:=Pos_RightTopLin - Pos_RightTopMotor;
-	DeltaPos_LeftBottom:=Pos_LeftBottomLin - Pos_LeftBottomMotor;
-	DeltaPos_RightBottom:=Pos_RightBottomLin - Pos_RightBottomMotor;
+	DeltaPos_LeftTop:=DINT_TO_LREAL(LREAL_TO_DINT((Pos_LeftTopLin - Pos_LeftTopMotor)*100000))/100000;
+	DeltaPos_RightTop:=DINT_TO_LREAL(LREAL_TO_DINT((Pos_RightTopLin - Pos_RightTopMotor)*100000))/100000;
+	DeltaPos_LeftBottom:=DINT_TO_LREAL(LREAL_TO_DINT((Pos_LeftBottomLin - Pos_LeftBottomMotor)*100000))/100000;
+	DeltaPos_RightBottom:=DINT_TO_LREAL(LREAL_TO_DINT((Pos_RightBottomLin - Pos_RightBottomMotor)*100000))/100000;
 	//Delta Velocity	
-	DeltaVelo_LeftTop:=Velo_LeftTopLin - Velo_LeftTopMotor;
-	DeltaVelo_RightTop:=Velo_RightTopLin - Velo_RightTopMotor;
-	DeltaVelo_LeftBottom:=Velo_LeftBottomLin - Velo_LeftBottomMotor;
-	DeltaVelo_RightBottom:=Velo_RightBottomLin - Velo_RightBottomMotor;
+	DeltaVelo_LeftTop:=DINT_TO_LREAL(LREAL_TO_DINT((Velo_LeftTopLin - Velo_LeftTopMotor)*100000))/100000;
+	DeltaVelo_RightTop:=DINT_TO_LREAL(LREAL_TO_DINT((Velo_RightTopLin - Velo_RightTopMotor)*100000))/100000;
+	DeltaVelo_LeftBottom:=DINT_TO_LREAL(LREAL_TO_DINT((Velo_LeftBottomLin - Velo_LeftBottomMotor)*100000))/100000;
+	DeltaVelo_RightBottom:=DINT_TO_LREAL(LREAL_TO_DINT((Velo_RightBottomLin - Velo_RightBottomMotor)*100000))/100000;
 	//Delta lagDistance
-	DeltaPosDiff_LeftTop_actual:=PosDiff_LeftTopLin_actual - PosDiff_LeftTopMotor_actual;
-	DeltaPosDiff_RightTop_actual:=PosDiff_RightTopLin_actual - PosDiff_RightTopMotor_actual;
-	DeltaPosDiff_LeftBottom_actual:=PosDiff_LeftBottomLin_actual - PosDiff_LeftBottomMotor_actual;
-	DeltaPosDiff_RightBottom_actual:=PosDiff_RightBottomLin_actual - PosDiff_RightBottomMotor_actual;	
+	DeltaPosDiff_LeftTop_actual:=DINT_TO_LREAL(LREAL_TO_DINT((PosDiff_LeftTopLin_actual - PosDiff_LeftTopMotor_actual)*100000))/100000;
+	DeltaPosDiff_RightTop_actual:=DINT_TO_LREAL(LREAL_TO_DINT((PosDiff_RightTopLin_actual - PosDiff_RightTopMotor_actual)*100000))/100000;
+	DeltaPosDiff_LeftBottom_actual:=DINT_TO_LREAL(LREAL_TO_DINT((PosDiff_LeftBottomLin_actual - PosDiff_LeftBottomMotor_actual)*100000))/100000;
+	DeltaPosDiff_RightBottom_actual:=DINT_TO_LREAL(LREAL_TO_DINT((PosDiff_RightBottomLin_actual - PosDiff_RightBottomMotor_actual)*100000))/100000;	
 	//Delta Torque
-	DeltaTorque_LeftTop:=Torque_LeftTopLin - Torque_LeftTopMotor;
-	DeltaTorque_RightTop:=Torque_RightTopLin - Torque_RightTopMotor;
-	DeltaTorque_LeftBottom:=Torque_LeftBottomLin -Torque_LeftBottomMotor;
-	DeltaTorque_RightBottom:=Torque_RightBottomLin - Torque_RightBottomMotor;
+	DeltaTorque_LeftTop:=DINT_TO_LREAL(LREAL_TO_DINT((Torque_LeftTopLin - Torque_LeftTopMotor)*100000))/100000;;
+	DeltaTorque_RightTop:=DINT_TO_LREAL(LREAL_TO_DINT((Torque_RightTopLin - Torque_RightTopMotor)*100000))/100000;;
+	DeltaTorque_LeftBottom:=DINT_TO_LREAL(LREAL_TO_DINT((Torque_LeftBottomLin -Torque_LeftBottomMotor)*100000))/100000;;
+	DeltaTorque_RightBottom:=DINT_TO_LREAL(LREAL_TO_DINT((Torque_RightBottomLin - Torque_RightBottomMotor)*100000))/100000;;
 	
 	(*//feedback2 LE value when no LE*)
 	IF NOT USELinearEncoder THEN

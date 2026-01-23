@@ -212,9 +212,13 @@ VAR_GLOBAL
 	LeftBottomMotor:axis_ref;
 	RightBottomMotor:axis_ref;
 (*axis Position*)
+	{attribute:'TcAnalytics'}
 	Pos_LeftTopLin: LREAL;
+	{attribute:'TcAnalytics'}
 	Pos_RightTopLin:LREAL;
+	{attribute:'TcAnalytics'}
 	Pos_LeftBottomLin:LREAL;
+	{attribute:'TcAnalytics'}
 	Pos_RightBottomLin:LREAL;
 (*axis Position-motor*)
 	Pos_LeftTopMotor: LREAL;
