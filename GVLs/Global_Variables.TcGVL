@@ -5,6 +5,9 @@
 VAR_GLOBAL
 (*IDControl Ready*)
 	IDControlReady:BOOL;
+(*Maintenance Mode*)
+	MaintenanceMode:BOOL;
+	MaintenanceModeLed:BOOL;
 (*RecipeDescription*)
 	RecipeSavedDate:STRING;
 	RecipeDescription:STRING;
@@ -157,6 +160,7 @@ VAR_GLOBAL
 	USELinearEncoder:BOOL:=TRUE;
 (*restartTwinCAT*)
 	m_restartTC:BOOL;
+	m_simpleRestartTC:BOOL;
 (*Plc_EmergencyStop *)
 	Plc_EmergencyStop  AT %Q*:BOOL:=TRUE;
 (*硬急停*)
@@ -344,8 +348,9 @@ VAR_GLOBAL
 	Diff_UserBottomVelo_actual: LREAL;
 	Diff_UserLeftVelo_actual: LREAL;
 	Diff_UserRightVelo_actual:  LREAL;
+	//ID taper Mode
 	TaperFunctionSolidOn:BOOL;//该ID是否有taper需求，taper总开关，只在参数表生效
-	TaperOrNot:BOOL;
+	TaperOrNot:BOOL;//ID taper功能开关，入口电机不动，出口电机动
 	UserTaperPositionActual:LREAL;
 	UserTaperVelocityActual:LREAL;
 (***********************Power status and couple statatus***********************)
@@ -515,9 +520,26 @@ Struct_M_lakeshore_168:ARRAY[1..52] OF Struct_M_lakeshore:=(Temperature:=-255.02
 	//			: ComBuffer;	(* Receive data buffer; used with all receive function blocks *)
 	//TxBufferEL			: ComBuffer;	(* Transmit data buffer; used with all receive function blocks *)
 
-(*ColiControl Function*)
-(*Use in HALF *)
-CoilControlFunction:BOOL:=FALSE;
+	(*ColiControl Function*)
+	(*Use in HALF *)
+	CoilControlFunction:BOOL:=FALSE;
+	(*add Beamline taper 模式，入口和出口电机都运动，保持中心gap不变*)
+	//3种模式划分：
+	NormalGapMode:BOOL;
+	IDTaperMode:BOOL;
+	BLTaperMode:BOOL;
+	//BLtaper相关参数
+	BLTaperOrNot:BOOL;//ID taper功能开关，入口电机不动，出口电机动
+	BLUserTaperPositionActual:LREAL;
+	BLUserTaperVelocityActual:LREAL;
+		//
+	min_BLUserTaperPositionNew: LREAL:=0;;
+	max_BLUserTaperPositionNew: LREAL:=1;
+	inRange_BLUserTaperPositionNew: BOOL;
+	//
+	min_BLUserTaperVelocityNew: LREAL:=0;
+	max_BLUserTaperVelocityNew: LREAL:=1;
+	inRange_BLUserTaperVelocityNew: BOOL;
 END_VAR
 
 ]]></Declaration>
