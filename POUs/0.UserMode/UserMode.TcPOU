@@ -357,19 +357,33 @@ END_IF
 IF UserGapVelocityNew>=min_UserGapVelocityNew AND UserGapVelocityNew<=max_UserGapVelocityNew THEN
 	inRange_UserGapVelocityNew:=TRUE;
 END_IF
-//taper position
+//IDtaper position
 IF UserTaperPositionNew<min_UserTaperPositionNew OR UserTaperPositionNew>max_UserTaperPositionNew THEN
 	inRange_UserTaperPositionNew:=FALSE;
 END_IF
 IF UserTaperPositionNew>=min_UserTaperPositionNew AND UserTaperPositionNew<=max_UserTaperPositionNew THEN
 	inRange_UserTaperPositionNew:=TRUE;
 END_IF
-//taper velocity
+//IDtaper velocity
 IF UserTaperVelocityNew<min_UserTaperVelocityNew OR UserTaperVelocityNew>max_UserTaperVelocityNew THEN
 	inRange_UserTaperVelocityNew:=FALSE;
 END_IF
 IF UserTaperVelocityNew>=min_UserTaperVelocityNew AND UserTaperVelocityNew<=max_UserTaperVelocityNew THEN
 	inRange_UserTaperVelocityNew:=TRUE;
+END_IF
+//BLtaper position
+IF BLUserTaperPositionNew<min_BLUserTaperPositionNew OR BLUserTaperPositionNew>max_BLUserTaperPositionNew THEN
+	inRange_BLUserTaperPositionNew:=FALSE;
+END_IF
+IF BLUserTaperPositionNew>=min_BLUserTaperPositionNew AND BLUserTaperPositionNew<=max_BLUserTaperPositionNew THEN
+	inRange_BLUserTaperPositionNew:=TRUE;
+END_IF
+//BLtaper velocity
+IF BLUserTaperVelocityNew<min_BLUserTaperVelocityNew OR BLUserTaperVelocityNew>max_BLUserTaperVelocityNew THEN
+	inRange_BLUserTaperVelocityNew:=FALSE;
+END_IF
+IF BLUserTaperVelocityNew>=min_BLUserTaperVelocityNew AND BLUserTaperVelocityNew<=max_BLUserTaperVelocityNew THEN
+	inRange_BLUserTaperVelocityNew:=TRUE;
 END_IF
 //SS Mode
 IF SS_StepSize<min_SS_StepSize OR SS_StepSize>max_SS_StepSize THEN
@@ -454,6 +468,32 @@ IF btn_UserGapMove  AND NOT SSMotionMode AND RegularMotionMode THEN
 		ErrorId:=0;
 		ErrorDescription:='';
 	END_IF
+	IF NOT inRange_BLUserTaperPositionNew THEN
+		btn_UserGapStop:=TRUE;
+		btn_UserGapMove:=FALSE;
+		Error:=TRUE;
+		ErrorId:=805;
+		ErrorDescription:='target BLTaper Position out of range,please check';
+		RETURN;
+	ELSE
+		//btn_UserGapStop:=FALSE;
+		Error:=FALSE;
+		ErrorId:=0;
+		ErrorDescription:='';
+	END_IF
+	IF NOT inRange_BLUserTaperVelocityNew THEN
+		btn_UserGapStop:=TRUE;
+		btn_UserGapMove:=FALSE;
+		Error:=TRUE;
+		ErrorId:=806;
+		ErrorDescription:='target BLTaper velocity out of range,please check';
+		RETURN;
+	ELSE
+		//btn_UserGapStop:=FALSE;
+		Error:=FALSE;
+		ErrorId:=0;
+		ErrorDescription:='';
+	END_IF
 END_IF
 
 //
@@ -463,29 +503,43 @@ IF moveStatusAnyAxis THEN
 	IF NOT inRange_UserGapPositionNew THEN
 		btn_UserGapStop:=TRUE;
 		Error:=TRUE;
-		ErrorId:=805;
+		ErrorId:=807;
 		ErrorDescription:='target Gap position out of range in moving process!';
 		FB_PlcEmergencyStop();
 	END_IF
 	IF NOT inRange_UserGapVelocityNew THEN
 		btn_UserGapStop:=TRUE;
 		Error:=TRUE;
-		ErrorId:=806;
+		ErrorId:=808;
 		ErrorDescription:='target Gap velocity out of range in moving process!';
 		FB_PlcEmergencyStop();
 	END_IF
 	IF NOT inRange_UserTaperPositionNew THEN
 		btn_UserGapStop:=TRUE;
 		Error:=TRUE;
-		ErrorId:=807;
+		ErrorId:=809;
 		ErrorDescription:='target Taper Position out of range in moving process!';
 		FB_PlcEmergencyStop();
 	END_IF
 	IF NOT inRange_UserTaperVelocityNew THEN
 		btn_UserGapStop:=TRUE;
 		Error:=TRUE;
-		ErrorId:=808;
+		ErrorId:=810;
 		ErrorDescription:='target Taper velocity out of range in moving process!';
+		FB_PlcEmergencyStop();
+	END_IF
+	IF NOT inRange_BLUserTaperPositionNew THEN
+		btn_UserGapStop:=TRUE;
+		Error:=TRUE;
+		ErrorId:=811;
+		ErrorDescription:='target BLTaper Position out of range in moving process!';
+		FB_PlcEmergencyStop();
+	END_IF
+	IF NOT inRange_BLUserTaperVelocityNew THEN
+		btn_UserGapStop:=TRUE;
+		Error:=TRUE;
+		ErrorId:=812;
+		ErrorDescription:='target BLTaper velocity out of range in moving process!';
 		FB_PlcEmergencyStop();
 	END_IF
 END_IF
@@ -493,7 +547,7 @@ END_IF
 //运动过程中，监控每一个轴的目标位置，目标位置若超出阈值，Emergency
 //
 IF moveStatusAnyAxis THEN
-	IF NOT TaperOrNot THEN
+	IF NormalGapMode THEN
 		IF LeftTopLinPositionNew<min_UserLEProtectionGapPosition/2 OR LeftTopLinPositionNew>max_UserLEProtectionGapPosition/2 THEN
 			btn_UserGapStop:=TRUE;
 			Error:=TRUE;
@@ -2199,11 +2253,11 @@ END_IF;
 //插入件taper/线站taper
 IDTaperAndBLTaperScale:=L_Center2Motor/L_HalfGirder;
 //插入件taper模式下，入口被动减小的距离，也即a
-TaperAndGapSafetyScale:=(L_HalfGirder-L_Center2Motor)/(2*L_Center2Motor);
+TaperAndGapSafetyScale:=DINT_TO_LREAL(LREAL_TO_DINT(((L_HalfGirder-L_Center2Motor)/(2*L_Center2Motor))*100000))/100000;
 
 //线站模式下，最大taper由参数表决定，ID模式的最大tape由scale计算得到
-max_UserTaperPositionNew:=max_BLUserTaperPositionNew*IDTaperAndBLTaperScale;
-max_UserTaperVelocityNew:=max_BLUserTaperVelocityNew;
+max_UserTaperPositionNew:=DINT_TO_LREAL(LREAL_TO_DINT((max_BLUserTaperPositionNew*IDTaperAndBLTaperScale)*100000))/100000;
+max_UserTaperVelocityNew:=DINT_TO_LREAL(LREAL_TO_DINT((max_BLUserTaperVelocityNew)*100000))/100000;
 //最小taper固定位0
 min_UserTaperPositionNew:=0;
 min_UserTaperVelocityNew:=0;
@@ -2240,15 +2294,23 @@ min_UserTaperVelocityNew:=0;
     </LineIds>
     <LineIds Name="UserMode.A_CheckMotorsPos">
       <LineId Id="176" Count="2" />
-      <LineId Id="122" Count="53" />
+      <LineId Id="122" Count="27" />
+      <LineId Id="249" Count="12" />
+      <LineId Id="248" Count="0" />
+      <LineId Id="150" Count="25" />
       <LineId Id="121" Count="0" />
       <LineId Id="32" Count="0" />
       <LineId Id="117" Count="1" />
-      <LineId Id="33" Count="53" />
+      <LineId Id="33" Count="52" />
+      <LineId Id="263" Count="24" />
+      <LineId Id="262" Count="0" />
+      <LineId Id="86" Count="0" />
       <LineId Id="247" Count="0" />
       <LineId Id="87" Count="0" />
       <LineId Id="119" Count="1" />
-      <LineId Id="88" Count="28" />
+      <LineId Id="88" Count="27" />
+      <LineId Id="288" Count="13" />
+      <LineId Id="116" Count="0" />
       <LineId Id="31" Count="0" />
       <LineId Id="28" Count="2" />
       <LineId Id="180" Count="0" />

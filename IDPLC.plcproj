@@ -102,9 +102,6 @@
     <Compile Include="PlcTask.TcTTO">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="POU11.TcPOU">
-      <SubType>Code</SubType>
-    </Compile>
     <Compile Include="POUs\0.UserMode\F_GetSysTime.TcPOU">
       <SubType>Code</SubType>
     </Compile>
@@ -168,7 +165,16 @@
     <Compile Include="POUs\MainPRG\FB_CheckCoupleStatus.TcPOU">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="POUs\TiltSensor\FB_Simple_MovingAvg.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="POUs\TiltSensor\SAFE.TcPOU">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="RecipeManager.TcRMO">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Task_Safe.TcTTO">
       <SubType>Code</SubType>
     </Compile>
     <Compile Include="VISUs\Visualization.TcVIS">
@@ -195,6 +201,7 @@
     <Folder Include="POUs\MainPRG" />
     <Folder Include="POUs\0.UserMode" />
     <Folder Include="POUs\CoilControl" />
+    <Folder Include="POUs\TiltSensor" />
     <Folder Include="VISUs" />
   </ItemGroup>
   <ItemGroup>
