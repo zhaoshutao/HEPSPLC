@@ -10,7 +10,7 @@ VAR
 	TiltSensorTopAngle_INT AT%I*: INT;
 	TiltSensorTopAngle_mA: LREAL;
 	TileSensorTop_SN:STRING:='TT1026';
-	TiltSensorTop_ScaleFactor: LREAL:=0.0596;
+	TiltSensorTop_ScaleFactor: LREAL:=0.201;
 	fbMovingAvg_TiltSensorTop : FB_Simple_MovingAvg;
 	TiltSensorTop_FilterWindow : INT := 1000;  // 100个周期平均 = 1000ms
 	TiltSensorTop_mA_Filter:LREAL;
@@ -83,8 +83,8 @@ fbMovingAvg_TiltSensorTop(x := TiltSensorTopAngle_mA,    // 输入原始值
             rst := FALSE,       // 不复位
             y => TiltSensorTopAngle_mA_Filter);     // 输出平均值
 //计算角度
-TiltSensorTopAngle_Filter:=DINT_TO_LREAL(LREAL_TO_DINT(((TiltSensorTopAngle_mA_Filter-12)*TiltSensorTop_ScaleFactor+TiltSensorTop_InitAngle)*100000))/100000;//滤波后
-TiltSensorTopAngle:=DINT_TO_LREAL(LREAL_TO_DINT(((TiltSensorTopAngle_mA-12)*TiltSensorTop_ScaleFactor+TiltSensorTop_InitAngle)*100000))/100000;//未滤波，原始数据
+TiltSensorTopAngle_Filter:=DINT_TO_LREAL(LREAL_TO_DINT(((TiltSensorTopAngle_mA_Filter-12)*(0.625/TiltSensorTop_ScaleFactor)+TiltSensorTop_InitAngle)*100000))/100000;//滤波后
+TiltSensorTopAngle:=DINT_TO_LREAL(LREAL_TO_DINT(((TiltSensorTopAngle_mA-12)*(0.625/TiltSensorTop_ScaleFactor)+TiltSensorTop_InitAngle)*100000))/100000;//未滤波，原始数据
 //计算电机处由于倾斜导致的偏移量，单位毫米
 //TileMotorOffset:=L_Center2Motor*2*TAN(TiltSensorAngle_degree*PI / 180);
 //阈值触发

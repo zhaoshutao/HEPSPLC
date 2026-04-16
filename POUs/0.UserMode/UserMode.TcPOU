@@ -1701,7 +1701,8 @@ IF InitCompensationDatasDone THEN
 					FB_Move.CoupleState:=st_Couple;			
 					FB_Move.PowerState:=st_Power;						
 			
-					IF btn_UserGapMove THEN
+					IF btn_UserGapMove THEN						
+						moveStatusGap:=TRUE;
 						IF NOT st_Power THEN
 							ErrorID:=1501;
 							Error:=TRUE;
@@ -1757,6 +1758,7 @@ IF InitCompensationDatasDone THEN
 						m_state:=88;
 					END_IF
 				88:
+					moveStatusGap:=FALSE;
 					btn_UserGapMove:=FALSE;
 					Led_Run:=FALSE;
 					m_state:=0;
@@ -1768,7 +1770,8 @@ IF InitCompensationDatasDone THEN
 					FB_Move.Mode:=5;						//1.gap;2.single;3.taper;4.debug;5.BCGap&UserMode;5:userMode_2
 					FB_Move.CoupleState:=st_Couple;			
 					FB_Move.PowerState:=st_Power;			
-					IF btn_UserGapMove THEN	
+					IF btn_UserGapMove THEN						
+						moveStatusGap:=TRUE;
 						IF NOT st_Power THEN
 							ErrorID:=1501;
 							Error:=TRUE;
@@ -1917,7 +1920,8 @@ IF InitCompensationDatasDone THEN
 						FB_Move.BCGapMove_2:=FALSE;
 					END_IF
 					*)
-				88:
+				88:					
+					moveStatusGap:=FALSE;
 					btn_UserGapMove:=FALSE;					
 					Led_Run:=FALSE;
 					n_state:=0;
@@ -1929,7 +1933,8 @@ IF InitCompensationDatasDone THEN
 	//
 END_IF
 
-IF btn_UserGapStop OR btn_Reset THEN
+IF btn_UserGapStop OR btn_Reset THEN					
+	moveStatusGap:=FALSE;
 	FB_Move.BCGapReset:=TRUE;
 	FB_Move();	
 	btn_UserGapMove:=FALSE;	
@@ -2612,6 +2617,7 @@ min_UserTaperVelocityNew:=0;
       <LineId Id="37" Count="6" />
       <LineId Id="347" Count="0" />
       <LineId Id="52" Count="0" />
+      <LineId Id="757" Count="0" />
       <LineId Id="418" Count="0" />
       <LineId Id="422" Count="2" />
       <LineId Id="421" Count="0" />
@@ -2633,8 +2639,11 @@ min_UserTaperVelocityNew:=0;
       <LineId Id="563" Count="0" />
       <LineId Id="53" Count="4" />
       <LineId Id="216" Count="0" />
-      <LineId Id="58" Count="18" />
+      <LineId Id="58" Count="7" />
+      <LineId Id="752" Count="0" />
+      <LineId Id="66" Count="10" />
       <LineId Id="504" Count="0" />
+      <LineId Id="758" Count="0" />
       <LineId Id="594" Count="12" />
       <LineId Id="593" Count="0" />
       <LineId Id="521" Count="23" />
@@ -2667,11 +2676,17 @@ min_UserTaperVelocityNew:=0;
       <LineId Id="115" Count="8" />
       <LineId Id="131" Count="11" />
       <LineId Id="688" Count="20" />
-      <LineId Id="146" Count="23" />
+      <LineId Id="146" Count="16" />
+      <LineId Id="754" Count="0" />
+      <LineId Id="759" Count="0" />
+      <LineId Id="164" Count="5" />
       <LineId Id="415" Count="0" />
       <LineId Id="414" Count="0" />
       <LineId Id="416" Count="0" />
-      <LineId Id="171" Count="7" />
+      <LineId Id="171" Count="1" />
+      <LineId Id="755" Count="0" />
+      <LineId Id="760" Count="0" />
+      <LineId Id="174" Count="4" />
       <LineId Id="645" Count="0" />
       <LineId Id="179" Count="17" />
       <LineId Id="417" Count="0" />

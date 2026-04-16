@@ -182,10 +182,10 @@ CASE BCGapState OF
 		IF LeftTopLin.Status.Moving OR RightTopLin.Status.Moving
 			 OR LeftBottomLin.Status.Moving OR RightBottomLin.Status.Moving THEN	
 			BCGapState:=88;
-		ELSIF Top_MC_MoveAbsolute.Error OR Bottom_MC_MoveAbsolute.Error OR
-				RightTopLin_MC_MoveAbsolute.Error OR RightBottomLin_MC_MoveAbsolute.Error THEN	
-			ErrorID:=2;
-			BCGapState:=99;
+		//ELSIF Top_MC_MoveAbsolute.Error OR Bottom_MC_MoveAbsolute.Error OR
+		//		RightTopLin_MC_MoveAbsolute.Error OR RightBottomLin_MC_MoveAbsolute.Error THEN	
+		//	ErrorID:=2;
+		//	BCGapState:=99;
 		(*ELSIF ABS(Pos_LeftTopLin-GapPosition/2)<0.002 AND  ABS(Pos_LeftBottomLin-GapPosition)<0.002 THEN	
 			GapState:=88;*)
 		ELSIF leftTopLin.Status.NotMoving AND  leftBottomLin.Status.NotMoving
@@ -216,7 +216,7 @@ CASE BCGapState OF
 		END_IF
 		(*½ÓÊÕµ½stopÐÅºÅÊ±£¬reset×´Ì¬*)
 		IF BCGapReset THEN
-			BCGapState:=89;
+			BCGapState:=88;
 		END_IF
 
 	88:
@@ -245,7 +245,7 @@ CASE BCGapState OF
 		fb_ton_BC.IN:=FALSE;
 	99:
 		BCGapMove:=FALSE;
-		BCGapState:=99;
+		BCGapState:=0;
 		BCGapBusy:=FALSE;
 		BCGapDone:=FALSE;
 		Error:=TRUE;
