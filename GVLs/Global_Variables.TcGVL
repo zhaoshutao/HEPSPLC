@@ -104,6 +104,7 @@ VAR_GLOBAL
 	moveStatusAllAxis: BOOL;
 	moveStatusAnyAxis: BOOL;
 	moveStatusGap:BOOL;
+	moveStatusTaper:BOOL;
 (*Moving or notmoving-Motor*)
 	moveStatusLeftTopMotor: BOOL;
 	moveStatusRightTopMotor: BOOL;
