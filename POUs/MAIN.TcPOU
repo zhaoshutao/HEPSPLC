@@ -107,6 +107,9 @@ VAR
 	//
 	HasTemperatureSensorOrNot:BOOL;//Only IVU or CPMU
 	(*Sensor Reading*)
+	TempSensorHardware:DINT:=1;//1:profibus;2:EL3202
+	EL3202_Reading AT %I*:ARRAY[0..7] OF INT;	
+	EL3202_hReading AT %I*:ARRAY[0..7] OF INT;
 	Sensor_Reading_1 AT %I*:ARRAY[0..3] OF BYTE;
 	Sensor_Reading_2 AT %I*:ARRAY[0..3] OF BYTE;
 	Sensor_Reading_3 AT %I*:ARRAY[0..3] OF BYTE;
@@ -423,6 +426,13 @@ VAR
 	{attribute:'TcAnalytics'}
 	X:REAL;
 	AutoLoadOpcIOC: BOOL:=TRUE;
+	(*GetMotorTempture*)
+	MotorTemperature AT %I*:ARRAY[0..3] OF UINT;
+	MotorTemperature_LeftTop:LREAL;
+	MotorTemperature_RightTop:LREAL;
+	MotorTemperature_LeftBottom:LREAL;
+	MotorTemperature_RightBottom:LREAL;
+	
 END_VAR]]></Declaration>
     <Implementation>
       <ST><![CDATA[(*MaintenanceMode*)
@@ -575,7 +585,9 @@ IF MonitorMotorAndLEFunctionOn AND SetMotorAxisPositionDone THEN
 	A_MonitorMotorAndLE();
 END_IF
 (*A_CheckMaxVelocity*)
-A_CheckMaxVelocity();]]></ST>
+A_CheckMaxVelocity();
+(**)
+A_GetMotorTemperature();]]></ST>
     </Implementation>
     <Folder Name="Axis" Id="{1f5db9b2-f074-43bd-a7a5-f28b002c6ac6}" />
     <Folder Name="Check" Id="{79c48f21-8e44-4159-8773-87594d6e7620}" />
@@ -6838,6 +6850,14 @@ END_CASE
         </NWL>
       </Implementation>
     </Action>
+    <Action Name="A_GetMotorTemperature" Id="{177f6aa7-fb59-4f66-a7a6-1b4260347e60}" FolderPath="Axis\">
+      <Implementation>
+        <ST><![CDATA[MotorTemperature_LeftTop:=UINT_TO_LREAL(MotorTemperature[0]);
+MotorTemperature_RightTop:=UINT_TO_LREAL(MotorTemperature[1]);
+MotorTemperature_LeftBottom:=UINT_TO_LREAL(MotorTemperature[2]);
+MotorTemperature_RightBottom:=UINT_TO_LREAL(MotorTemperature[3]);]]></ST>
+      </Implementation>
+    </Action>
     <Action Name="A_GetScaleFactor" Id="{3d8f43f3-06a3-4c0b-994a-2efc8fe2ae68}" FolderPath="Axis\">
       <Implementation>
         <NWL>
@@ -7765,54 +7785,66 @@ END_CASE
     </Action>
     <Action Name="A_GetTemperatureSensorsData" Id="{d73fb87c-9e06-4b36-8cf6-68d5032eab30}" FolderPath="Temperature\">
       <Implementation>
-        <ST><![CDATA[//sensor_1
-dut_sensor_datas_1.data_byte[3]:=Sensor_Reading_1[0];
-dut_sensor_datas_1.data_byte[2]:=Sensor_Reading_1[1];
-dut_sensor_datas_1.data_byte[1]:=Sensor_Reading_1[2];
-dut_sensor_datas_1.data_byte[0]:=Sensor_Reading_1[3];
-TemperatureSensors_1:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_1.data_lreal*100))/100;
-//sensor_2
-dut_sensor_datas_2.data_byte[3]:=Sensor_Reading_2[0];
-dut_sensor_datas_2.data_byte[2]:=Sensor_Reading_2[1];
-dut_sensor_datas_2.data_byte[1]:=Sensor_Reading_2[2];
-dut_sensor_datas_2.data_byte[0]:=Sensor_Reading_2[3];
-TemperatureSensors_2:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_2.data_lreal*100))/100;
-//sensor_3
-dut_sensor_datas_3.data_byte[3]:=Sensor_Reading_3[0];
-dut_sensor_datas_3.data_byte[2]:=Sensor_Reading_3[1];
-dut_sensor_datas_3.data_byte[1]:=Sensor_Reading_3[2];
-dut_sensor_datas_3.data_byte[0]:=Sensor_Reading_3[3];
-TemperatureSensors_3:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_3.data_lreal*100))/100;
-//sensor_4
-dut_sensor_datas_4.data_byte[3]:=Sensor_Reading_4[0];
-dut_sensor_datas_4.data_byte[2]:=Sensor_Reading_4[1];
-dut_sensor_datas_4.data_byte[1]:=Sensor_Reading_4[2];
-dut_sensor_datas_4.data_byte[0]:=Sensor_Reading_4[3];
-TemperatureSensors_4:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_4.data_lreal*100))/100;
-//sensor_5
-dut_sensor_datas_5.data_byte[3]:=Sensor_Reading_5[0];
-dut_sensor_datas_5.data_byte[2]:=Sensor_Reading_5[1];
-dut_sensor_datas_5.data_byte[1]:=Sensor_Reading_5[2];
-dut_sensor_datas_5.data_byte[0]:=Sensor_Reading_5[3];
-TemperatureSensors_5:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_5.data_lreal*100))/100;
-//sensor_6
-dut_sensor_datas_6.data_byte[3]:=Sensor_Reading_6[0];
-dut_sensor_datas_6.data_byte[2]:=Sensor_Reading_6[1];
-dut_sensor_datas_6.data_byte[1]:=Sensor_Reading_6[2];
-dut_sensor_datas_6.data_byte[0]:=Sensor_Reading_6[3];
-TemperatureSensors_6:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_6.data_lreal*100))/100;
-//sensor_7
-dut_sensor_datas_7.data_byte[3]:=Sensor_Reading_7[0];
-dut_sensor_datas_7.data_byte[2]:=Sensor_Reading_7[1];
-dut_sensor_datas_7.data_byte[1]:=Sensor_Reading_7[2];
-dut_sensor_datas_7.data_byte[0]:=Sensor_Reading_7[3];
-TemperatureSensors_7:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_7.data_lreal*100))/100;
-//sensor_8
-dut_sensor_datas_8.data_byte[3]:=Sensor_Reading_8[0];
-dut_sensor_datas_8.data_byte[2]:=Sensor_Reading_8[1];
-dut_sensor_datas_8.data_byte[1]:=Sensor_Reading_8[2];
-dut_sensor_datas_8.data_byte[0]:=Sensor_Reading_8[3];
-TemperatureSensors_8:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_8.data_lreal*100))/100;
+        <ST><![CDATA[IF TempSensorHardware=1 THEN//from profibus,lakeshore 240-8P
+	//sensor_1
+	dut_sensor_datas_1.data_byte[3]:=Sensor_Reading_1[0];
+	dut_sensor_datas_1.data_byte[2]:=Sensor_Reading_1[1];
+	dut_sensor_datas_1.data_byte[1]:=Sensor_Reading_1[2];
+	dut_sensor_datas_1.data_byte[0]:=Sensor_Reading_1[3];
+	TemperatureSensors_1:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_1.data_lreal*100))/100;
+	//sensor_2
+	dut_sensor_datas_2.data_byte[3]:=Sensor_Reading_2[0];
+	dut_sensor_datas_2.data_byte[2]:=Sensor_Reading_2[1];
+	dut_sensor_datas_2.data_byte[1]:=Sensor_Reading_2[2];
+	dut_sensor_datas_2.data_byte[0]:=Sensor_Reading_2[3];
+	TemperatureSensors_2:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_2.data_lreal*100))/100;
+	//sensor_3
+	dut_sensor_datas_3.data_byte[3]:=Sensor_Reading_3[0];
+	dut_sensor_datas_3.data_byte[2]:=Sensor_Reading_3[1];
+	dut_sensor_datas_3.data_byte[1]:=Sensor_Reading_3[2];
+	dut_sensor_datas_3.data_byte[0]:=Sensor_Reading_3[3];
+	TemperatureSensors_3:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_3.data_lreal*100))/100;
+	//sensor_4
+	dut_sensor_datas_4.data_byte[3]:=Sensor_Reading_4[0];
+	dut_sensor_datas_4.data_byte[2]:=Sensor_Reading_4[1];
+	dut_sensor_datas_4.data_byte[1]:=Sensor_Reading_4[2];
+	dut_sensor_datas_4.data_byte[0]:=Sensor_Reading_4[3];
+	TemperatureSensors_4:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_4.data_lreal*100))/100;
+	//sensor_5
+	dut_sensor_datas_5.data_byte[3]:=Sensor_Reading_5[0];
+	dut_sensor_datas_5.data_byte[2]:=Sensor_Reading_5[1];
+	dut_sensor_datas_5.data_byte[1]:=Sensor_Reading_5[2];
+	dut_sensor_datas_5.data_byte[0]:=Sensor_Reading_5[3];
+	TemperatureSensors_5:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_5.data_lreal*100))/100;
+	//sensor_6
+	dut_sensor_datas_6.data_byte[3]:=Sensor_Reading_6[0];
+	dut_sensor_datas_6.data_byte[2]:=Sensor_Reading_6[1];
+	dut_sensor_datas_6.data_byte[1]:=Sensor_Reading_6[2];
+	dut_sensor_datas_6.data_byte[0]:=Sensor_Reading_6[3];
+	TemperatureSensors_6:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_6.data_lreal*100))/100;
+	//sensor_7
+	dut_sensor_datas_7.data_byte[3]:=Sensor_Reading_7[0];
+	dut_sensor_datas_7.data_byte[2]:=Sensor_Reading_7[1];
+	dut_sensor_datas_7.data_byte[1]:=Sensor_Reading_7[2];
+	dut_sensor_datas_7.data_byte[0]:=Sensor_Reading_7[3];
+	TemperatureSensors_7:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_7.data_lreal*100))/100;
+	//sensor_8
+	dut_sensor_datas_8.data_byte[3]:=Sensor_Reading_8[0];
+	dut_sensor_datas_8.data_byte[2]:=Sensor_Reading_8[1];
+	dut_sensor_datas_8.data_byte[1]:=Sensor_Reading_8[2];
+	dut_sensor_datas_8.data_byte[0]:=Sensor_Reading_8[3];
+	TemperatureSensors_8:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_8.data_lreal*100))/100;
+END_IF
+IF TempSensorHardware=2 THEN//from BECKHOFF EL3202
+	TemperatureSensors_1:=INT_TO_LREAL(EL3202_Reading[0])/100;
+	TemperatureSensors_2:=INT_TO_LREAL(EL3202_Reading[1])/100;
+	TemperatureSensors_3:=INT_TO_LREAL(EL3202_Reading[2])/100;
+	TemperatureSensors_4:=INT_TO_LREAL(EL3202_Reading[3])/100;
+	TemperatureSensors_5:=INT_TO_LREAL(EL3202_Reading[4])/100;
+	TemperatureSensors_6:=INT_TO_LREAL(EL3202_Reading[5])/100;
+	TemperatureSensors_7:=INT_TO_LREAL(EL3202_Reading[6])/100;
+	TemperatureSensors_8:=INT_TO_LREAL(EL3202_Reading[7])/100;
+END_IF
 //计算temperature_gradient
 temperature_gradient_2_To_1:=ABS(TemperatureSensors_2-TemperatureSensors_1);
 temperature_gradient_3_To_2:=ABS(TemperatureSensors_3-TemperatureSensors_2);
@@ -7848,55 +7880,67 @@ END_IF
 							
 //
 //high temperature
-//				
-//sensor_h1
-dut_sensor_datas_h1.data_byte[3]:=Sensor_Reading_h1[0];
-dut_sensor_datas_h1.data_byte[2]:=Sensor_Reading_h1[1];
-dut_sensor_datas_h1.data_byte[1]:=Sensor_Reading_h1[2];
-dut_sensor_datas_h1.data_byte[0]:=Sensor_Reading_h1[3];
-TemperatureSensors_h1:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_h1.data_lreal*100))/100;
-//sensor_h2
-dut_sensor_datas_h2.data_byte[3]:=Sensor_Reading_h2[0];
-dut_sensor_datas_h2.data_byte[2]:=Sensor_Reading_h2[1];
-dut_sensor_datas_h2.data_byte[1]:=Sensor_Reading_h2[2];
-dut_sensor_datas_h2.data_byte[0]:=Sensor_Reading_h2[3];
-TemperatureSensors_h2:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_h2.data_lreal*100))/100;
-//sensor_h3
-dut_sensor_datas_h3.data_byte[3]:=Sensor_Reading_h3[0];
-dut_sensor_datas_h3.data_byte[2]:=Sensor_Reading_h3[1];
-dut_sensor_datas_h3.data_byte[1]:=Sensor_Reading_h3[2];
-dut_sensor_datas_h3.data_byte[0]:=Sensor_Reading_h3[3];
-TemperatureSensors_h3:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_h3.data_lreal*100))/100;
-//sensor_h4
-dut_sensor_datas_h4.data_byte[3]:=Sensor_Reading_h4[0];
-dut_sensor_datas_h4.data_byte[2]:=Sensor_Reading_h4[1];
-dut_sensor_datas_h4.data_byte[1]:=Sensor_Reading_h4[2];
-dut_sensor_datas_h4.data_byte[0]:=Sensor_Reading_h4[3];
-TemperatureSensors_h4:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_h4.data_lreal*100))/100;
-//sensor_h5
-dut_sensor_datas_h5.data_byte[3]:=Sensor_Reading_h5[0];
-dut_sensor_datas_h5.data_byte[2]:=Sensor_Reading_h5[1];
-dut_sensor_datas_h5.data_byte[1]:=Sensor_Reading_h5[2];
-dut_sensor_datas_h5.data_byte[0]:=Sensor_Reading_h5[3];
-TemperatureSensors_h5:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_h5.data_lreal*100))/100;
-//sensor_h6
-dut_sensor_datas_h6.data_byte[3]:=Sensor_Reading_h6[0];
-dut_sensor_datas_h6.data_byte[2]:=Sensor_Reading_h6[1];
-dut_sensor_datas_h6.data_byte[1]:=Sensor_Reading_h6[2];
-dut_sensor_datas_h6.data_byte[0]:=Sensor_Reading_h6[3];
-TemperatureSensors_h6:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_h6.data_lreal*100))/100;
-//sensor_h7
-dut_sensor_datas_h7.data_byte[3]:=Sensor_Reading_h7[0];
-dut_sensor_datas_h7.data_byte[2]:=Sensor_Reading_h7[1];
-dut_sensor_datas_h7.data_byte[1]:=Sensor_Reading_h7[2];
-dut_sensor_datas_h7.data_byte[0]:=Sensor_Reading_h7[3];
-TemperatureSensors_h7:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_h7.data_lreal*100))/100;
-//sensor_h8
-dut_sensor_datas_h8.data_byte[3]:=Sensor_Reading_h8[0];
-dut_sensor_datas_h8.data_byte[2]:=Sensor_Reading_h8[1];
-dut_sensor_datas_h8.data_byte[1]:=Sensor_Reading_h8[2];
-dut_sensor_datas_h8.data_byte[0]:=Sensor_Reading_h8[3];
-TemperatureSensors_h8:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_h8.data_lreal*100))/100;
+//		
+IF TempSensorHardware=1 THEN//from profibus,lakeshore 240-8P		
+	//sensor_h1
+	dut_sensor_datas_h1.data_byte[3]:=Sensor_Reading_h1[0];
+	dut_sensor_datas_h1.data_byte[2]:=Sensor_Reading_h1[1];
+	dut_sensor_datas_h1.data_byte[1]:=Sensor_Reading_h1[2];
+	dut_sensor_datas_h1.data_byte[0]:=Sensor_Reading_h1[3];
+	TemperatureSensors_h1:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_h1.data_lreal*100))/100;
+	//sensor_h2
+	dut_sensor_datas_h2.data_byte[3]:=Sensor_Reading_h2[0];
+	dut_sensor_datas_h2.data_byte[2]:=Sensor_Reading_h2[1];
+	dut_sensor_datas_h2.data_byte[1]:=Sensor_Reading_h2[2];
+	dut_sensor_datas_h2.data_byte[0]:=Sensor_Reading_h2[3];
+	TemperatureSensors_h2:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_h2.data_lreal*100))/100;
+	//sensor_h3
+	dut_sensor_datas_h3.data_byte[3]:=Sensor_Reading_h3[0];
+	dut_sensor_datas_h3.data_byte[2]:=Sensor_Reading_h3[1];
+	dut_sensor_datas_h3.data_byte[1]:=Sensor_Reading_h3[2];
+	dut_sensor_datas_h3.data_byte[0]:=Sensor_Reading_h3[3];
+	TemperatureSensors_h3:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_h3.data_lreal*100))/100;
+	//sensor_h4
+	dut_sensor_datas_h4.data_byte[3]:=Sensor_Reading_h4[0];
+	dut_sensor_datas_h4.data_byte[2]:=Sensor_Reading_h4[1];
+	dut_sensor_datas_h4.data_byte[1]:=Sensor_Reading_h4[2];
+	dut_sensor_datas_h4.data_byte[0]:=Sensor_Reading_h4[3];
+	TemperatureSensors_h4:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_h4.data_lreal*100))/100;
+	//sensor_h5
+	dut_sensor_datas_h5.data_byte[3]:=Sensor_Reading_h5[0];
+	dut_sensor_datas_h5.data_byte[2]:=Sensor_Reading_h5[1];
+	dut_sensor_datas_h5.data_byte[1]:=Sensor_Reading_h5[2];
+	dut_sensor_datas_h5.data_byte[0]:=Sensor_Reading_h5[3];
+	TemperatureSensors_h5:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_h5.data_lreal*100))/100;
+	//sensor_h6
+	dut_sensor_datas_h6.data_byte[3]:=Sensor_Reading_h6[0];
+	dut_sensor_datas_h6.data_byte[2]:=Sensor_Reading_h6[1];
+	dut_sensor_datas_h6.data_byte[1]:=Sensor_Reading_h6[2];
+	dut_sensor_datas_h6.data_byte[0]:=Sensor_Reading_h6[3];
+	TemperatureSensors_h6:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_h6.data_lreal*100))/100;
+	//sensor_h7
+	dut_sensor_datas_h7.data_byte[3]:=Sensor_Reading_h7[0];
+	dut_sensor_datas_h7.data_byte[2]:=Sensor_Reading_h7[1];
+	dut_sensor_datas_h7.data_byte[1]:=Sensor_Reading_h7[2];
+	dut_sensor_datas_h7.data_byte[0]:=Sensor_Reading_h7[3];
+	TemperatureSensors_h7:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_h7.data_lreal*100))/100;
+	//sensor_h8
+	dut_sensor_datas_h8.data_byte[3]:=Sensor_Reading_h8[0];
+	dut_sensor_datas_h8.data_byte[2]:=Sensor_Reading_h8[1];
+	dut_sensor_datas_h8.data_byte[1]:=Sensor_Reading_h8[2];
+	dut_sensor_datas_h8.data_byte[0]:=Sensor_Reading_h8[3];
+	TemperatureSensors_h8:=DINT_TO_LREAL(LREAL_TO_DINT(dut_sensor_datas_h8.data_lreal*100))/100;
+END_IF
+IF TempSensorHardware=2 THEN//from BECKHOFF EL3202
+	TemperatureSensors_h1:=INT_TO_LREAL(EL3202_hReading[0])/100;
+	TemperatureSensors_h2:=INT_TO_LREAL(EL3202_hReading[1])/100;
+	TemperatureSensors_h3:=INT_TO_LREAL(EL3202_hReading[2])/100;
+	TemperatureSensors_h4:=INT_TO_LREAL(EL3202_hReading[3])/100;
+	TemperatureSensors_h5:=INT_TO_LREAL(EL3202_hReading[4])/100;
+	TemperatureSensors_h6:=INT_TO_LREAL(EL3202_hReading[5])/100;
+	TemperatureSensors_h7:=INT_TO_LREAL(EL3202_hReading[6])/100;
+	TemperatureSensors_h8:=INT_TO_LREAL(EL3202_hReading[7])/100;
+END_IF
 //计算temperature_gradient
 temperature_gradient_h2_To_h1:=ABS(TemperatureSensors_h2-TemperatureSensors_h1);
 temperature_gradient_h3_To_h2:=ABS(TemperatureSensors_h3-TemperatureSensors_h2);
@@ -9997,6 +10041,7 @@ END_CASE
       <LineId Id="5638" Count="0" />
       <LineId Id="5642" Count="0" />
       <LineId Id="5644" Count="0" />
+      <LineId Id="6520" Count="1" />
     </LineIds>
     <LineIds Name="MAIN.A_CheckHardwareEmergencyStopStatus">
       <LineId Id="2" Count="0" />
@@ -10146,7 +10191,11 @@ END_CASE
       <LineId Id="162" Count="0" />
       <LineId Id="39" Count="0" />
     </LineIds>
+    <LineIds Name="MAIN.A_GetMotorTemperature">
+      <LineId Id="1" Count="3" />
+    </LineIds>
     <LineIds Name="MAIN.A_GetTemperatureSensorsData">
+      <LineId Id="180" Count="0" />
       <LineId Id="37" Count="0" />
       <LineId Id="33" Count="3" />
       <LineId Id="28" Count="0" />
@@ -10164,6 +10213,10 @@ END_CASE
       <LineId Id="68" Count="0" />
       <LineId Id="75" Count="4" />
       <LineId Id="74" Count="0" />
+      <LineId Id="181" Count="0" />
+      <LineId Id="183" Count="1" />
+      <LineId Id="187" Count="6" />
+      <LineId Id="185" Count="0" />
       <LineId Id="81" Count="1" />
       <LineId Id="84" Count="4" />
       <LineId Id="97" Count="0" />
@@ -10178,7 +10231,12 @@ END_CASE
       <LineId Id="115" Count="0" />
       <LineId Id="91" Count="1" />
       <LineId Id="119" Count="1" />
-      <LineId Id="123" Count="56" />
+      <LineId Id="194" Count="0" />
+      <LineId Id="123" Count="47" />
+      <LineId Id="195" Count="0" />
+      <LineId Id="197" Count="8" />
+      <LineId Id="196" Count="0" />
+      <LineId Id="171" Count="8" />
       <LineId Id="122" Count="0" />
       <LineId Id="93" Count="3" />
     </LineIds>
