@@ -6852,10 +6852,10 @@ END_CASE
     </Action>
     <Action Name="A_GetMotorTemperature" Id="{177f6aa7-fb59-4f66-a7a6-1b4260347e60}" FolderPath="Axis\">
       <Implementation>
-        <ST><![CDATA[MotorTemperature_LeftTop:=UINT_TO_LREAL(MotorTemperature[0]);
-MotorTemperature_RightTop:=UINT_TO_LREAL(MotorTemperature[1]);
-MotorTemperature_LeftBottom:=UINT_TO_LREAL(MotorTemperature[2]);
-MotorTemperature_RightBottom:=UINT_TO_LREAL(MotorTemperature[3]);]]></ST>
+        <ST><![CDATA[MotorTemperature_LeftTop:=UINT_TO_LREAL(MotorTemperature[0])/10;
+MotorTemperature_RightTop:=UINT_TO_LREAL(MotorTemperature[1])/10;
+MotorTemperature_LeftBottom:=UINT_TO_LREAL(MotorTemperature[2])/10;
+MotorTemperature_RightBottom:=UINT_TO_LREAL(MotorTemperature[3])/10;]]></ST>
       </Implementation>
     </Action>
     <Action Name="A_GetScaleFactor" Id="{3d8f43f3-06a3-4c0b-994a-2efc8fe2ae68}" FolderPath="Axis\">
