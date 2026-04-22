@@ -75,6 +75,11 @@ VAR_GLOBAL
 	Threshold_BottomPos_Debug: LREAL:=4;
 	Threshold_LeftPos_Debug: LREAL:=4;
 	Threshold_RightPos_Debug: LREAL:=4;
+	//单轴目标位置和当前位置之差，阈值
+	Threshold_LeftTopPos_Debug: LREAL:=0.4;	
+	Threshold_RightTopPos_Debug: LREAL:=0.4;
+	Threshold_LeftBottomPos_Debug: LREAL:=0.4;
+	Threshold_RightBottomPos_Debug: LREAL:=0.4;
 (*Taper Mode Threshold*)
 	Range_TaperPos:LREAL:=5.01;
 	Range_TaperVelo:LREAL:=1.01;

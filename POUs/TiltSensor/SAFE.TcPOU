@@ -31,6 +31,8 @@ VAR
 	TiltSensorTop_GapThreshold:LREAL;
 	TiltSensorTop_IDTaperThreshold:LREAL;
 	TiltSensorTop_BLTaperThreshold:LREAL;
+	TiltSensorTop_SingleCarrierThreshold:LREAL;
+	TiltSensorTop_DebugThreshold:LREAL;
 	//角度与taper的比例
 	TaperAndTileTopAngleScale:LREAL;
 		//
@@ -60,6 +62,8 @@ VAR
 	TiltSensorBottom_GapThreshold:LREAL;
 	TiltSensorBottom_IDTaperThreshold:LREAL;
 	TiltSensorBottom_BLTaperThreshold:LREAL;
+	TiltSensorBottom_SingleCarrierThreshold:LREAL;
+	TiltSensorBottom_DebugThreshold:LREAL;
 	//角度与taper的比例
 	TaperAndTileBottomAngleScale:LREAL;
 	
@@ -88,29 +92,48 @@ TiltSensorTopAngle:=DINT_TO_LREAL(LREAL_TO_DINT(((TiltSensorTopAngle_mA-12)*(0.6
 //计算电机处由于倾斜导致的偏移量，单位毫米
 //TileMotorOffset:=L_Center2Motor*2*TAN(TiltSensorAngle_degree*PI / 180);
 //阈值触发
-IF NormalGapMode THEN
-	IF TiltSensorTopAngle>TiltSensorTop_GapThreshold THEN
-		ErrorID:=1601;
+(*先分几种大梁运动模式，每种模式再细分*)
+IF MAIN.pbUserMode THEN
+	IF NormalGapMode THEN
+		IF TiltSensorTopAngle>TiltSensorTop_GapThreshold THEN
+			ErrorID:=1601;
+			Error:=TRUE;
+			ErrorDescription:='TiltSensorTopAngle>TiltSensorTop_Threshold';
+			FB_PlcEmergencyStop();
+			LED_Error:=TRUE;
+		END_IF
+	END_IF
+	IF IDTaperMode THEN
+		IF TiltSensorTopAngle>TiltSensorTop_IDTaperThreshold THEN
+			ErrorID:=1602;
+			Error:=TRUE;
+			ErrorDescription:='TiltSensorTopAngle>TiltSensorTop_IDTaperThreshold';
+			FB_PlcEmergencyStop();
+			LED_Error:=TRUE;
+		END_IF
+	END_IF
+	IF BLTaperMode THEN
+		IF TiltSensorTopAngle>TiltSensorTop_BLTaperThreshold THEN
+			ErrorID:=1603;
+			Error:=TRUE;
+			ErrorDescription:='TiltSensorTopAngle>TiltSensorTop_BLTaperThreshold';
+			FB_PlcEmergencyStop();
+			LED_Error:=TRUE;
+		END_IF
+	END_IF
+ELSIF MAIN.pbSingleCarrierMode THEN
+	IF TiltSensorTopAngle>TiltSensorTop_SingleCarrierThreshold THEN
+		ErrorID:=1604;
 		Error:=TRUE;
-		ErrorDescription:='TiltSensorTopAngle>TiltSensorTop_Threshold';
+		ErrorDescription:='TiltSensorTopAngle>TiltSensorTop_SingleCarrierThreshold';
 		FB_PlcEmergencyStop();
 		LED_Error:=TRUE;
 	END_IF
-END_IF
-IF IDTaperMode THEN
-	IF TiltSensorTopAngle>TiltSensorTop_IDTaperThreshold THEN
-		ErrorID:=1602;
+ELSIF MAIN.pbDebugMode THEN
+	IF TiltSensorTopAngle>TiltSensorTop_DebugThreshold THEN
+		ErrorID:=1605;
 		Error:=TRUE;
-		ErrorDescription:='TiltSensorTopAngle>TiltSensorTop_IDTaperThreshold';
-		FB_PlcEmergencyStop();
-		LED_Error:=TRUE;
-	END_IF
-END_IF
-IF BLTaperMode THEN
-	IF TiltSensorTopAngle>TiltSensorTop_BLTaperThreshold THEN
-		ErrorID:=1603;
-		Error:=TRUE;
-		ErrorDescription:='TiltSensorTopAngle>TiltSensorTop_BLTaperThreshold';
+		ErrorDescription:='TiltSensorTopAngle>TiltSensorTop_DebugThreshold';
 		FB_PlcEmergencyStop();
 		LED_Error:=TRUE;
 	END_IF
@@ -123,6 +146,7 @@ ELSIF IDTaperMode THEN
 ELSIF BLTaperMode THEN
 	TaperAndTileTopAngleScale:=DINT_TO_LREAL(LREAL_TO_DINT((ATAN((UserMode.BLUserTaperPositionNew/4)/(UserMode.L_HalfGirder))*180/PI)*100000))/100000;
 END_IF
+(*
 //超出检测范围处理
 IF TileSensorTop_Underrange THEN
 	ErrorID:=1604;
@@ -160,6 +184,7 @@ ELSE
 	ErrorDescription:='';
 	LED_Error:=FALSE;
 END_IF
+*)
 //
 //Bottom TiltSensor
 //
@@ -175,29 +200,47 @@ TiltSensorBottomAngle:=DINT_TO_LREAL(LREAL_TO_DINT(((TiltSensorBottomAngle_mA-12
 //计算电机处由于倾斜导致的偏移量，单位毫米
 //TileMotorOffset:=L_Center2Motor*2*TAN(TiltSensorAngle_degree*PI / 180);
 //阈值触发
-IF NormalGapMode THEN
-	IF TiltSensorBottomAngle>TiltSensorBottom_GapThreshold THEN
-		ErrorID:=1607;
-		Error:=TRUE;
-		ErrorDescription:='TiltSensorBottomAngle>TiltSensorBottom_Threshold';
-		FB_PlcEmergencyStop();
-		LED_Error:=TRUE;
+IF MAIN.pbUserMode THEN
+	IF NormalGapMode THEN
+		IF TiltSensorBottomAngle>TiltSensorBottom_GapThreshold THEN
+			ErrorID:=1606;
+			Error:=TRUE;
+			ErrorDescription:='TiltSensorBottomAngle>TiltSensorBottom_Threshold';
+			FB_PlcEmergencyStop();
+			LED_Error:=TRUE;
+		END_IF
 	END_IF
-END_IF
-IF IDTaperMode THEN
-	IF TiltSensorBottomAngle>TiltSensorBottom_IDTaperThreshold THEN
-		ErrorID:=1608;
-		Error:=TRUE;
-		ErrorDescription:='TiltSensorBottomAngle>TiltSensorBottom_IDTaperThreshold';
-		FB_PlcEmergencyStop();
-		LED_Error:=TRUE;
+	IF IDTaperMode THEN
+		IF TiltSensorBottomAngle>TiltSensorBottom_IDTaperThreshold THEN
+			ErrorID:=1607;
+			Error:=TRUE;
+			ErrorDescription:='TiltSensorBottomAngle>TiltSensorBottom_IDTaperThreshold';
+			FB_PlcEmergencyStop();
+			LED_Error:=TRUE;
+		END_IF
 	END_IF
-END_IF
-IF BLTaperMode THEN
-	IF TiltSensorBottomAngle>TiltSensorBottom_BLTaperThreshold THEN
+	IF BLTaperMode THEN
+		IF TiltSensorBottomAngle>TiltSensorBottom_BLTaperThreshold THEN
+			ErrorID:=1608;
+			Error:=TRUE;
+			ErrorDescription:='TiltSensorBottomAngle>TiltSensorBottom_BLTaperThreshold';
+			FB_PlcEmergencyStop();
+			LED_Error:=TRUE;
+		END_IF
+	END_IF
+ELSIF MAIN.pbSingleCarrierMode THEN
+	IF TiltSensorBottomAngle>TiltSensorBottom_SingleCarrierThreshold THEN
 		ErrorID:=1609;
 		Error:=TRUE;
-		ErrorDescription:='TiltSensorBottomAngle>TiltSensorBottom_BLTaperThreshold';
+		ErrorDescription:='TiltSensorTopAngle>TiltSensorBottom_SingleCarrierThreshold';
+		FB_PlcEmergencyStop();
+		LED_Error:=TRUE;
+	END_IF
+ELSIF MAIN.pbDebugMode THEN
+	IF TiltSensorBottomAngle>TiltSensorBottom_DebugThreshold THEN
+		ErrorID:=1610;
+		Error:=TRUE;
+		ErrorDescription:='TiltSensorBottomAngle>TiltSensorBottom_DebugThreshold';
 		FB_PlcEmergencyStop();
 		LED_Error:=TRUE;
 	END_IF
@@ -210,6 +253,7 @@ ELSIF IDTaperMode THEN
 ELSIF BLTaperMode THEN
 	TaperAndTileBottomAngleScale:=DINT_TO_LREAL(LREAL_TO_DINT((ATAN((UserMode.BLUserTaperPositionNew/4)/(UserMode.L_HalfGirder))*180/PI)*100000))/100000;;
 END_IF
+(*
 //超出检测范围处理
 IF TileSensorBottom_Underrange THEN
 	ErrorID:=1610;
@@ -247,7 +291,7 @@ ELSE
 	ErrorDescription:='';
 	LED_Error:=FALSE;
 END_IF
-]]></ST>
+*)]]></ST>
     </Implementation>
     <LineIds Name="SAFE">
       <LineId Id="81" Count="2" />
@@ -258,6 +302,8 @@ END_IF
       <LineId Id="31" Count="0" />
       <LineId Id="33" Count="0" />
       <LineId Id="87" Count="0" />
+      <LineId Id="415" Count="0" />
+      <LineId Id="413" Count="0" />
       <LineId Id="69" Count="0" />
       <LineId Id="263" Count="0" />
       <LineId Id="77" Count="3" />
@@ -268,12 +314,19 @@ END_IF
       <LineId Id="270" Count="0" />
       <LineId Id="280" Count="7" />
       <LineId Id="279" Count="0" />
+      <LineId Id="414" Count="0" />
+      <LineId Id="420" Count="5" />
+      <LineId Id="416" Count="1" />
+      <LineId Id="428" Count="5" />
+      <LineId Id="419" Count="0" />
+      <LineId Id="418" Count="0" />
       <LineId Id="88" Count="0" />
       <LineId Id="94" Count="1" />
       <LineId Id="90" Count="0" />
       <LineId Id="97" Count="0" />
       <LineId Id="92" Count="0" />
       <LineId Id="100" Count="1" />
+      <LineId Id="410" Count="0" />
       <LineId Id="129" Count="1" />
       <LineId Id="133" Count="3" />
       <LineId Id="341" Count="4" />
@@ -286,9 +339,16 @@ END_IF
       <LineId Id="331" Count="4" />
       <LineId Id="150" Count="0" />
       <LineId Id="144" Count="0" />
+      <LineId Id="411" Count="0" />
       <LineId Id="151" Count="13" />
-      <LineId Id="288" Count="26" />
-      <LineId Id="172" Count="15" />
+      <LineId Id="288" Count="0" />
+      <LineId Id="435" Count="0" />
+      <LineId Id="289" Count="25" />
+      <LineId Id="454" Count="0" />
+      <LineId Id="436" Count="15" />
+      <LineId Id="172" Count="8" />
+      <LineId Id="412" Count="0" />
+      <LineId Id="181" Count="6" />
       <LineId Id="315" Count="0" />
       <LineId Id="317" Count="2" />
       <LineId Id="316" Count="0" />
