@@ -230,10 +230,10 @@ VAR
 	OneKeyToMaxGap_TON_Stop2Move_InTaperMode:TON;
 	OneKeyToMaxGap_TON_Power2Move:TON;
 	OneKeyToMaxGap_Done:BOOL;
-	FTrig_ReachLSa: F_TRIG;
-	Unreach_LS_Fara: BOOL;
-	Unreach_LS_Neara: BOOL;
-	btn_UserGapStopa: BOOL;
+	//FTrig_ReachLS: F_TRIG;
+	//Unreach_LS_Far: BOOL;
+	//Unreach_LS_Near: BOOL;
+	//btn_UserGapStopa: BOOL;
 	
 	//OneKeyToMTaperZero
 	btn_OneKeyToTaperZero:BOOL;
@@ -1702,8 +1702,9 @@ IF InitCompensationDatasDone THEN
 					FB_Move.CoupleState:=st_Couple;			
 					FB_Move.PowerState:=st_Power;						
 			
-					IF btn_UserGapMove THEN						
+					IF btn_UserGapMove THEN					
 						moveStatusGap:=TRUE;
+						FB_Move.BCGapReset:=TRUE;
 						IF NOT st_Power THEN
 							ErrorID:=1501;
 							Error:=TRUE;
@@ -1745,11 +1746,11 @@ IF InitCompensationDatasDone THEN
 							FB_Move.BCLeftBottomVelocity:=0;
 							FB_Move.BCRightBottomVelocity:=0;
 						END_IF
-						FB_Move.BCGapMove:=TRUE;
 						m_state:=1;
 						FB_Move();
 					END_IF
 				1:
+					FB_Move.BCGapMove:=TRUE;
 					btn_UserGapMove:=FALSE;
 					FB_Move();
 					IF NOT FB_Move.BCGapDone THEN
@@ -1771,7 +1772,8 @@ IF InitCompensationDatasDone THEN
 					FB_Move.Mode:=5;						//1.gap;2.single;3.taper;4.debug;5.BCGap&UserMode;5:userMode_2
 					FB_Move.CoupleState:=st_Couple;			
 					FB_Move.PowerState:=st_Power;			
-					IF btn_UserGapMove THEN						
+					IF btn_UserGapMove THEN	
+						FB_Move.BCGapReset:=TRUE;					
 						moveStatusGap:=TRUE;
 						IF NOT st_Power THEN
 							ErrorID:=1501;
@@ -1855,13 +1857,14 @@ IF InitCompensationDatasDone THEN
 							FB_Move.BCRightBottomVelocity:=0;
 						END_IF	
 
-						FB_Move.BCGapMove:=TRUE;
+
 						FB_Move();
 						HysteresisMoving:=TRUE;		
 						n_state:=1;	
 					END_IF
 				1:
-					btn_UserGapMove:=FALSE;
+					btn_UserGapMove:=FALSE;	
+					FB_Move.BCGapMove:=TRUE;
 					FB_Move();
 					IF NOT FB_Move.BCGapDone THEN			(*还未运动到位置,运动过程中*)
 						Led_Run:=TRUE;
@@ -1934,40 +1937,50 @@ IF InitCompensationDatasDone THEN
 	//
 END_IF
 
-IF btn_UserGapStop OR btn_Reset THEN					
-	moveStatusGap:=FALSE;
-	FB_Move.BCGapReset:=TRUE;
-	FB_Move();	
-	btn_UserGapMove:=FALSE;	
-	m_state:=0;	
-	n_state:=0;	
-	HysteresisMoving:=FALSE;
-	CASE s_state OF
-			0:
-				FB_Stop.Mode:=5;	
-				FB_Stop.CoupleState:=st_Couple;	
-				FB_Stop.PowerState:=st_Power;
-				FB_Stop.BCGapStop:=TRUE;
-				FB_Stop();	
-				s_state:=1;
-			1:
-				FB_Stop();
-				IF NOT FB_Stop.BCGapDone THEN
-					s_state:=1;
-				ELSE
-					s_state:=88;
-				END_IF
-			88:
-				btn_UserGapStop:=FALSE;	
-				FB_Move.BCGapReset:=FALSE;
-				btn_reset:=FALSE;
-				s_state:=0;
-		END_CASE
-END_IF
+//
+//STOP
+//
+CASE s_state OF
+	0:
+		IF btn_UserGapStop OR btn_Reset THEN					
+			moveStatusGap:=FALSE;
+			m_state:=0;	
+			n_state:=0;	
+			HysteresisMoving:=FALSE;
+					
+			FB_Stop.Mode:=5;	
+			FB_Stop.CoupleState:=st_Couple;	
+			FB_Stop.PowerState:=st_Power;
+			FB_Stop.BCGapStop:=TRUE;
+			FB_Stop();	
+			s_state:=1;
+		END_IF
+	1:
+		btn_UserGapStop:=FALSE;	
+		FB_Stop();
+		IF NOT FB_Stop.BCGapDone THEN
+			s_state:=1;
+		ELSE
+			s_state:=88;
+		END_IF
+	88:
+		FB_Move.BCGapReset:=FALSE;
+		btn_reset:=FALSE;
+		s_state:=0;
+END_CASE
+
 
 (*触发限位开关后，相当于点击了Stop按钮*)
 FTrig_ReachLS(CLK:=Unreach_LS_Far AND Unreach_LS_Near);
 IF FTrig_ReachLS.Q THEN
+	btn_UserGapStop:=TRUE;
+END_IF
+
+(*触发限位后，如果继续向前运动，点击move，则相当于点击stop，用于恢复move的状态位*)
+IF NOT Unreach_LS_Far AND btn_UserGapMove AND UserGapPositionNew >= UserGapPositionDisplay THEN
+	btn_UserGapStop:=TRUE;
+END_IF
+IF NOT Unreach_LS_Near AND btn_UserGapMove AND UserGapPositionNew <= UserGapPositionDisplay THEN
 	btn_UserGapStop:=TRUE;
 END_IF]]></ST>
       </Implementation>
@@ -2617,8 +2630,8 @@ min_UserTaperVelocityNew:=0;
       <LineId Id="33" Count="2" />
       <LineId Id="37" Count="6" />
       <LineId Id="347" Count="0" />
+      <LineId Id="775" Count="1" />
       <LineId Id="52" Count="0" />
-      <LineId Id="757" Count="0" />
       <LineId Id="418" Count="0" />
       <LineId Id="422" Count="2" />
       <LineId Id="421" Count="0" />
@@ -2638,12 +2651,14 @@ min_UserTaperVelocityNew:=0;
       <LineId Id="672" Count="2" />
       <LineId Id="670" Count="0" />
       <LineId Id="563" Count="0" />
-      <LineId Id="53" Count="4" />
+      <LineId Id="54" Count="3" />
+      <LineId Id="780" Count="0" />
       <LineId Id="216" Count="0" />
       <LineId Id="58" Count="7" />
       <LineId Id="752" Count="0" />
       <LineId Id="66" Count="10" />
       <LineId Id="504" Count="0" />
+      <LineId Id="777" Count="0" />
       <LineId Id="758" Count="0" />
       <LineId Id="594" Count="12" />
       <LineId Id="593" Count="0" />
@@ -2674,6 +2689,7 @@ min_UserTaperVelocityNew:=0;
       <LineId Id="77" Count="0" />
       <LineId Id="114" Count="0" />
       <LineId Id="218" Count="0" />
+      <LineId Id="781" Count="0" />
       <LineId Id="115" Count="8" />
       <LineId Id="131" Count="11" />
       <LineId Id="688" Count="20" />
@@ -2685,17 +2701,27 @@ min_UserTaperVelocityNew:=0;
       <LineId Id="414" Count="0" />
       <LineId Id="416" Count="0" />
       <LineId Id="171" Count="1" />
-      <LineId Id="755" Count="0" />
-      <LineId Id="760" Count="0" />
-      <LineId Id="174" Count="4" />
       <LineId Id="645" Count="0" />
-      <LineId Id="179" Count="17" />
+      <LineId Id="778" Count="1" />
+      <LineId Id="179" Count="1" />
+      <LineId Id="764" Count="1" />
+      <LineId Id="769" Count="1" />
+      <LineId Id="763" Count="0" />
+      <LineId Id="771" Count="0" />
+      <LineId Id="181" Count="5" />
+      <LineId Id="772" Count="0" />
+      <LineId Id="187" Count="0" />
+      <LineId Id="762" Count="0" />
+      <LineId Id="188" Count="6" />
+      <LineId Id="196" Count="0" />
       <LineId Id="417" Count="0" />
       <LineId Id="197" Count="1" />
       <LineId Id="1" Count="0" />
       <LineId Id="204" Count="0" />
       <LineId Id="200" Count="3" />
       <LineId Id="199" Count="0" />
+      <LineId Id="783" Count="6" />
+      <LineId Id="782" Count="0" />
     </LineIds>
     <LineIds Name="UserMode.A_SpectroscopyScanningMotion">
       <LineId Id="171" Count="0" />
