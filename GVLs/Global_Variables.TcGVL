@@ -8,6 +8,10 @@ VAR_GLOBAL
 (*Maintenance Mode*)
 	MaintenanceMode:BOOL;
 	MaintenanceModeLed:BOOL;
+(*本台插入件运动许可，与MC_Power挂钩*)
+	bMovePermit:BOOL:=TRUE;
+	bPositiveMovePermit:BOOL:=TRUE;
+	bNegativeMovePermit:BOOL:=TRUE;
 (*RecipeDescription*)
 	RecipeSavedDate:STRING;
 	RecipeDescription:STRING;
@@ -23,6 +27,10 @@ VAR_GLOBAL
 	Error:BOOL;
 	ErrorID:DINT;
 	ErrorDescription:STRING;
+(*Warning Massage*)
+	Warning:BOOL;
+	WarningID:DINT;
+	WarningDescription:STRING;
 (*加载配方参数*)
 	LoadRecipeParameters:BOOL;
 	loadParametersDone:BOOL;

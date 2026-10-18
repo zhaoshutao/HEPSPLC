@@ -199,7 +199,7 @@ END_IF]]></ST>
                           </o>
                           <o>
                             <o n="Operand" t="Operand">
-                              <v n="Operand">"Unreach_LS_Far AND NOT Taper_BeyondRangeNegtive"</v>
+                              <v n="Operand">"bPositiveMovePermit"</v>
                               <v n="Type">"BOOL"</v>
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
@@ -218,7 +218,7 @@ END_IF]]></ST>
                           </o>
                           <o>
                             <o n="Operand" t="Operand">
-                              <v n="Operand">"Unreach_LS_Near AND NOT Taper_BeyondRangePositive"</v>
+                              <v n="Operand">"bNegativeMovePermit"</v>
                               <v n="Type">"BOOL"</v>
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
@@ -464,7 +464,7 @@ END_IF]]></ST>
                           </o>
                           <o>
                             <o n="Operand" t="Operand">
-                              <v n="Operand">"Unreach_LS_Far AND NOT Taper_BeyondRangePositive"</v>
+                              <v n="Operand">"bPositiveMovePermit"</v>
                               <v n="Type">"BOOL"</v>
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
@@ -483,7 +483,7 @@ END_IF]]></ST>
                           </o>
                           <o>
                             <o n="Operand" t="Operand">
-                              <v n="Operand">"Unreach_LS_Near AND NOT Taper_BeyondRangeNegtive"</v>
+                              <v n="Operand">"bNegativeMovePermit"</v>
                               <v n="Type">"BOOL"</v>
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
@@ -729,7 +729,7 @@ END_IF]]></ST>
                           </o>
                           <o>
                             <o n="Operand" t="Operand">
-                              <v n="Operand">"Unreach_LS_Far AND NOT Taper_BeyondRangeNegtive"</v>
+                              <v n="Operand">"bPositiveMovePermit"</v>
                               <v n="Type">"BOOL"</v>
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
@@ -748,7 +748,7 @@ END_IF]]></ST>
                           </o>
                           <o>
                             <o n="Operand" t="Operand">
-                              <v n="Operand">"Unreach_LS_Near AND NOT Taper_BeyondRangePositive"</v>
+                              <v n="Operand">"bNegativeMovePermit"</v>
                               <v n="Type">"BOOL"</v>
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
@@ -994,7 +994,7 @@ END_IF]]></ST>
                           </o>
                           <o>
                             <o n="Operand" t="Operand">
-                              <v n="Operand">"Unreach_LS_Far AND NOT Taper_BeyondRangePositive"</v>
+                              <v n="Operand">"bPositiveMovePermit"</v>
                               <v n="Type">"BOOL"</v>
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>
@@ -1013,7 +1013,7 @@ END_IF]]></ST>
                           </o>
                           <o>
                             <o n="Operand" t="Operand">
-                              <v n="Operand">"Unreach_LS_Near AND NOT Taper_BeyondRangeNegtive"</v>
+                              <v n="Operand">"bNegativeMovePermit"</v>
                               <v n="Type">"BOOL"</v>
                               <v n="Comment">""</v>
                               <v n="SymbolComment">""</v>

@@ -1982,7 +1982,8 @@ IF NOT Unreach_LS_Far AND btn_UserGapMove AND UserGapPositionNew >= UserGapPosit
 END_IF
 IF NOT Unreach_LS_Near AND btn_UserGapMove AND UserGapPositionNew <= UserGapPositionDisplay THEN
 	btn_UserGapStop:=TRUE;
-END_IF]]></ST>
+END_IF
+]]></ST>
       </Implementation>
     </Action>
     <Action Name="A_SpectroscopyScanningMotion" Id="{6676a965-5ff1-46e4-b651-02d2762b99bc}">
@@ -2722,6 +2723,7 @@ min_UserTaperVelocityNew:=0;
       <LineId Id="199" Count="0" />
       <LineId Id="783" Count="6" />
       <LineId Id="782" Count="0" />
+      <LineId Id="790" Count="0" />
     </LineIds>
     <LineIds Name="UserMode.A_SpectroscopyScanningMotion">
       <LineId Id="171" Count="0" />
